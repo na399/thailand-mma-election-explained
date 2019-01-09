@@ -143,12 +143,13 @@ function runElection(electionConfig) {
 
   const partyNames = [
     'Red',
-    'Blue',
+    'SkyBlue',
     'Green',
     'Orange',
     'Pink',
-    'Yellow',
-    'Lime'
+    'Blue',
+    'Lime',
+    'Yellow'
   ]; // must be unique
 
   // assign winning propabilities and party names, i.e., colours
@@ -237,7 +238,7 @@ function runElection(electionConfig) {
   }, 0);
 
   // calculate allocated seats
-  let nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
+  let nVotePerSeat = Math.round(nTotalVote / electionConfig.nTotalSeat);
 
   parties = parties.map(party => {
     party.nInitialAllocatedSeat = Math.round(party.nTotalVote / nVotePerSeat);
@@ -625,10 +626,164 @@ function drawFinalAllocation(electionResult, electionConfig) {
   );
 }
 
+function addIntroText(electionConfig, additionalText) {
+  const introText = `
+    <p>การเลือกตั้งที่จะถึงนี้ มีการเปลี่ยนแปลงบัตรลงคะแนนจนเหลือเพียงใบเดียวคือ ผู้มีสิทธิ์สามารถลงคะแนนเลือกได้แค่แบบแบ่งเขตเลือกตั้ง จากเดิมสามารถเลือกได้ทั้งผู้สมัครแบบแบ่งเขตเลือกตั้ง และผู้สมัครแบบบัญชีรายชื่อ</p>
+    <p>เนื่องจากรัฐธรรมนูญฉบับปีพ.ศ.2560 ได้ระบุให้มีการใช้ระบบเลือกตั้งแบบจัดสรรปันส่วนผสม (mixed member apportionment system หรือ MMA)</p>
+    <p>ซึ่งการคำนวณที่มาของส.ส. แบบบัญชีรายชื่อนั้น มีความสลับซับซ้อน สร้างความงุนงงให้กับผู้คนทั่วไป</p>
+    <p>ต่อไปนี้จะไปการแสดงแบบจำลองสมมติของการเลือกตั้ง และการนับจำนวนส.ส. เพื่อเราจะได้เข้าใจระบบการเลือกตั้งพิสดารนี้ดียิ่งขึ้น</p>
+    <br />
+    <p>${additionalText}</p>
+    <p>กำหนดให้ในสภามีจำนวน ส.ส. ทั้งหมด ${
+      electionConfig.nTotalSeat
+    } ที่นั่ง แบ่งเป็นแบบแบ่งเขต ${
+    electionConfig.nConstituentSeat
+  } ที่นั่ง และแบบบัญชีรายชื่อ ${electionConfig.nPartyListSeat} ที่นั่ง</p>
+    <p>ดังนั้นจึงมีเขตเลือกตั้งทั้งหมด ${
+      electionConfig.nConstituentSeat
+    } เขต โดยสมมติว่าทุกเขตมีผู้ลงสมัครครบทุกพรรค รวม ${
+    electionConfig.nParty
+  } พรรค แต่ละพรรคแทนด้วยสีที่สมมติขึ้นมา</p>
+    <p>และมีผู้มาใช้สิทธิ์เลือกตั้ง จำนวน ${numberWithCommas(
+      electionConfig.nVote
+    )} คน โดยสมมติว่าบัตรเลือกตั้งทุกใบเป็นบัตรดีและลงคะแนนเสียง</p>
+    <p>จำนวนเสียงในแต่ละเขตนั้นเป็นจำนวนสุ่ม ไม่ได้อ้างอิงมาจากการเลือกตั้งครั้งก่อนหรือผลโพลในปัจจุบันแต่อย่างใด</p>
+    <br />
+    <h3>ผลการนับคะแนนแบบแบ่งเขตเลือกตั้ง</h3>
+    <p>กราฟแท่งด้านล่างแสดงคะแนนของผู้สมัครแต่ละเขต ทั้ง ${
+      electionConfig.nConstituentSeat
+    } เขต โดยผู้สมัครที่ได้คะแนนสูงสุดเป็นผู้ได้รับเลือกตั้งในเขตนั้นไป</p>
+  `;
+
+  const div = d3.select('#intro').html(introText);
+}
+
+function addConstituentText(electionResult, electionConfig, additionalText) {
+  const winningParties = _.uniq(electionResult.constituentSeatsNames);
+  const winningPartiesCount = winningParties.map(
+    party => electionResult.constituentSeatsNames.filter(n => n == party).length
+  );
+  const winners = _.zipObject(winningParties, winningPartiesCount);
+  const keysSorted = Object.keys(winners).sort(function(a, b) {
+    return winners[b] - winners[a];
+  });
+
+  let winnersText = ``;
+
+  for (let party of keysSorted) {
+    winnersText += `<li>พรรค ${party} ได้ส.ส.แบบแบ่งเขตเลือกตั้ง ${
+      winners[party]
+    } ที่นั่ง</li>`;
+  }
+
+  const constituentText = `
+  <p>จากเขตเลือกตั้ง ${electionConfig.nConstituentSeat} เขต มีผู้ชนะดังนี้</p>
+  <ul>${winnersText}</ul>
+  <br />
+  <h3>ผลคะแนนรวมทั่วประเทศ</h3>
+  <p>ขั้นตอนต่อไปของการเลือกตั้งคือการจัดสรรจำนวนส.ส.แบบบัญชีรายชื่อให้ผู้สมัครแต่ละพรรค โดยคิดคำนวณจากคะแนนรวมทั้งประเทศจากการเลือกตั้งแบบแบ่งเขตในขั้นตอนแรก</p>
+  <p>จำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมีได้นั้น มาจากจำนวนเสียงทั้งหมด ${numberWithCommas(
+    electionConfig.nVote
+  )} เสียง หารด้วยจำนวนส.ส.ทั้งหมด ${
+    electionConfig.nTotalSeat
+  } ที่นั่ง ได้ผลลัพธ์ว่าต้องใช้เสียง ${numberWithCommas(
+    electionResult.nVotePerSeat
+  )} ต่อ 1 ที่นั่งในสภา</p>
+  <p>จำนวนดังกล่าวแทนด้วยเส้นแนวตั้งสีดำในกราฟด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี ตามจำนวนเสียงที่ได้มากกว่าแต่ละเส้น จนครบกว่าจะครบทั้ง ${
+    electionConfig.nTotalSeat
+  } ในสภา</p>
+  <p>หากไม่ครบ จะจัดที่นั่งดังกล่าวให้พรรคที่มีจำนวนเสียงเป็นเศษมากที่สุดก่อน เรียงลำดับต่อไปจนกว่าจะครบ</p>
+  `;
+
+  const div = d3.select('#constituent-seats').html(constituentText);
+}
+
+function addAllocatedText(electionResult, electionConfig, additionalText) {
+  const parties = _.orderBy(
+    electionResult.parties,
+    ['nInitialAllocatedSeat', 'nTotalVote'],
+    ['desc', 'desc']
+  );
+
+  let text = ``;
+
+  for (let party of parties) {
+    text += `<li>พรรค ${party.name} ได้ส.ส.พึงมีจำนวน ${
+      party.nInitialAllocatedSeat
+    } ที่นั่ง</li>`;
+  }
+
+  const AllocatedText = `
+  <h4>จำนวนส.ส.พึงมี</h4>
+  <p>จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมีให้แต่ละพรรคดังต่อไปนี้</p>
+  <ul>${text}</ul>
+  <br />
+  <p>เนื่องจากมี ${
+    electionResult.nPartyWithoutPartyListNeeded
+  } พรรค ได้รับจำนวนส.ส.แบบเบ่งเขต ไปครบจำนวนส.ส.พึงมีแล้ว จึงกำหนดให้ ${
+    electionResult.nPartyWithoutPartyListNeeded
+  } พรรคนี้ได้รับส.ส.ตามที่ชนะมาจากแบบแบ่งเขตเลือกตั้ง แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อได้อีก</p>
+  <p>ดังนั้นการจัดสรรส.ส.พึงมีจึงพิจารณจาก ${electionConfig.nParty -
+    electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น</p>
+  <br />
+      <h3>ผลการแบ่งส.ส.บัญชีรายชื่อ</h3>
+      `;
+
+  const div = d3.select('#allocated-seats').html(AllocatedText);
+}
+
+function addPartyListText(electionResult, electionConfig, additionalText) {
+  const parties = _.orderBy(
+    electionResult.parties,
+    ['nPartyListSeat', 'nTotalVote'],
+    ['desc', 'desc']
+  );
+
+  let text = ``;
+
+  for (let party of parties) {
+    text += `<li>พรรค ${party.name} พึงมีส.ส.จำนวน ${
+      party.nAllocatedSeat
+    } ที่นั่ง และได้ส.ส.บัญชีรายชื่อจำนวน ${
+      party.nPartyListSeat
+    } ที่นั่ง</li>`;
+  }
+
+  const parties2 = _.orderBy(
+    electionResult.parties,
+    ['nAllocatedSeat', 'nConstituentSeat', 'nPartyListSeat', 'nTotalVote'],
+    ['desc', 'desc', 'desc', 'desc']
+  );
+
+  let text2 = ``;
+
+  for (let party of parties2) {
+    text2 += `<li>พรรค ${party.name} ได้ส.ส.รวม ${party.nConstituentSeat +
+      party.nPartyListSeat} ที่นั่ง แบ่งเป็น ส.ส.แบบแบ่งเขต ${party.nConstituentSeat} ที่นั่ง และ ส.ส.แบบบัญชีรายชื่อ ${
+      party.nPartyListSeat
+    } ที่นั่ง</li>`;
+  }
+
+  const partyListText = `
+  <h4>จำนวนส.ส.บัญชีรายชื่อ</h4>
+  <p>จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมี และ ส.ส.บัญชีรายชื่อ (ส่วนต่างระหว่างจำนวนส.ส.พึงมี - จำนวนส.ส.แบ่งเขต) ให้แต่ละพรรคได้ดังต่อไปนี้</p>
+  <ul>${text}</ul>
+  <br />
+  <h3>สรุปจำนวนส.ส.ทั้งหมด</h3>
+  <ul>${text2}</ul>
+  <br />
+      `;
+  const div = d3.select('#party-list-seats').html(partyListText);
+}
+
 export {
   runElection,
   ElectionConfig,
   drawResultConstituents,
   drawInitialAllocation,
-  drawFinalAllocation
+  drawFinalAllocation,
+  addIntroText,
+  addConstituentText,
+  addAllocatedText,
+  addPartyListText
 };

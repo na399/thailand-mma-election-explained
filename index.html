@@ -1,30 +1,48 @@
 <html>
+  <head>
+    <title>[WIP] Thailand MMA Election Explained</title>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="src/main.css" />
+  </head>
 
-<head>
-	<title>Thailand MMA Election Explained</title>
-	<meta charset="UTF-8" />
-
-	<style>
-		body {
-			font-family: Helvetica, sans-serif;
-			font-size: 14px;
-		}
-
-		.x-axis, .y-axis {
-			font-size: 14px;
-		}
-	</style>
-</head>
-
-<body>
-	<div id="constituents" style="margin: 20px">
-	</div>
-	<div style="margin: 20px">
-		<svg id="initial-allocation"></svg>
-		<svg id="final-allocation"></svg>
-		</div>
-	<script src="src/main.js"></script>
-	<script src="src/starter.js"></script>
-</body>
-
+  <body>
+    <div class="container">
+      <h1>Thailand MMA Election Explained -- Work In Progress</h1>
+      <h2>Starter simulation</h2>
+      <div id="intro"></div>
+      <div id="constituents"></div>
+      <div id="constituent-seats"></div>
+      <div><svg id="initial-allocation"></svg></div>
+      <div id="allocated-seats"></div>
+      <div><svg id="final-allocation"></svg></div>
+      <div id="party-list-seats"></div>
+      <hr />
+      <h3>To-do list</h3>
+      <ol>
+        <li>Narrative</li>
+        <li>Annotations</li>
+        <li>Legend</li>
+        <li>Fix glitches in full election</li>
+				<li>Aesthetic: readability, major details</li>
+				<li>Add parliament composition graphic <a href="https://ichef.bbci.co.uk/news/624/cpsprodpb/16061/production/_103790209_thai_election_prediction_graph640_c2_thai-nc.png">like this</a></li>
+        <li>Interactive: Hover on chart items</li>
+        <li>Put on Obseravable</li>
+        <li>
+          Interactive: User-defined parameters e.g. number of parties, chances
+          of winning of parties
+				</li>
+				<li>Simulate the party splitting strategy</li>
+        <li>Review by friends</li>
+        <li>Review by experts</li>
+        <li>Aesthetic: Final touch</li>
+				<li>Release</li>
+				<li>Add English translation</li>
+      </ol>
+      <hr />
+      <a href="full-election.html">See Full Election</a>
+      <p>Built with D3.js and Parcel.js</p>
+    </div>
+    <script src="src/main.js"></script>
+    <script src="src/starter.js"></script>
+  </body>
 </html>
