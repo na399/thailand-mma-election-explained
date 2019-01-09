@@ -48518,7 +48518,6 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 var fullConfig = new main.ElectionConfig({
   nParty: 7
 });
-var fullResult = main.runElection(fullConfig);
 main.drawResultConstituents(fullResult, fullConfig);
 main.drawInitialAllocation(fullResult, fullConfig);
 main.drawFinalAllocation(fullResult, fullConfig);
