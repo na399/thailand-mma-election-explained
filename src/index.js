@@ -32,7 +32,7 @@ class ElectionResult {
     nPartyWithoutPartyListNeeded,
     nVotePerRemainingSeat,
     nUnallocatedSeat,
-    nTotalPreAllocatedSeat,
+    nTotalInitialAllocatedSeat,
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
     nTotalPartyListSeat
@@ -45,7 +45,7 @@ class ElectionResult {
     this.nPartyWithoutPartyListNeeded = nPartyWithoutPartyListNeeded;
     this.nVotePerRemainingSeat = nVotePerRemainingSeat;
     this.nUnallocatedSeat = nUnallocatedSeat;
-    this.nTotalPreAllocatedSeat = nTotalPreAllocatedSeat;
+    this.nTotalInitialAllocatedSeat = nTotalInitialAllocatedSeat;
     this.nTotalAllocatedSeat = nTotalAllocatedSeat;
     this.nTotalConstituentSeat = nTotalConstituentSeat;
     this.nTotalPartyListSeat = nTotalPartyListSeat;
@@ -60,7 +60,7 @@ class Party {
     nConstituentSeat = 0,
     nExpectedConstituentSeat = 0,
     nPartyListSeat = 0,
-    nPreAllocatedSeat = 0,
+    nInitialAllocatedSeat = 0,
     nAllocatedSeat = 0,
     bPartyListNeeded = true,
     nRemainderVote = 0
@@ -70,7 +70,7 @@ class Party {
     this.nTotalVote = nTotalVote;
     this.nConstituentSeat = nConstituentSeat;
     this.nPartyListSeat = nPartyListSeat;
-    this.nPreAllocatedSeat = nPreAllocatedSeat;
+    this.nInitialAllocatedSeat = nInitialAllocatedSeat;
     this.nAllocatedSeat = nAllocatedSeat;
     this.bPartyListNeeded = bPartyListNeeded;
     this.nRemainderVote = nRemainderVote;
@@ -241,18 +241,18 @@ function runElection(electionConfig) {
   let nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
 
   parties = parties.map(party => {
-    party.nPreAllocatedSeat = Math.round(party.nTotalVote / nVotePerSeat);
+    party.nInitialAllocatedSeat = Math.round(party.nTotalVote / nVotePerSeat);
     return party;
   });
 
-  // check whether nConstituentSeat exceeds nPreAllocatedSeats
+  // check whether nConstituentSeat exceeds nInitialAllocatedSeats
   for (let party of parties) {
-    if (party.nConstituentSeat >= party.nPreAllocatedSeat) {
+    if (party.nConstituentSeat >= party.nInitialAllocatedSeat) {
       party.bPartyListNeeded = false;
     }
   }
 
-  // recalculate votes per remaining seat if there is at least one party with nConstituentSeat exceeds nPreAllocatedSeats
+  // recalculate votes per remaining seat if there is at least one party with nConstituentSeat exceeds nInitialAllocatedSeats
   const nPartyWithoutPartyListNeeded = _.filter(parties, [
     'bPartyListNeeded',
     false
@@ -308,8 +308,8 @@ function runElection(electionConfig) {
     parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
   }
 
-  const nTotalPreAllocatedSeat = parties.reduce(
-    (n, party) => n + party.nPreAllocatedSeat,
+  const nTotalInitialAllocatedSeat = parties.reduce(
+    (n, party) => n + party.nInitialAllocatedSeat,
     0
   );
 
@@ -337,13 +337,29 @@ function runElection(electionConfig) {
     nPartyWithoutPartyListNeeded,
     nVotePerRemainingSeat,
     nUnallocatedSeat,
-    nTotalPreAllocatedSeat,
+    nTotalInitialAllocatedSeat,
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
     nTotalPartyListSeat
   );
 
   return electionResult;
+}
+
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function getResultConstituentConfig() {
+  const width = 400;
+  const height = 400;
+  const margin = { top: 20, right: 20, bottom: 40, left: 60 };
+
+  return {
+    width,
+    height,
+    margin
+  };
 }
 
 function getResultConstituentScales(electionResult, config) {
@@ -364,7 +380,8 @@ function getResultConstituentScales(electionResult, config) {
   const yScale = d3
     .scaleLinear()
     .domain([0, yMax])
-    .range([height - margin.bottom, margin.top]);
+    .range([height - margin.bottom, margin.top])
+    .nice();
 
   const xScale = d3
     .scaleBand()
@@ -399,9 +416,24 @@ function drawResultConstituent(resultConstituent, idSvg, config, scales) {
     .attr('height', d => yScale(0) - yScale(d.nVote))
     .attr('fill', d => d.name);
 
+  // // paint losing parties with white
+  //   const maxVote = _.max(_.map(resultConstituent, d => d.nVote));
+  // for (let party of resultConstituent) {
+  //   if (party.nVote != maxVote) {
+  //     svg
+  //       .datum(party)
+  //       .append('rect')
+  //       .attr('x', d => xScale(d.name) + 3)
+  //       .attr('y', d => yScale(d.nVote) + 3)
+  //       .attr('width', xScale.bandwidth() - 6)
+  //       .attr('height', d => yScale(0) - yScale(d.nVote) - 3)
+  //       .attr('fill', 'white');
+  //   }
+  // }
+
   const yAxis = d3
     .axisLeft()
-    .tickFormat(d => (d % 10000 === 0 ? `${parseInt(d)}` : ''))
+    .tickFormat(d => (d % 20000 === 0 ? `${numberWithCommas(d)}` : ''))
     .scale(yScale);
 
   const yAxisG = svg
@@ -423,18 +455,6 @@ function drawResultConstituent(resultConstituent, idSvg, config, scales) {
     .call(xAxis);
 }
 
-function getResultConstituentConfig() {
-  const width = 400;
-  const height = 400;
-  const margin = { top: 20, right: 20, bottom: 40, left: 60 };
-
-  return {
-    width,
-    height,
-    margin
-  };
-}
-
 function drawResultConstituents(electionResult, electionConfig) {
   const config = getResultConstituentConfig();
   const scales = getResultConstituentScales(electionResult, config);
@@ -452,18 +472,164 @@ function drawResultConstituents(electionResult, electionConfig) {
   }
 }
 
-seedrandom('starter', { global: true });
+function getAllocationConfig(electionResult, electionConfig, stage) {
+  const width = 800;
+  const height =
+    stage == 'initial'
+      ? electionConfig.nParty * 100
+      : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) *
+        100;
+  const margin = { top: 20, right: 20, bottom: 40, left: 60 };
 
-let starterConfig = new ElectionConfig({
-  nTotalSeat: 5,
-  nConstituentSeat: 3,
-  nVoter: 500000,
-  pVoterTurnout: 0.7,
-  nParty: 3
-});
+  return {
+    width,
+    height,
+    margin
+  };
+}
 
-const starterResult = runElection(starterConfig);
+function getAllocationScales(electionResult, config, stage) {
+  const { width, height, margin } = config;
 
-console.log(starterResult);
+  const xMax = _.max(electionResult.parties.map(party => party.nTotalVote));
+  let partyNames;
 
-drawResultConstituents(starterResult, starterConfig);
+  if (stage == 'initial') {
+    partyNames = _.orderBy(electionResult.parties, 'nTotalVote', 'asc').map(
+      party => party.name
+    );
+  } else {
+    const remainingParties = _.filter(
+      electionResult.parties,
+      'bPartyListNeeded'
+    );
+    // xMax = _.max(remainingParties.map(party => party.nTotalVote));
+    partyNames = _.orderBy(remainingParties, 'nTotalVote', 'asc').map(
+      party => party.name
+    );
+  }
+
+  const xScale = d3
+    .scaleLinear()
+    .domain([0, xMax * 1.1])
+    .range([margin.left, width - margin.right])
+    .nice();
+
+  const yScale = d3
+    .scaleBand()
+    .domain(partyNames)
+    .range([height - margin.bottom, margin.top])
+    .padding(0.2);
+
+  return { xScale, yScale, xMax };
+}
+
+function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
+  const { width, height, margin } = config;
+  const { xScale, yScale, xMax } = scales;
+
+  const svg = d3
+    .select(`#${idSvg}`)
+    .attr('width', width)
+    .attr('height', height)
+    .style('overflow', 'visible');
+
+  const bars = svg
+    .append('g')
+    .selectAll('.bar')
+    .data(
+      stage == 'initial'
+        ? electionResult.parties
+        : _.filter(electionResult.parties, 'bPartyListNeeded')
+    );
+
+  bars
+    .enter()
+    .append('rect')
+    .attr('y', d => yScale(d.name))
+    .attr('x', d => margin.left)
+    .attr('height', yScale.bandwidth())
+    .attr('width', d => xScale(d.nTotalVote))
+    .attr('fill', d => d.name);
+
+  const xAxis = d3
+    .axisBottom()
+    .tickFormat(d => (d % 20000 === 0 ? `${numberWithCommas(d)}` : ''))
+    .scale(xScale);
+
+  const xAxisG = svg
+    .append('g')
+    .classed('x-axis', true)
+    .attr('transform', `translate(0, ${height - margin.bottom})`)
+    .call(xAxis);
+
+  xAxisG.select('.domain').remove();
+
+  const yAxis = d3
+    .axisLeft()
+    .tickSizeOuter(0)
+    .scale(yScale);
+  svg
+    .append('g')
+    .classed('y-axis', true)
+    .attr('transform', `translate(${margin.left}, 0)`)
+    .call(yAxis);
+
+  // nVotePerSeat
+  let i = 1;
+  if (stage == 'initial') {
+    while (electionResult.nVotePerSeat * i < xMax) {
+      svg
+        .append('line')
+        .attr('x1', xScale(electionResult.nVotePerSeat * i))
+        .attr('x2', xScale(electionResult.nVotePerSeat * i))
+        .attr('y1', margin.top)
+        .attr('y2', height - margin.bottom)
+        .attr('stroke', 'black');
+      i++;
+    }
+  } else {
+    while (electionResult.nVotePerRemainingSeat * i < xMax) {
+      svg
+        .append('line')
+        .attr('x1', xScale(electionResult.nVotePerRemainingSeat * i))
+        .attr('x2', xScale(electionResult.nVotePerRemainingSeat * i))
+        .attr('y1', margin.top)
+        .attr('y2', height - margin.bottom)
+        .attr('stroke', 'black');
+      i++;
+    }
+  }
+}
+
+function drawInitialAllocation(electionResult, electionConfig) {
+  const config = getAllocationConfig(electionResult, electionConfig, 'initial');
+  const scales = getAllocationScales(electionResult, config, 'initial');
+  drawAllocationChart(
+    electionResult,
+    'initial-allocation',
+    config,
+    scales,
+    'initial'
+  );
+}
+
+function drawFinalAllocation(electionResult, electionConfig) {
+  const config = getAllocationConfig(electionResult, electionConfig, 'final');
+  const scales = getAllocationScales(electionResult, config, 'final');
+  drawAllocationChart(
+    electionResult,
+    'final-allocation',
+    config,
+    scales,
+    'final'
+  );
+}
+
+export {
+  runElection,
+  ElectionConfig,
+  drawResultConstituents,
+  drawInitialAllocation,
+  drawFinalAllocation
+};
