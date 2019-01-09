@@ -13,12 +13,13 @@ let starterConfig = new main.ElectionConfig({
 
 const starterResult = main.runElection(starterConfig);
 
-main.addIntroText(starterConfig, 'เพื่อลดความสับสน จึงขอเริ่มต้นกันด้วยแบบจำลองฉบับย่อกันก่อน');
+main.addIntroText(
+  starterConfig,
+  'เพื่อลดความสับสน จึงขอเริ่มต้นกันด้วยแบบจำลองฉบับย่อกันก่อน'
+);
 main.drawResultConstituents(starterResult, starterConfig);
 main.addConstituentText(starterResult, starterConfig);
 main.drawInitialAllocation(starterResult, starterConfig);
 main.addAllocatedText(starterResult, starterConfig);
 main.drawFinalAllocation(starterResult, starterConfig);
 main.addPartyListText(starterResult, starterConfig);
-
-console.log(starterResult);

@@ -686,9 +686,9 @@ function addConstituentText(electionResult, electionConfig, additionalText) {
     electionConfig.nVote
   )} เสียง หารด้วยจำนวนส.ส.ทั้งหมด ${
     electionConfig.nTotalSeat
-  } ที่นั่ง ได้ผลลัพธ์ว่าต้องใช้เสียง ${numberWithCommas(
+  } ที่นั่ง ได้ผลลัพธ์ว่าต้องใช้ ${numberWithCommas(
     electionResult.nVotePerSeat
-  )} ต่อ 1 ที่นั่งในสภา</p>
+  )} เสียงต่อ 1 ที่นั่งในสภา</p>
   <p>จำนวนดังกล่าวแทนด้วยเส้นแนวตั้งสีดำในกราฟด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี ตามจำนวนเสียงที่ได้มากกว่าแต่ละเส้น จนครบกว่าจะครบทั้ง ${
     electionConfig.nTotalSeat
   } ในสภา</p>
@@ -744,9 +744,7 @@ function addPartyListText(electionResult, electionConfig, additionalText) {
   for (let party of parties) {
     text += `<li>พรรค ${party.name} พึงมีส.ส.จำนวน ${
       party.nAllocatedSeat
-    } ที่นั่ง และได้ส.ส.บัญชีรายชื่อจำนวน ${
-      party.nPartyListSeat
-    } ที่นั่ง</li>`;
+    } ที่นั่ง และได้ส.ส.บัญชีรายชื่อจำนวน ${party.nPartyListSeat} ที่นั่ง</li>`;
   }
 
   const parties2 = _.orderBy(
@@ -759,9 +757,9 @@ function addPartyListText(electionResult, electionConfig, additionalText) {
 
   for (let party of parties2) {
     text2 += `<li>พรรค ${party.name} ได้ส.ส.รวม ${party.nConstituentSeat +
-      party.nPartyListSeat} ที่นั่ง แบ่งเป็น ส.ส.แบบแบ่งเขต ${party.nConstituentSeat} ที่นั่ง และ ส.ส.แบบบัญชีรายชื่อ ${
-      party.nPartyListSeat
-    } ที่นั่ง</li>`;
+      party.nPartyListSeat} ที่นั่ง แบ่งเป็น ส.ส.แบบแบ่งเขต ${
+      party.nConstituentSeat
+    } ที่นั่ง และ ส.ส.แบบบัญชีรายชื่อ ${party.nPartyListSeat} ที่นั่ง</li>`;
   }
 
   const partyListText = `
