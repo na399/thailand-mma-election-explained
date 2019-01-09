@@ -2,15 +2,15 @@ import * as d3 from 'd3';
 import _ from 'lodash';
 import seedrandom from 'seedrandom';
 
-class Election {
+class ElectionConfig {
   constructor({
     nTotalSeat = 500,
     nConstituentSeat = 350,
-    nPartyListSeat = nTotalSeat - nConstituentSeat,
+    nPartyListSeat,
     nVoter = 50000000,
     pVoterTurnout = 0.7,
-    nVote = nVoter * pVoterTurnout,
-    nParty = 20
+    nVote,
+    nParty = 5
   } = {}) {
     this.nTotalSeat = nTotalSeat;
     this.nConstituentSeat = nConstituentSeat;
@@ -19,6 +19,36 @@ class Election {
     this.pVoterTurnout = pVoterTurnout;
     this.nVote = nVoter * pVoterTurnout;
     this.nParty = nParty;
+  }
+}
+
+class ElectionResult {
+  constructor(
+    parties,
+    resultConstituents,
+    constituentSeatsNames,
+    nTotalVote,
+    nVotePerSeat,
+    nPartyWithoutPartyListNeeded,
+    nVotePerRemainingSeat,
+    nUnallocatedSeat,
+    nTotalPreAllocatedSeat,
+    nTotalAllocatedSeat,
+    nTotalConstituentSeat,
+    nTotalPartyListSeat
+  ) {
+    this.parties = parties;
+    this.resultConstituents = resultConstituents;
+    this.constituentSeatsNames = constituentSeatsNames;
+    this.nTotalVote = nTotalVote;
+    this.nVotePerSeat = nVotePerSeat;
+    this.nPartyWithoutPartyListNeeded = nPartyWithoutPartyListNeeded;
+    this.nVotePerRemainingSeat = nVotePerRemainingSeat;
+    this.nUnallocatedSeat = nUnallocatedSeat;
+    this.nTotalPreAllocatedSeat = nTotalPreAllocatedSeat;
+    this.nTotalAllocatedSeat = nTotalAllocatedSeat;
+    this.nTotalConstituentSeat = nTotalConstituentSeat;
+    this.nTotalPartyListSeat = nTotalPartyListSeat;
   }
 }
 
@@ -104,41 +134,35 @@ function simulateResultConstituent(parties, nVote, expectedConstituentSeats) {
   return resultConstituent;
 }
 
-function sum(arr) {
-  return arr.reduce((a, b) => {
-    return a + b;
-  }, 0);
-}
-
-const partyNames = ['red', 'blue', 'green', 'orange', 'pink', 'yellow', 'lime']; // must be unique
-
-function starter() {
-  let election = new Election({
-    // nTotalSeat: 5,
-    // nConstituentSeat: 3,
-    // nVoter: 500000,
-    // pVoterTurnout: 0.7,
-    nParty: 4
-  });
-
-  // get party vote/win propablities
-  let pParties = Array.from({ length: election.nParty }, () => Math.random());
+function runElection(electionConfig) {
+  // get party winning propablities
+  let pParties = Array.from({ length: electionConfig.nParty }, () =>
+    Math.random()
+  );
 
   pParties = pParties.map(p => p / _.sum(pParties));
 
-  console.log('pParties :', pParties);
+  const partyNames = [
+    'Red',
+    'Blue',
+    'Green',
+    'Orange',
+    'Pink',
+    'Yellow',
+    'Lime'
+  ]; // must be unique
 
-  // assign vote propabilities and party names, i.e., colours
+  // assign winning propabilities and party names, i.e., colours
   let parties = pParties.map((p, i) => {
     let party = new Party({
       name: partyNames[i],
       pParty: p,
-      nExpectedConstituentSeat: _.round(p * election.nConstituentSeat)
+      nExpectedConstituentSeat: _.round(p * electionConfig.nConstituentSeat)
     });
     return party;
   });
 
-  /* USE PROBABILITIES FOR WINNING CONSTITUENT SEATS */
+  // array of possible winners to be drawn from randomly
   let expectedConstituentSeats = parties.map(party => {
     return Array.from(
       { length: party.nExpectedConstituentSeat },
@@ -148,16 +172,14 @@ function starter() {
 
   expectedConstituentSeats = _.flatten(expectedConstituentSeats);
 
-  console.log('expectedConstituentSeats :', expectedConstituentSeats);
-
   // calculate number of votes per each constituent
   let nVotePerConstituent = Math.floor(
-    election.nVote / election.nConstituentSeat
+    electionConfig.nVote / electionConfig.nConstituentSeat
   );
 
   // generate result for all constituents
   let resultConstituents = Array.from(
-    { length: election.nConstituentSeat },
+    { length: electionConfig.nConstituentSeat },
     () =>
       simulateResultConstituent(
         parties,
@@ -165,7 +187,6 @@ function starter() {
         expectedConstituentSeats
       )
   );
-  console.log('resultConstituents :', resultConstituents);
 
   // find winners from constituents
   let constituentSeats = resultConstituents.map(resultConstituent => {
@@ -186,10 +207,7 @@ function starter() {
     return seat;
   });
 
-  let constituentSeatsNames = constituentSeats.map(party => party.name);
-
-  console.log('constituentSeats :', constituentSeats);
-  console.log('constituentSeatsNames :', constituentSeatsNames);
+  const constituentSeatsNames = constituentSeats.map(party => party.name);
 
   // count constituentSeats won by party
   parties = parties.map(party => {
@@ -214,17 +232,13 @@ function starter() {
   });
 
   // find total votes from all constituents
-  let nTotalVote = parties.reduce((nTotalVote, party) => {
+  const nTotalVote = parties.reduce((nTotalVote, party) => {
     nTotalVote += party.nTotalVote;
     return nTotalVote;
   }, 0);
 
-  console.log('nTotalVote :', nTotalVote);
-
   // calculate allocated seats
-  let nVotePerSeat = Math.floor(nTotalVote / election.nTotalSeat);
-
-  console.log('nVotePerSeat :', nVotePerSeat);
+  let nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
 
   parties = parties.map(party => {
     party.nPreAllocatedSeat = Math.round(party.nTotalVote / nVotePerSeat);
@@ -239,10 +253,10 @@ function starter() {
   }
 
   // recalculate votes per remaining seat if there is at least one party with nConstituentSeat exceeds nPreAllocatedSeats
-  console.log(
-    'nParty without PartyListNeeded :',
-    _.filter(parties, ['bPartyListNeeded', false]).length
-  );
+  const nPartyWithoutPartyListNeeded = _.filter(parties, [
+    'bPartyListNeeded',
+    false
+  ]).length;
 
   if (_.filter(parties, ['bPartyListNeeded', false]).length > 0) {
     let nTotalRemainingVote = parties.reduce((nTotalRemainingVote, party) => {
@@ -253,13 +267,11 @@ function starter() {
     }, 0);
 
     var nVotePerRemainingSeat = Math.floor(
-      nTotalRemainingVote / election.nPartyListSeat
+      nTotalRemainingVote / electionConfig.nPartyListSeat
     );
   } else {
     var nVotePerRemainingSeat = nVotePerSeat;
   }
-
-  console.log('nVotePerRemainingSeat :', nVotePerRemainingSeat);
 
   parties = parties.map(party => {
     if (party.bPartyListNeeded) {
@@ -282,13 +294,11 @@ function starter() {
   });
 
   // assing unallocated seats
-  let nUnallocatedSeat = parties.reduce(
+  const nUnallocatedSeat = parties.reduce(
     (nUnallocatedSeat, party) =>
       nUnallocatedSeat - (party.nConstituentSeat + party.nPartyListSeat),
-    election.nTotalSeat
+    electionConfig.nTotalSeat
   );
-
-  console.log('nUnallocatedSeat :', nUnallocatedSeat);
 
   parties = _.orderBy(parties, 'nRemainderVote', 'desc');
   let nPartiesGettingPartyList = _.filter(parties, 'bPartyListNeeded').length;
@@ -298,25 +308,162 @@ function starter() {
     parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
   }
 
-  console.log(parties);
+  const nTotalPreAllocatedSeat = parties.reduce(
+    (n, party) => n + party.nPreAllocatedSeat,
+    0
+  );
 
-  console.log(
-    'nTotalPreAllocatedSeat',
-    parties.reduce((n, party) => n + party.nPreAllocatedSeat, 0)
+  const nTotalAllocatedSeat = parties.reduce(
+    (n, party) => n + party.nAllocatedSeat,
+    0
   );
-  console.log(
-    'nTotalAllocatedSeat',
-    parties.reduce((n, party) => n + party.nAllocatedSeat, 0)
+
+  const nTotalConstituentSeat = parties.reduce(
+    (n, party) => n + party.nConstituentSeat,
+    0
   );
-  console.log(
-    'nTotalConstituentSeat',
-    parties.reduce((n, party) => n + party.nConstituentSeat, 0)
+
+  const nTotalPartyListSeat = parties.reduce(
+    (n, party) => n + party.nPartyListSeat,
+    0
   );
-  console.log(
-    'nTotalPartyListSeat',
-    parties.reduce((n, party) => n + party.nPartyListSeat, 0)
+
+  let electionResult = new ElectionResult(
+    parties,
+    resultConstituents,
+    constituentSeatsNames,
+    nTotalVote,
+    nVotePerSeat,
+    nPartyWithoutPartyListNeeded,
+    nVotePerRemainingSeat,
+    nUnallocatedSeat,
+    nTotalPreAllocatedSeat,
+    nTotalAllocatedSeat,
+    nTotalConstituentSeat,
+    nTotalPartyListSeat
   );
+
+  return electionResult;
+}
+
+function getResultConstituentScales(electionResult, config) {
+  const { width, height, margin } = config;
+
+  const yMax = _.max(
+    electionResult.resultConstituents.map(constituent =>
+      _.max(constituent.map(party => party.nVote))
+    )
+  );
+
+  const partyNames = _.orderBy(
+    electionResult.parties,
+    'nTotalVote',
+    'desc'
+  ).map(party => party.name);
+
+  const yScale = d3
+    .scaleLinear()
+    .domain([0, yMax])
+    .range([height - margin.bottom, margin.top]);
+
+  const xScale = d3
+    .scaleBand()
+    .domain(partyNames)
+    .range([margin.left, width - margin.right])
+    .padding(0.2);
+
+  return { xScale, yScale };
+}
+
+function drawResultConstituent(resultConstituent, idSvg, config, scales) {
+  const { width, height, margin } = config;
+  const { xScale, yScale } = scales;
+
+  const svg = d3
+    .select(`#${idSvg}`)
+    .attr('width', width)
+    .attr('height', height)
+    .style('overflow', 'visible');
+
+  const bars = svg
+    .append('g')
+    .selectAll('.bar')
+    .data(resultConstituent);
+
+  bars
+    .enter()
+    .append('rect')
+    .attr('x', d => xScale(d.name))
+    .attr('y', d => yScale(d.nVote))
+    .attr('width', xScale.bandwidth())
+    .attr('height', d => yScale(0) - yScale(d.nVote))
+    .attr('fill', d => d.name);
+
+  const yAxis = d3
+    .axisLeft()
+    .tickFormat(d => (d % 10000 === 0 ? `${parseInt(d)}` : ''))
+    .scale(yScale);
+
+  const yAxisG = svg
+    .append('g')
+    .classed('y-axis', true)
+    .attr('transform', `translate(${margin.left}, 0)`)
+    .call(yAxis);
+
+  yAxisG.select('.domain').remove();
+
+  const xAxis = d3
+    .axisBottom()
+    .tickSizeOuter(0)
+    .scale(xScale);
+  svg
+    .append('g')
+    .classed('x-axis', true)
+    .attr('transform', `translate(0, ${yScale(0)})`)
+    .call(xAxis);
+}
+
+function getResultConstituentConfig() {
+  const width = 400;
+  const height = 400;
+  const margin = { top: 20, right: 20, bottom: 40, left: 60 };
+
+  return {
+    width,
+    height,
+    margin
+  };
+}
+
+function drawResultConstituents(electionResult, electionConfig) {
+  const config = getResultConstituentConfig();
+  const scales = getResultConstituentScales(electionResult, config);
+  for (let i = 0; i < electionConfig.nConstituentSeat; i++) {
+    d3.select('#constituents')
+      .append('svg')
+      .attr('id', `constituent${i}`);
+
+    drawResultConstituent(
+      electionResult.resultConstituents[i],
+      `constituent${i}`,
+      config,
+      scales
+    );
+  }
 }
 
 seedrandom('starter', { global: true });
-starter();
+
+let starterConfig = new ElectionConfig({
+  nTotalSeat: 5,
+  nConstituentSeat: 3,
+  nVoter: 500000,
+  pVoterTurnout: 0.7,
+  nParty: 3
+});
+
+const starterResult = runElection(starterConfig);
+
+console.log(starterResult);
+
+drawResultConstituents(starterResult, starterConfig);
