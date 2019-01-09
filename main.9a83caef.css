@@ -1,0 +1,17 @@
+body {
+  font-family: Helvetica, sans-serif;
+  font-size: 14px;
+}
+
+div {
+  margin: 20px;
+}
+
+.container {
+  margin: 40px;
+}
+
+.x-axis,
+.y-axis {
+  font-size: 14px;
+}

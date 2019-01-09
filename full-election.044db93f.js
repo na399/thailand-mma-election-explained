@@ -47006,7 +47006,539 @@ var define;
   }
 }.call(this));
 
-},{"buffer":"node_modules/buffer/index.js"}],"node_modules/seedrandom/lib/alea.js":[function(require,module,exports) {
+},{"buffer":"node_modules/buffer/index.js"}],"src/main.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.runElection = runElection;
+exports.drawResultConstituents = drawResultConstituents;
+exports.drawInitialAllocation = drawInitialAllocation;
+exports.drawFinalAllocation = drawFinalAllocation;
+exports.ElectionConfig = void 0;
+
+var d3 = _interopRequireWildcard(require("d3"));
+
+var _lodash = _interopRequireDefault(require("lodash"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ElectionConfig = function ElectionConfig() {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref$nTotalSeat = _ref.nTotalSeat,
+      nTotalSeat = _ref$nTotalSeat === void 0 ? 500 : _ref$nTotalSeat,
+      _ref$nConstituentSeat = _ref.nConstituentSeat,
+      nConstituentSeat = _ref$nConstituentSeat === void 0 ? 350 : _ref$nConstituentSeat,
+      nPartyListSeat = _ref.nPartyListSeat,
+      _ref$nVoter = _ref.nVoter,
+      nVoter = _ref$nVoter === void 0 ? 50000000 : _ref$nVoter,
+      _ref$pVoterTurnout = _ref.pVoterTurnout,
+      pVoterTurnout = _ref$pVoterTurnout === void 0 ? 0.7 : _ref$pVoterTurnout,
+      nVote = _ref.nVote,
+      _ref$nParty = _ref.nParty,
+      nParty = _ref$nParty === void 0 ? 5 : _ref$nParty;
+
+  _classCallCheck(this, ElectionConfig);
+
+  this.nTotalSeat = nTotalSeat;
+  this.nConstituentSeat = nConstituentSeat;
+  this.nPartyListSeat = nTotalSeat - nConstituentSeat;
+  this.nVoter = nVoter;
+  this.pVoterTurnout = pVoterTurnout;
+  this.nVote = nVoter * pVoterTurnout;
+  this.nParty = nParty;
+};
+
+exports.ElectionConfig = ElectionConfig;
+
+var ElectionResult = function ElectionResult(parties, resultConstituents, constituentSeatsNames, nTotalVote, nVotePerSeat, nPartyWithoutPartyListNeeded, nVotePerRemainingSeat, nUnallocatedSeat, nTotalInitialAllocatedSeat, nTotalAllocatedSeat, nTotalConstituentSeat, nTotalPartyListSeat) {
+  _classCallCheck(this, ElectionResult);
+
+  this.parties = parties;
+  this.resultConstituents = resultConstituents;
+  this.constituentSeatsNames = constituentSeatsNames;
+  this.nTotalVote = nTotalVote;
+  this.nVotePerSeat = nVotePerSeat;
+  this.nPartyWithoutPartyListNeeded = nPartyWithoutPartyListNeeded;
+  this.nVotePerRemainingSeat = nVotePerRemainingSeat;
+  this.nUnallocatedSeat = nUnallocatedSeat;
+  this.nTotalInitialAllocatedSeat = nTotalInitialAllocatedSeat;
+  this.nTotalAllocatedSeat = nTotalAllocatedSeat;
+  this.nTotalConstituentSeat = nTotalConstituentSeat;
+  this.nTotalPartyListSeat = nTotalPartyListSeat;
+};
+
+var Party = function Party() {
+  var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref2$name = _ref2.name,
+      name = _ref2$name === void 0 ? '' : _ref2$name,
+      _ref2$pParty = _ref2.pParty,
+      pParty = _ref2$pParty === void 0 ? 0 : _ref2$pParty,
+      _ref2$nTotalVote = _ref2.nTotalVote,
+      nTotalVote = _ref2$nTotalVote === void 0 ? 0 : _ref2$nTotalVote,
+      _ref2$nConstituentSea = _ref2.nConstituentSeat,
+      nConstituentSeat = _ref2$nConstituentSea === void 0 ? 0 : _ref2$nConstituentSea,
+      _ref2$nExpectedConsti = _ref2.nExpectedConstituentSeat,
+      nExpectedConstituentSeat = _ref2$nExpectedConsti === void 0 ? 0 : _ref2$nExpectedConsti,
+      _ref2$nPartyListSeat = _ref2.nPartyListSeat,
+      nPartyListSeat = _ref2$nPartyListSeat === void 0 ? 0 : _ref2$nPartyListSeat,
+      _ref2$nInitialAllocat = _ref2.nInitialAllocatedSeat,
+      nInitialAllocatedSeat = _ref2$nInitialAllocat === void 0 ? 0 : _ref2$nInitialAllocat,
+      _ref2$nAllocatedSeat = _ref2.nAllocatedSeat,
+      nAllocatedSeat = _ref2$nAllocatedSeat === void 0 ? 0 : _ref2$nAllocatedSeat,
+      _ref2$bPartyListNeede = _ref2.bPartyListNeeded,
+      bPartyListNeeded = _ref2$bPartyListNeede === void 0 ? true : _ref2$bPartyListNeede,
+      _ref2$nRemainderVote = _ref2.nRemainderVote,
+      nRemainderVote = _ref2$nRemainderVote === void 0 ? 0 : _ref2$nRemainderVote;
+
+  _classCallCheck(this, Party);
+
+  this.name = name;
+  this.pParty = pParty;
+  this.nTotalVote = nTotalVote;
+  this.nConstituentSeat = nConstituentSeat;
+  this.nPartyListSeat = nPartyListSeat;
+  this.nInitialAllocatedSeat = nInitialAllocatedSeat;
+  this.nAllocatedSeat = nAllocatedSeat;
+  this.bPartyListNeeded = bPartyListNeeded;
+  this.nRemainderVote = nRemainderVote;
+  this.nExpectedConstituentSeat = nExpectedConstituentSeat;
+};
+/**
+ * Shuffles array in place. ES6 version
+ * @param {Array} a items An array containing the items.
+ * from https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
+ */
+
+
+function shuffle(a) {
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var _ref3 = [a[j], a[i]];
+    a[i] = _ref3[0];
+    a[j] = _ref3[1];
+  }
+
+  return a;
+}
+
+function simulateResultConstituent(parties, nVote, expectedConstituentSeats) {
+  /* USE PROBABILITIES FOR VOTE
+  let resultConstituent = parties.map(party => {
+    return {
+      name: party.name,
+      nVote: Math.round(
+        party.pParty * nVote * (Math.random() * (0.7 - 1.3) + 0.7)
+      )
+    };
+  });
+  */
+  var rankings = []; // let winningParty = _.sample(expectedConstituentSeats);
+  // prefer Math.random(), which is controlled by seedrandom
+
+  var winningParty = expectedConstituentSeats[Math.floor(Math.random() * expectedConstituentSeats.length)];
+  var partyNames = parties.map(function (party) {
+    return party.name;
+  }); // simulate ranking for the constituent
+
+  rankings.push(winningParty);
+  rankings = rankings.concat(shuffle(partyNames.filter(function (name) {
+    return name != winningParty;
+  }))); // simulate vote for each pary
+
+  var votes = Array.from({
+    length: parties.length
+  }, function () {
+    return Math.random();
+  });
+  votes = votes.map(function (vote) {
+    return _lodash.default.round(vote / _lodash.default.sum(votes) * nVote);
+  });
+  votes = _lodash.default.reverse(_lodash.default.sortBy(votes));
+  var resultConstituent = rankings.map(function (name, i) {
+    return {
+      name: name,
+      nVote: votes[i]
+    };
+  });
+  return resultConstituent;
+}
+
+function runElection(electionConfig) {
+  // get party winning propablities
+  var pParties = Array.from({
+    length: electionConfig.nParty
+  }, function () {
+    return Math.random();
+  });
+  pParties = pParties.map(function (p) {
+    return p / _lodash.default.sum(pParties);
+  });
+  var partyNames = ['Red', 'Blue', 'Green', 'Orange', 'Pink', 'Skyblue', 'Lime', 'Yellow']; // must be unique
+  // assign winning propabilities and party names, i.e., colours
+
+  var parties = pParties.map(function (p, i) {
+    var party = new Party({
+      name: partyNames[i],
+      pParty: p,
+      nExpectedConstituentSeat: _lodash.default.round(p * electionConfig.nConstituentSeat)
+    });
+    return party;
+  }); // array of possible winners to be drawn from randomly
+
+  var expectedConstituentSeats = parties.map(function (party) {
+    return Array.from({
+      length: party.nExpectedConstituentSeat
+    }, function () {
+      return party.name;
+    });
+  });
+  expectedConstituentSeats = _lodash.default.flatten(expectedConstituentSeats); // calculate number of votes per each constituent
+
+  var nVotePerConstituent = Math.floor(electionConfig.nVote / electionConfig.nConstituentSeat); // generate result for all constituents
+
+  var resultConstituents = Array.from({
+    length: electionConfig.nConstituentSeat
+  }, function () {
+    return simulateResultConstituent(parties, nVotePerConstituent, expectedConstituentSeats);
+  }); // find winners from constituents
+
+  var constituentSeats = resultConstituents.map(function (resultConstituent) {
+    var seat = resultConstituent.reduce(function (seat, resultParty) {
+      if (resultParty.nVote > seat.nVote) {
+        seat = resultParty;
+      } else if (resultParty.nVote == seat.nVote) {
+        // if draw, randomly pick one
+        if (Math.random() > 0.5) {
+          seat = resultParty;
+        }
+      }
+
+      return seat;
+    }, {
+      nVote: 0
+    });
+    return seat;
+  });
+  var constituentSeatsNames = constituentSeats.map(function (party) {
+    return party.name;
+  }); // count constituentSeats won by party
+
+  parties = parties.map(function (party) {
+    party.nConstituentSeat = constituentSeatsNames.filter(function (name) {
+      return name == party.name;
+    }).length;
+    return party;
+  }); // find total votes from all constituents by party
+
+  parties = parties.map(function (party) {
+    party.nTotalVote = resultConstituents.reduce(function (nTotalPartyVote, resultConstituent) {
+      nTotalPartyVote += resultConstituent.filter(function (i) {
+        return i.name == party.name;
+      })[0].nVote;
+      return nTotalPartyVote;
+    }, 0);
+    return party;
+  }); // find total votes from all constituents
+
+  var nTotalVote = parties.reduce(function (nTotalVote, party) {
+    nTotalVote += party.nTotalVote;
+    return nTotalVote;
+  }, 0); // calculate allocated seats
+
+  var nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
+  parties = parties.map(function (party) {
+    party.nInitialAllocatedSeat = Math.round(party.nTotalVote / nVotePerSeat);
+    return party;
+  }); // check whether nConstituentSeat exceeds nInitialAllocatedSeats
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = parties[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var party = _step.value;
+
+      if (party.nConstituentSeat >= party.nInitialAllocatedSeat) {
+        party.bPartyListNeeded = false;
+      }
+    } // recalculate votes per remaining seat if there is at least one party with nConstituentSeat exceeds nInitialAllocatedSeats
+
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return != null) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  var nPartyWithoutPartyListNeeded = _lodash.default.filter(parties, ['bPartyListNeeded', false]).length;
+
+  if (_lodash.default.filter(parties, ['bPartyListNeeded', false]).length > 0) {
+    var nTotalRemainingVote = parties.reduce(function (nTotalRemainingVote, party) {
+      if (party.bPartyListNeeded) {
+        nTotalRemainingVote += party.nTotalVote;
+      }
+
+      return nTotalRemainingVote;
+    }, 0);
+    var nVotePerRemainingSeat = Math.floor(nTotalRemainingVote / electionConfig.nPartyListSeat);
+  } else {
+    var nVotePerRemainingSeat = nVotePerSeat;
+  }
+
+  parties = parties.map(function (party) {
+    if (party.bPartyListNeeded) {
+      party.nAllocatedSeat = Math.floor(party.nTotalVote / nVotePerRemainingSeat);
+      party.nRemainderVote = party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat) || party.nTotalVote; // in case of party.nAllocatedSeat == 0
+    } else {
+      party.nAllocatedSeat = party.nConstituentSeat;
+    }
+
+    return party;
+  }); // allocate party list seats
+
+  parties = parties.map(function (party) {
+    party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
+    return party;
+  }); // assing unallocated seats
+
+  var nUnallocatedSeat = parties.reduce(function (nUnallocatedSeat, party) {
+    return nUnallocatedSeat - (party.nConstituentSeat + party.nPartyListSeat);
+  }, electionConfig.nTotalSeat);
+  parties = _lodash.default.orderBy(parties, 'nRemainderVote', 'desc');
+
+  var nPartiesGettingPartyList = _lodash.default.filter(parties, 'bPartyListNeeded').length;
+
+  for (var i = 0; i < nUnallocatedSeat; i++) {
+    parties[i % nPartiesGettingPartyList].nAllocatedSeat += 1;
+    parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
+  }
+
+  var nTotalInitialAllocatedSeat = parties.reduce(function (n, party) {
+    return n + party.nInitialAllocatedSeat;
+  }, 0);
+  var nTotalAllocatedSeat = parties.reduce(function (n, party) {
+    return n + party.nAllocatedSeat;
+  }, 0);
+  var nTotalConstituentSeat = parties.reduce(function (n, party) {
+    return n + party.nConstituentSeat;
+  }, 0);
+  var nTotalPartyListSeat = parties.reduce(function (n, party) {
+    return n + party.nPartyListSeat;
+  }, 0);
+  var electionResult = new ElectionResult(parties, resultConstituents, constituentSeatsNames, nTotalVote, nVotePerSeat, nPartyWithoutPartyListNeeded, nVotePerRemainingSeat, nUnallocatedSeat, nTotalInitialAllocatedSeat, nTotalAllocatedSeat, nTotalConstituentSeat, nTotalPartyListSeat);
+  return electionResult;
+}
+
+function numberWithCommas(x) {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+function getResultConstituentConfig() {
+  var width = 400;
+  var height = 400;
+  var margin = {
+    top: 20,
+    right: 20,
+    bottom: 40,
+    left: 60
+  };
+  return {
+    width: width,
+    height: height,
+    margin: margin
+  };
+}
+
+function getResultConstituentScales(electionResult, config) {
+  var width = config.width,
+      height = config.height,
+      margin = config.margin;
+
+  var yMax = _lodash.default.max(electionResult.resultConstituents.map(function (constituent) {
+    return _lodash.default.max(constituent.map(function (party) {
+      return party.nVote;
+    }));
+  }));
+
+  var partyNames = _lodash.default.orderBy(electionResult.parties, 'nTotalVote', 'desc').map(function (party) {
+    return party.name;
+  });
+
+  var yScale = d3.scaleLinear().domain([0, yMax]).range([height - margin.bottom, margin.top]).nice();
+  var xScale = d3.scaleBand().domain(partyNames).range([margin.left, width - margin.right]).padding(0.2);
+  return {
+    xScale: xScale,
+    yScale: yScale
+  };
+}
+
+function drawResultConstituent(resultConstituent, idSvg, config, scales) {
+  var width = config.width,
+      height = config.height,
+      margin = config.margin;
+  var xScale = scales.xScale,
+      yScale = scales.yScale;
+  var svg = d3.select("#".concat(idSvg)).attr('width', width).attr('height', height).style('overflow', 'visible');
+  var bars = svg.append('g').selectAll('.bar').data(resultConstituent);
+  bars.enter().append('rect').attr('x', function (d) {
+    return xScale(d.name);
+  }).attr('y', function (d) {
+    return yScale(d.nVote);
+  }).attr('width', xScale.bandwidth()).attr('height', function (d) {
+    return yScale(0) - yScale(d.nVote);
+  }).attr('fill', function (d) {
+    return d.name;
+  }); // // paint losing parties with white
+  //   const maxVote = _.max(_.map(resultConstituent, d => d.nVote));
+  // for (let party of resultConstituent) {
+  //   if (party.nVote != maxVote) {
+  //     svg
+  //       .datum(party)
+  //       .append('rect')
+  //       .attr('x', d => xScale(d.name) + 3)
+  //       .attr('y', d => yScale(d.nVote) + 3)
+  //       .attr('width', xScale.bandwidth() - 6)
+  //       .attr('height', d => yScale(0) - yScale(d.nVote) - 3)
+  //       .attr('fill', 'white');
+  //   }
+  // }
+
+  var yAxis = d3.axisLeft().tickFormat(function (d) {
+    return d % 20000 === 0 ? "".concat(numberWithCommas(d)) : '';
+  }).scale(yScale);
+  var yAxisG = svg.append('g').classed('y-axis', true).attr('transform', "translate(".concat(margin.left, ", 0)")).call(yAxis);
+  yAxisG.select('.domain').remove();
+  var xAxis = d3.axisBottom().tickSizeOuter(0).scale(xScale);
+  svg.append('g').classed('x-axis', true).attr('transform', "translate(0, ".concat(yScale(0), ")")).call(xAxis);
+}
+
+function drawResultConstituents(electionResult, electionConfig) {
+  var config = getResultConstituentConfig();
+  var scales = getResultConstituentScales(electionResult, config);
+
+  for (var i = 0; i < electionConfig.nConstituentSeat; i++) {
+    d3.select('#constituents').append('svg').attr('id', "constituent".concat(i));
+    drawResultConstituent(electionResult.resultConstituents[i], "constituent".concat(i), config, scales);
+  }
+}
+
+function getAllocationConfig(electionResult, electionConfig, stage) {
+  var width = 800;
+  var height = stage == 'initial' ? electionConfig.nParty * 100 : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) * 100;
+  var margin = {
+    top: 20,
+    right: 20,
+    bottom: 40,
+    left: 60
+  };
+  return {
+    width: width,
+    height: height,
+    margin: margin
+  };
+}
+
+function getAllocationScales(electionResult, config, stage) {
+  var width = config.width,
+      height = config.height,
+      margin = config.margin;
+
+  var xMax = _lodash.default.max(electionResult.parties.map(function (party) {
+    return party.nTotalVote;
+  }));
+
+  var partyNames;
+
+  if (stage == 'initial') {
+    partyNames = _lodash.default.orderBy(electionResult.parties, 'nTotalVote', 'asc').map(function (party) {
+      return party.name;
+    });
+  } else {
+    var remainingParties = _lodash.default.filter(electionResult.parties, 'bPartyListNeeded'); // xMax = _.max(remainingParties.map(party => party.nTotalVote));
+
+
+    partyNames = _lodash.default.orderBy(remainingParties, 'nTotalVote', 'asc').map(function (party) {
+      return party.name;
+    });
+  }
+
+  var xScale = d3.scaleLinear().domain([0, xMax * 1.1]).range([margin.left, width - margin.right]).nice();
+  var yScale = d3.scaleBand().domain(partyNames).range([height - margin.bottom, margin.top]).padding(0.2);
+  return {
+    xScale: xScale,
+    yScale: yScale,
+    xMax: xMax
+  };
+}
+
+function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
+  var width = config.width,
+      height = config.height,
+      margin = config.margin;
+  var xScale = scales.xScale,
+      yScale = scales.yScale,
+      xMax = scales.xMax;
+  var svg = d3.select("#".concat(idSvg)).attr('width', width).attr('height', height).style('overflow', 'visible');
+  var bars = svg.append('g').selectAll('.bar').data(stage == 'initial' ? electionResult.parties : _lodash.default.filter(electionResult.parties, 'bPartyListNeeded'));
+  bars.enter().append('rect').attr('y', function (d) {
+    return yScale(d.name);
+  }).attr('x', function (d) {
+    return margin.left;
+  }).attr('height', yScale.bandwidth()).attr('width', function (d) {
+    return xScale(d.nTotalVote);
+  }).attr('fill', function (d) {
+    return d.name;
+  });
+  var xAxis = d3.axisBottom().tickFormat(function (d) {
+    return d % 20000 === 0 ? "".concat(numberWithCommas(d)) : '';
+  }).scale(xScale);
+  var xAxisG = svg.append('g').classed('x-axis', true).attr('transform', "translate(0, ".concat(height - margin.bottom, ")")).call(xAxis);
+  xAxisG.select('.domain').remove();
+  var yAxis = d3.axisLeft().tickSizeOuter(0).scale(yScale);
+  svg.append('g').classed('y-axis', true).attr('transform', "translate(".concat(margin.left, ", 0)")).call(yAxis); // nVotePerSeat
+
+  var i = 1;
+
+  if (stage == 'initial') {
+    while (electionResult.nVotePerSeat * i < xMax) {
+      svg.append('line').attr('x1', xScale(electionResult.nVotePerSeat * i)).attr('x2', xScale(electionResult.nVotePerSeat * i)).attr('y1', margin.top).attr('y2', height - margin.bottom).attr('stroke', 'black');
+      i++;
+    }
+  } else {
+    while (electionResult.nVotePerRemainingSeat * i < xMax) {
+      svg.append('line').attr('x1', xScale(electionResult.nVotePerRemainingSeat * i)).attr('x2', xScale(electionResult.nVotePerRemainingSeat * i)).attr('y1', margin.top).attr('y2', height - margin.bottom).attr('stroke', 'black');
+      i++;
+    }
+  }
+}
+
+function drawInitialAllocation(electionResult, electionConfig) {
+  var config = getAllocationConfig(electionResult, electionConfig, 'initial');
+  var scales = getAllocationScales(electionResult, config, 'initial');
+  drawAllocationChart(electionResult, 'initial-allocation', config, scales, 'initial');
+}
+
+function drawFinalAllocation(electionResult, electionConfig) {
+  var config = getAllocationConfig(electionResult, electionConfig, 'final');
+  var scales = getAllocationScales(electionResult, config, 'final');
+  drawAllocationChart(electionResult, 'final-allocation', config, scales, 'final');
+}
+},{"d3":"node_modules/d3/index.js","lodash":"node_modules/lodash/lodash.js"}],"node_modules/seedrandom/lib/alea.js":[function(require,module,exports) {
 var define;
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
@@ -47969,21 +48501,10 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":"node_modules/seedrandom/lib/alea.js","./lib/xor128":"node_modules/seedrandom/lib/xor128.js","./lib/xorwow":"node_modules/seedrandom/lib/xorwow.js","./lib/xorshift7":"node_modules/seedrandom/lib/xorshift7.js","./lib/xor4096":"node_modules/seedrandom/lib/xor4096.js","./lib/tychei":"node_modules/seedrandom/lib/tychei.js","./seedrandom":"node_modules/seedrandom/seedrandom.js"}],"src/index.js":[function(require,module,exports) {
+},{"./lib/alea":"node_modules/seedrandom/lib/alea.js","./lib/xor128":"node_modules/seedrandom/lib/xor128.js","./lib/xorwow":"node_modules/seedrandom/lib/xorwow.js","./lib/xorshift7":"node_modules/seedrandom/lib/xorshift7.js","./lib/xor4096":"node_modules/seedrandom/lib/xor4096.js","./lib/tychei":"node_modules/seedrandom/lib/tychei.js","./seedrandom":"node_modules/seedrandom/seedrandom.js"}],"src/full-election.js":[function(require,module,exports) {
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.runElection = runElection;
-exports.drawResultConstituents = drawResultConstituents;
-exports.drawInitialAllocation = drawInitialAllocation;
-exports.drawFinalAllocation = drawFinalAllocation;
-exports.ElectionConfig = void 0;
-
-var d3 = _interopRequireWildcard(require("d3"));
-
-var _lodash = _interopRequireDefault(require("lodash"));
+var main = _interopRequireWildcard(require("./main"));
 
 var _seedrandom = _interopRequireDefault(require("seedrandom"));
 
@@ -47991,519 +48512,18 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var ElectionConfig = function ElectionConfig() {
-  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref$nTotalSeat = _ref.nTotalSeat,
-      nTotalSeat = _ref$nTotalSeat === void 0 ? 500 : _ref$nTotalSeat,
-      _ref$nConstituentSeat = _ref.nConstituentSeat,
-      nConstituentSeat = _ref$nConstituentSeat === void 0 ? 350 : _ref$nConstituentSeat,
-      nPartyListSeat = _ref.nPartyListSeat,
-      _ref$nVoter = _ref.nVoter,
-      nVoter = _ref$nVoter === void 0 ? 50000000 : _ref$nVoter,
-      _ref$pVoterTurnout = _ref.pVoterTurnout,
-      pVoterTurnout = _ref$pVoterTurnout === void 0 ? 0.7 : _ref$pVoterTurnout,
-      nVote = _ref.nVote,
-      _ref$nParty = _ref.nParty,
-      nParty = _ref$nParty === void 0 ? 5 : _ref$nParty;
-
-  _classCallCheck(this, ElectionConfig);
-
-  this.nTotalSeat = nTotalSeat;
-  this.nConstituentSeat = nConstituentSeat;
-  this.nPartyListSeat = nTotalSeat - nConstituentSeat;
-  this.nVoter = nVoter;
-  this.pVoterTurnout = pVoterTurnout;
-  this.nVote = nVoter * pVoterTurnout;
-  this.nParty = nParty;
-};
-
-exports.ElectionConfig = ElectionConfig;
-
-var ElectionResult = function ElectionResult(parties, resultConstituents, constituentSeatsNames, nTotalVote, nVotePerSeat, nPartyWithoutPartyListNeeded, nVotePerRemainingSeat, nUnallocatedSeat, nTotalInitialAllocatedSeat, nTotalAllocatedSeat, nTotalConstituentSeat, nTotalPartyListSeat) {
-  _classCallCheck(this, ElectionResult);
-
-  this.parties = parties;
-  this.resultConstituents = resultConstituents;
-  this.constituentSeatsNames = constituentSeatsNames;
-  this.nTotalVote = nTotalVote;
-  this.nVotePerSeat = nVotePerSeat;
-  this.nPartyWithoutPartyListNeeded = nPartyWithoutPartyListNeeded;
-  this.nVotePerRemainingSeat = nVotePerRemainingSeat;
-  this.nUnallocatedSeat = nUnallocatedSeat;
-  this.nTotalInitialAllocatedSeat = nTotalInitialAllocatedSeat;
-  this.nTotalAllocatedSeat = nTotalAllocatedSeat;
-  this.nTotalConstituentSeat = nTotalConstituentSeat;
-  this.nTotalPartyListSeat = nTotalPartyListSeat;
-};
-
-var Party = function Party() {
-  var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref2$name = _ref2.name,
-      name = _ref2$name === void 0 ? '' : _ref2$name,
-      _ref2$pParty = _ref2.pParty,
-      pParty = _ref2$pParty === void 0 ? 0 : _ref2$pParty,
-      _ref2$nTotalVote = _ref2.nTotalVote,
-      nTotalVote = _ref2$nTotalVote === void 0 ? 0 : _ref2$nTotalVote,
-      _ref2$nConstituentSea = _ref2.nConstituentSeat,
-      nConstituentSeat = _ref2$nConstituentSea === void 0 ? 0 : _ref2$nConstituentSea,
-      _ref2$nExpectedConsti = _ref2.nExpectedConstituentSeat,
-      nExpectedConstituentSeat = _ref2$nExpectedConsti === void 0 ? 0 : _ref2$nExpectedConsti,
-      _ref2$nPartyListSeat = _ref2.nPartyListSeat,
-      nPartyListSeat = _ref2$nPartyListSeat === void 0 ? 0 : _ref2$nPartyListSeat,
-      _ref2$nInitialAllocat = _ref2.nInitialAllocatedSeat,
-      nInitialAllocatedSeat = _ref2$nInitialAllocat === void 0 ? 0 : _ref2$nInitialAllocat,
-      _ref2$nAllocatedSeat = _ref2.nAllocatedSeat,
-      nAllocatedSeat = _ref2$nAllocatedSeat === void 0 ? 0 : _ref2$nAllocatedSeat,
-      _ref2$bPartyListNeede = _ref2.bPartyListNeeded,
-      bPartyListNeeded = _ref2$bPartyListNeede === void 0 ? true : _ref2$bPartyListNeede,
-      _ref2$nRemainderVote = _ref2.nRemainderVote,
-      nRemainderVote = _ref2$nRemainderVote === void 0 ? 0 : _ref2$nRemainderVote;
-
-  _classCallCheck(this, Party);
-
-  this.name = name;
-  this.pParty = pParty;
-  this.nTotalVote = nTotalVote;
-  this.nConstituentSeat = nConstituentSeat;
-  this.nPartyListSeat = nPartyListSeat;
-  this.nInitialAllocatedSeat = nInitialAllocatedSeat;
-  this.nAllocatedSeat = nAllocatedSeat;
-  this.bPartyListNeeded = bPartyListNeeded;
-  this.nRemainderVote = nRemainderVote;
-  this.nExpectedConstituentSeat = nExpectedConstituentSeat;
-};
-/**
- * Shuffles array in place. ES6 version
- * @param {Array} a items An array containing the items.
- * from https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
- */
-
-
-function shuffle(a) {
-  for (var i = a.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var _ref3 = [a[j], a[i]];
-    a[i] = _ref3[0];
-    a[j] = _ref3[1];
-  }
-
-  return a;
-}
-
-function simulateResultConstituent(parties, nVote, expectedConstituentSeats) {
-  /* USE PROBABILITIES FOR VOTE
-  let resultConstituent = parties.map(party => {
-    return {
-      name: party.name,
-      nVote: Math.round(
-        party.pParty * nVote * (Math.random() * (0.7 - 1.3) + 0.7)
-      )
-    };
-  });
-  */
-  var rankings = []; // let winningParty = _.sample(expectedConstituentSeats);
-  // prefer Math.random(), which is controlled by seedrandom
-
-  var winningParty = expectedConstituentSeats[Math.floor(Math.random() * expectedConstituentSeats.length)];
-  var partyNames = parties.map(function (party) {
-    return party.name;
-  }); // simulate ranking for the constituent
-
-  rankings.push(winningParty);
-  rankings = rankings.concat(shuffle(partyNames.filter(function (name) {
-    return name != winningParty;
-  }))); // simulate vote for each pary
-
-  var votes = Array.from({
-    length: parties.length
-  }, function () {
-    return Math.random();
-  });
-  votes = votes.map(function (vote) {
-    return _lodash.default.round(vote / _lodash.default.sum(votes) * nVote);
-  });
-  votes = _lodash.default.reverse(_lodash.default.sortBy(votes));
-  var resultConstituent = rankings.map(function (name, i) {
-    return {
-      name: name,
-      nVote: votes[i]
-    };
-  });
-  return resultConstituent;
-}
-
-function runElection(electionConfig) {
-  // get party winning propablities
-  var pParties = Array.from({
-    length: electionConfig.nParty
-  }, function () {
-    return Math.random();
-  });
-  pParties = pParties.map(function (p) {
-    return p / _lodash.default.sum(pParties);
-  });
-  var partyNames = ['Red', 'Blue', 'Green', 'Orange', 'Pink', 'Yellow', 'Lime']; // must be unique
-  // assign winning propabilities and party names, i.e., colours
-
-  var parties = pParties.map(function (p, i) {
-    var party = new Party({
-      name: partyNames[i],
-      pParty: p,
-      nExpectedConstituentSeat: _lodash.default.round(p * electionConfig.nConstituentSeat)
-    });
-    return party;
-  }); // array of possible winners to be drawn from randomly
-
-  var expectedConstituentSeats = parties.map(function (party) {
-    return Array.from({
-      length: party.nExpectedConstituentSeat
-    }, function () {
-      return party.name;
-    });
-  });
-  expectedConstituentSeats = _lodash.default.flatten(expectedConstituentSeats); // calculate number of votes per each constituent
-
-  var nVotePerConstituent = Math.floor(electionConfig.nVote / electionConfig.nConstituentSeat); // generate result for all constituents
-
-  var resultConstituents = Array.from({
-    length: electionConfig.nConstituentSeat
-  }, function () {
-    return simulateResultConstituent(parties, nVotePerConstituent, expectedConstituentSeats);
-  }); // find winners from constituents
-
-  var constituentSeats = resultConstituents.map(function (resultConstituent) {
-    var seat = resultConstituent.reduce(function (seat, resultParty) {
-      if (resultParty.nVote > seat.nVote) {
-        seat = resultParty;
-      } else if (resultParty.nVote == seat.nVote) {
-        // if draw, randomly pick one
-        if (Math.random() > 0.5) {
-          seat = resultParty;
-        }
-      }
-
-      return seat;
-    }, {
-      nVote: 0
-    });
-    return seat;
-  });
-  var constituentSeatsNames = constituentSeats.map(function (party) {
-    return party.name;
-  }); // count constituentSeats won by party
-
-  parties = parties.map(function (party) {
-    party.nConstituentSeat = constituentSeatsNames.filter(function (name) {
-      return name == party.name;
-    }).length;
-    return party;
-  }); // find total votes from all constituents by party
-
-  parties = parties.map(function (party) {
-    party.nTotalVote = resultConstituents.reduce(function (nTotalPartyVote, resultConstituent) {
-      nTotalPartyVote += resultConstituent.filter(function (i) {
-        return i.name == party.name;
-      })[0].nVote;
-      return nTotalPartyVote;
-    }, 0);
-    return party;
-  }); // find total votes from all constituents
-
-  var nTotalVote = parties.reduce(function (nTotalVote, party) {
-    nTotalVote += party.nTotalVote;
-    return nTotalVote;
-  }, 0); // calculate allocated seats
-
-  var nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
-  parties = parties.map(function (party) {
-    party.nInitialAllocatedSeat = Math.round(party.nTotalVote / nVotePerSeat);
-    return party;
-  }); // check whether nConstituentSeat exceeds nInitialAllocatedSeats
-
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
-
-  try {
-    for (var _iterator = parties[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var party = _step.value;
-
-      if (party.nConstituentSeat >= party.nInitialAllocatedSeat) {
-        party.bPartyListNeeded = false;
-      }
-    } // recalculate votes per remaining seat if there is at least one party with nConstituentSeat exceeds nInitialAllocatedSeats
-
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return != null) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
-  }
-
-  var nPartyWithoutPartyListNeeded = _lodash.default.filter(parties, ['bPartyListNeeded', false]).length;
-
-  if (_lodash.default.filter(parties, ['bPartyListNeeded', false]).length > 0) {
-    var nTotalRemainingVote = parties.reduce(function (nTotalRemainingVote, party) {
-      if (party.bPartyListNeeded) {
-        nTotalRemainingVote += party.nTotalVote;
-      }
-
-      return nTotalRemainingVote;
-    }, 0);
-    var nVotePerRemainingSeat = Math.floor(nTotalRemainingVote / electionConfig.nPartyListSeat);
-  } else {
-    var nVotePerRemainingSeat = nVotePerSeat;
-  }
-
-  parties = parties.map(function (party) {
-    if (party.bPartyListNeeded) {
-      party.nAllocatedSeat = Math.floor(party.nTotalVote / nVotePerRemainingSeat);
-      party.nRemainderVote = party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat) || party.nTotalVote; // in case of party.nAllocatedSeat == 0
-    } else {
-      party.nAllocatedSeat = party.nConstituentSeat;
-    }
-
-    return party;
-  }); // allocate party list seats
-
-  parties = parties.map(function (party) {
-    party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
-    return party;
-  }); // assing unallocated seats
-
-  var nUnallocatedSeat = parties.reduce(function (nUnallocatedSeat, party) {
-    return nUnallocatedSeat - (party.nConstituentSeat + party.nPartyListSeat);
-  }, electionConfig.nTotalSeat);
-  parties = _lodash.default.orderBy(parties, 'nRemainderVote', 'desc');
-
-  var nPartiesGettingPartyList = _lodash.default.filter(parties, 'bPartyListNeeded').length;
-
-  for (var i = 0; i < nUnallocatedSeat; i++) {
-    parties[i % nPartiesGettingPartyList].nAllocatedSeat += 1;
-    parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
-  }
-
-  var nTotalInitialAllocatedSeat = parties.reduce(function (n, party) {
-    return n + party.nInitialAllocatedSeat;
-  }, 0);
-  var nTotalAllocatedSeat = parties.reduce(function (n, party) {
-    return n + party.nAllocatedSeat;
-  }, 0);
-  var nTotalConstituentSeat = parties.reduce(function (n, party) {
-    return n + party.nConstituentSeat;
-  }, 0);
-  var nTotalPartyListSeat = parties.reduce(function (n, party) {
-    return n + party.nPartyListSeat;
-  }, 0);
-  var electionResult = new ElectionResult(parties, resultConstituents, constituentSeatsNames, nTotalVote, nVotePerSeat, nPartyWithoutPartyListNeeded, nVotePerRemainingSeat, nUnallocatedSeat, nTotalInitialAllocatedSeat, nTotalAllocatedSeat, nTotalConstituentSeat, nTotalPartyListSeat);
-  return electionResult;
-}
-
-function numberWithCommas(x) {
-  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
-
-function getResultConstituentConfig() {
-  var width = 400;
-  var height = 400;
-  var margin = {
-    top: 20,
-    right: 20,
-    bottom: 40,
-    left: 60
-  };
-  return {
-    width: width,
-    height: height,
-    margin: margin
-  };
-}
-
-function getResultConstituentScales(electionResult, config) {
-  var width = config.width,
-      height = config.height,
-      margin = config.margin;
-
-  var yMax = _lodash.default.max(electionResult.resultConstituents.map(function (constituent) {
-    return _lodash.default.max(constituent.map(function (party) {
-      return party.nVote;
-    }));
-  }));
-
-  var partyNames = _lodash.default.orderBy(electionResult.parties, 'nTotalVote', 'desc').map(function (party) {
-    return party.name;
-  });
-
-  var yScale = d3.scaleLinear().domain([0, yMax]).range([height - margin.bottom, margin.top]).nice();
-  var xScale = d3.scaleBand().domain(partyNames).range([margin.left, width - margin.right]).padding(0.2);
-  return {
-    xScale: xScale,
-    yScale: yScale
-  };
-}
-
-function drawResultConstituent(resultConstituent, idSvg, config, scales) {
-  var width = config.width,
-      height = config.height,
-      margin = config.margin;
-  var xScale = scales.xScale,
-      yScale = scales.yScale;
-  var svg = d3.select("#".concat(idSvg)).attr('width', width).attr('height', height).style('overflow', 'visible');
-  var bars = svg.append('g').selectAll('.bar').data(resultConstituent);
-  bars.enter().append('rect').attr('x', function (d) {
-    return xScale(d.name);
-  }).attr('y', function (d) {
-    return yScale(d.nVote);
-  }).attr('width', xScale.bandwidth()).attr('height', function (d) {
-    return yScale(0) - yScale(d.nVote);
-  }).attr('fill', function (d) {
-    return d.name;
-  }); // // paint losing parties with white
-  //   const maxVote = _.max(_.map(resultConstituent, d => d.nVote));
-  // for (let party of resultConstituent) {
-  //   if (party.nVote != maxVote) {
-  //     svg
-  //       .datum(party)
-  //       .append('rect')
-  //       .attr('x', d => xScale(d.name) + 3)
-  //       .attr('y', d => yScale(d.nVote) + 3)
-  //       .attr('width', xScale.bandwidth() - 6)
-  //       .attr('height', d => yScale(0) - yScale(d.nVote) - 3)
-  //       .attr('fill', 'white');
-  //   }
-  // }
-
-  var yAxis = d3.axisLeft().tickFormat(function (d) {
-    return d % 20000 === 0 ? "".concat(numberWithCommas(d)) : '';
-  }).scale(yScale);
-  var yAxisG = svg.append('g').classed('y-axis', true).attr('transform', "translate(".concat(margin.left, ", 0)")).call(yAxis);
-  yAxisG.select('.domain').remove();
-  var xAxis = d3.axisBottom().tickSizeOuter(0).scale(xScale);
-  svg.append('g').classed('x-axis', true).attr('transform', "translate(0, ".concat(yScale(0), ")")).call(xAxis);
-}
-
-function drawResultConstituents(electionResult, electionConfig) {
-  var config = getResultConstituentConfig();
-  var scales = getResultConstituentScales(electionResult, config);
-
-  for (var i = 0; i < electionConfig.nConstituentSeat; i++) {
-    d3.select('#constituents').append('svg').attr('id', "constituent".concat(i));
-    drawResultConstituent(electionResult.resultConstituents[i], "constituent".concat(i), config, scales);
-  }
-}
-
-function getAllocationConfig(electionResult, electionConfig, stage) {
-  var width = 800;
-  var height = stage == 'initial' ? electionConfig.nParty * 100 : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) * 100;
-  var margin = {
-    top: 20,
-    right: 20,
-    bottom: 40,
-    left: 60
-  };
-  return {
-    width: width,
-    height: height,
-    margin: margin
-  };
-}
-
-function getAllocationScales(electionResult, config, stage) {
-  var width = config.width,
-      height = config.height,
-      margin = config.margin;
-
-  var xMax = _lodash.default.max(electionResult.parties.map(function (party) {
-    return party.nTotalVote;
-  }));
-
-  var partyNames;
-
-  if (stage == 'initial') {
-    partyNames = _lodash.default.orderBy(electionResult.parties, 'nTotalVote', 'asc').map(function (party) {
-      return party.name;
-    });
-  } else {
-    var remainingParties = _lodash.default.filter(electionResult.parties, 'bPartyListNeeded'); // xMax = _.max(remainingParties.map(party => party.nTotalVote));
-
-
-    partyNames = _lodash.default.orderBy(remainingParties, 'nTotalVote', 'asc').map(function (party) {
-      return party.name;
-    });
-  }
-
-  var xScale = d3.scaleLinear().domain([0, xMax * 1.1]).range([margin.left, width - margin.right]).nice();
-  var yScale = d3.scaleBand().domain(partyNames).range([height - margin.bottom, margin.top]).padding(0.2);
-  return {
-    xScale: xScale,
-    yScale: yScale,
-    xMax: xMax
-  };
-}
-
-function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
-  var width = config.width,
-      height = config.height,
-      margin = config.margin;
-  var xScale = scales.xScale,
-      yScale = scales.yScale,
-      xMax = scales.xMax;
-  var svg = d3.select("#".concat(idSvg)).attr('width', width).attr('height', height).style('overflow', 'visible');
-  var bars = svg.append('g').selectAll('.bar').data(stage == 'initial' ? electionResult.parties : _lodash.default.filter(electionResult.parties, 'bPartyListNeeded'));
-  bars.enter().append('rect').attr('y', function (d) {
-    return yScale(d.name);
-  }).attr('x', function (d) {
-    return margin.left;
-  }).attr('height', yScale.bandwidth()).attr('width', function (d) {
-    return xScale(d.nTotalVote);
-  }).attr('fill', function (d) {
-    return d.name;
-  });
-  var xAxis = d3.axisBottom().tickFormat(function (d) {
-    return d % 20000 === 0 ? "".concat(numberWithCommas(d)) : '';
-  }).scale(xScale);
-  var xAxisG = svg.append('g').classed('x-axis', true).attr('transform', "translate(0, ".concat(height - margin.bottom, ")")).call(xAxis);
-  xAxisG.select('.domain').remove();
-  var yAxis = d3.axisLeft().tickSizeOuter(0).scale(yScale);
-  svg.append('g').classed('y-axis', true).attr('transform', "translate(".concat(margin.left, ", 0)")).call(yAxis); // nVotePerSeat
-
-  var i = 1;
-
-  if (stage == 'initial') {
-    while (electionResult.nVotePerSeat * i < xMax) {
-      svg.append('line').attr('x1', xScale(electionResult.nVotePerSeat * i)).attr('x2', xScale(electionResult.nVotePerSeat * i)).attr('y1', margin.top).attr('y2', height - margin.bottom).attr('stroke', 'black');
-      i++;
-    }
-  } else {
-    while (electionResult.nVotePerRemainingSeat * i < xMax) {
-      svg.append('line').attr('x1', xScale(electionResult.nVotePerRemainingSeat * i)).attr('x2', xScale(electionResult.nVotePerRemainingSeat * i)).attr('y1', margin.top).attr('y2', height - margin.bottom).attr('stroke', 'black');
-      i++;
-    }
-  }
-}
-
-function drawInitialAllocation(electionResult, electionConfig) {
-  var config = getAllocationConfig(electionResult, electionConfig, 'initial');
-  var scales = getAllocationScales(electionResult, config, 'initial');
-  drawAllocationChart(electionResult, 'initial-allocation', config, scales, 'initial');
-}
-
-function drawFinalAllocation(electionResult, electionConfig) {
-  var config = getAllocationConfig(electionResult, electionConfig, 'final');
-  var scales = getAllocationScales(electionResult, config, 'final');
-  drawAllocationChart(electionResult, 'final-allocation', config, scales, 'final');
-}
-},{"d3":"node_modules/d3/index.js","lodash":"node_modules/lodash/lodash.js","seedrandom":"node_modules/seedrandom/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+(0, _seedrandom.default)('full', {
+  global: true
+});
+var fullConfig = new main.ElectionConfig({
+  nParty: 7
+});
+var fullResult = main.runElection(fullConfig);
+main.drawResultConstituents(fullResult, fullConfig);
+main.drawInitialAllocation(fullResult, fullConfig);
+main.drawFinalAllocation(fullResult, fullConfig);
+console.log(fullResult);
+},{"./main":"src/main.js","seedrandom":"node_modules/seedrandom/index.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -48530,7 +48550,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50304" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "65079" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
@@ -48672,5 +48692,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","src/index.js"], null)
-//# sourceMappingURL=/src.a2b27638.map
+},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","src/full-election.js"], null)
+//# sourceMappingURL=/full-election.044db93f.map
