@@ -55,8 +55,8 @@ class Party {
  */
 function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
 }
@@ -76,13 +76,18 @@ function simulateResultConstituent(parties, nVote, expectedConstituentSeats) {
   let rankings = [];
   // let winningParty = _.sample(expectedConstituentSeats);
   // prefer Math.random(), which is controlled by seedrandom
-  let winningParty = expectedConstituentSeats[Math.floor(Math.random() * expectedConstituentSeats.length)];
+  let winningParty =
+    expectedConstituentSeats[
+      Math.floor(Math.random() * expectedConstituentSeats.length)
+    ];
 
-  let partyNames = parties.map(party => party.name)
+  let partyNames = parties.map(party => party.name);
 
   // simulate ranking for the constituent
   rankings.push(winningParty);
-  rankings = rankings.concat(shuffle(partyNames.filter(name => name != winningParty)))
+  rankings = rankings.concat(
+    shuffle(partyNames.filter(name => name != winningParty))
+  );
 
   // simulate vote for each pary
   let votes = Array.from({ length: parties.length }, () => Math.random());
@@ -93,7 +98,7 @@ function simulateResultConstituent(parties, nVote, expectedConstituentSeats) {
     return {
       name: name,
       nVote: votes[i]
-    }
+    };
   });
 
   return resultConstituent;
@@ -153,7 +158,12 @@ function starter() {
   // generate result for all constituents
   let resultConstituents = Array.from(
     { length: election.nConstituentSeat },
-    () => simulateResultConstituent(parties, nVotePerConstituent, expectedConstituentSeats)
+    () =>
+      simulateResultConstituent(
+        parties,
+        nVotePerConstituent,
+        expectedConstituentSeats
+      )
   );
   console.log('resultConstituents :', resultConstituents);
 
@@ -229,7 +239,10 @@ function starter() {
   }
 
   // recalculate votes per remaining seat if there is at least one party with nConstituentSeat exceeds nPreAllocatedSeats
-  console.log('nParty without PartyListNeeded :', _.filter(parties, ['bPartyListNeeded', false]).length);
+  console.log(
+    'nParty without PartyListNeeded :',
+    _.filter(parties, ['bPartyListNeeded', false]).length
+  );
 
   if (_.filter(parties, ['bPartyListNeeded', false]).length > 0) {
     let nTotalRemainingVote = parties.reduce((nTotalRemainingVote, party) => {
@@ -254,7 +267,8 @@ function starter() {
         party.nTotalVote / nVotePerRemainingSeat
       );
       party.nRemainderVote =
-        party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat) || party.nTotalVote; // in case of party.nAllocatedSeat == 0
+        party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat) ||
+        party.nTotalVote; // in case of party.nAllocatedSeat == 0
     } else {
       party.nAllocatedSeat = party.nConstituentSeat;
     }
