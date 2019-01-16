@@ -54,6 +54,7 @@ class ElectionResult {
 class Party {
   constructor({
     name = '',
+    color = '',
     pParty = 0,
     nTotalVote = 0,
     nConstituentSeat = 0,
@@ -65,6 +66,7 @@ class Party {
     nRemainderVote = 0
   } = {}) {
     this.name = name;
+    this.color = color;
     this.pParty = pParty;
     this.nTotalVote = nTotalVote;
     this.nConstituentSeat = nConstituentSeat;
@@ -141,7 +143,7 @@ function runElection(electionConfig) {
 
   pParties = pParties.map(p => p / _.sum(pParties));
 
-  const partyNames = [
+  const partyColors = [
     'Red',
     'SkyBlue',
     'Green',
@@ -155,7 +157,8 @@ function runElection(electionConfig) {
   // assign winning propabilities and party names, i.e., colours
   let parties = pParties.map((p, i) => {
     let party = new Party({
-      name: partyNames[i],
+      name: partyColors[i],
+      color: partyColors[i],
       pParty: p,
       nExpectedConstituentSeat: _.round(p * electionConfig.nConstituentSeat)
     });
@@ -392,7 +395,13 @@ function getResultConstituentScales(electionResult, config) {
   return { xScale, yScale };
 }
 
-function drawResultConstituent(resultConstituent, idSvg, config, scales) {
+function drawResultConstituent(
+  electionResult,
+  resultConstituent,
+  idSvg,
+  config,
+  scales
+) {
   const { width, height, margin } = config;
   const { xScale, yScale } = scales;
 
@@ -414,7 +423,10 @@ function drawResultConstituent(resultConstituent, idSvg, config, scales) {
     .attr('y', d => yScale(d.nVote))
     .attr('width', xScale.bandwidth())
     .attr('height', d => yScale(0) - yScale(d.nVote))
-    .attr('fill', d => d.name);
+    .attr('fill', d => {
+      const p = _.find(electionResult.parties, ['name', d.name]);
+      return p.color;
+    });
 
   // // paint losing parties with white
   //   const maxVote = _.max(_.map(resultConstituent, d => d.nVote));
@@ -464,6 +476,7 @@ function drawResultConstituents(electionResult, electionConfig) {
       .attr('id', `constituent${i}`);
 
     drawResultConstituent(
+      electionResult,
       electionResult.resultConstituents[i],
       `constituent${i}`,
       config,
@@ -550,7 +563,10 @@ function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
     .attr('x', d => margin.left)
     .attr('height', yScale.bandwidth())
     .attr('width', d => xScale(d.nTotalVote))
-    .attr('fill', d => d.name);
+    .attr('fill', d => {
+      const p = _.find(electionResult.parties, ['name', d.name]);
+      return p.color;
+    });
 
   const xAxis = d3
     .axisBottom()
