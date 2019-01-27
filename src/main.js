@@ -731,7 +731,7 @@ function getAllocationScales(electionResult, config, stage) {
 
 function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
   const { width, height, margin } = config;
-  const { xScale, yScale, xMax } = scales;
+  let { xScale, yScale, xMax } = scales;
 
   const svg = d3
     .select(`#${idSvg}`)
@@ -789,8 +789,13 @@ function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
   const blockWidth = xScale(nVotePerSeat) - xScale(0);
   const markSize = blockWidth < 20 ? Math.floor(blockWidth) : 20;
 
-  let i = 1;
-  while (nVotePerSeat * i <= xMax) {
+  xMax = stage == 'initial'
+    ? xMax
+    : _.max(_.filter(electionResult.parties, 'bPartyListNeeded').map(party => party.nTotalVote))
+
+  let i = 0;
+  while (nVotePerSeat * i <=  xMax) {
+    i++;
     svg
       .append('line')
       .attr('x1', xScale(nVotePerSeat * i))
@@ -807,7 +812,6 @@ function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
       .attr('text-anchor', 'middle')
       .attr('font-size', markSize * 0.8)
       .text(i);
-    i++;
   }
 
   // draw constituent seats won by each party
@@ -920,7 +924,7 @@ function drawFinalAllocation(electionResult, electionConfig) {
 ********************************/
 function addIntroText(electionConfig, additionalText) {
   const introText = `
-    <p>การเลือกตั้งที่จะถึงนี้ มีการเปลี่ยนแปลงบัตรลงคะแนนจนเหลือเพียงใบเดียวคือ ผู้มีสิทธิ์สามารถลงคะแนนเลือกได้แค่แบบแบ่งเขตเลือกตั้ง จากเดิมสามารถเลือกได้ทั้งผู้สมัครแบบแบ่งเขตเลือกตั้ง และผู้สมัครแบบบัญชีรายชื่อ</p>
+    <p>การเลือกตั้งที่จะถึงนี้ มีการเปลี่ยนแปลงการลงคะแนนเสียง โดยมีบัตรเลือกตั้งเหลือเพียงใบเดียวคือ ผู้มีสิทธิ์สามารถลงคะแนนเลือกได้แค่แบบแบ่งเขตเลือกตั้ง จากเดิมเราสามารถเลือกได้ทั้งผู้สมัครแบบแบ่งเขตเลือกตั้ง และผู้สมัครแบบบัญชีรายชื่อผ่านการเลือกพรรคการเมือง</p>
     <p>เนื่องจากรัฐธรรมนูญฉบับปีพ.ศ.2560 ได้ระบุให้มีการใช้ระบบเลือกตั้งแบบจัดสรรปันส่วนผสม (mixed member apportionment system หรือ MMA)</p>
     <p>ซึ่งการคำนวณที่มาของส.ส. แบบบัญชีรายชื่อนั้น มีความสลับซับซ้อน สร้างความงุนงงให้กับผู้คนทั่วไป</p>
     <p>ต่อไปนี้จะไปการแสดงแบบจำลองสมมติของการเลือกตั้ง และการนับจำนวนส.ส. เพื่อเราจะได้เข้าใจระบบการเลือกตั้งพิสดารนี้ดียิ่งขึ้น</p>
@@ -983,7 +987,7 @@ function addConstituentText(electionResult, electionConfig, additionalText) {
   )} เสียงต่อ 1 ที่นั่งในสภา</p>
   <p>จำนวนดังกล่าวแทนด้วยแต่ละบล็อกในกราฟแท่งด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี ตามจำนวนเสียงที่ได้เต็มบล็อก จนครบกว่าจะครบทั้ง ${
     electionConfig.nTotalSeat
-  } ในสภา</p>
+  } ที่นั่งในสภา</p>
   <p>หากไม่ครบ จะจัดที่นั่งดังกล่าวให้พรรคที่มีจำนวนเสียงเป็นเศษมากที่สุดก่อน (บล็อกกว้างสุด แต่ยังไม่เต็มบล็อก) เรียงลำดับต่อไปจนกว่าจะครบ</p>
   <p>แต่ถ้าหากมีพรรคใดได้รับส.ส.แบบแบ่งเขตเลือกตั้งเป็นจำนวนเท่ากับหรือมากกว่าส.ส.พึงมี ให้นำพรรคนั้นออกจากการคำนวณ และไม่ได้รับส.ส.แบบบัญชีรายชื่อ ส่วนพรรคที่เหลือนำไปคำนวณส.ส.พึงมีใหม่อีกครั้งตามจำนวนส.ส.ที่เหลืออยู่</p>
   `;
@@ -1015,7 +1019,7 @@ function addAllocatedText(electionResult, electionConfig, additionalText) {
   พรรค ได้รับจำนวนส.ส.แบบเบ่งเขต ไปครบจำนวนส.ส.พึงมีแล้ว จึงกำหนดให้ 
   ${electionResult.nPartyWithoutPartyListNeeded} 
   พรรคนี้ได้รับส.ส.ตามที่ชนะมาจากแบบแบ่งเขตเลือกตั้ง แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อได้อีก</p>
-  <p>ดังนั้นการจัดสรรส.ส.พึงมีจึงพิจารณจาก ${electionConfig.nParty -
+  <p>ดังนั้นการจัดสรรส.ส.พึงมีและส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
     electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น</p>
   <br />
       <h3>ผลการแบ่งส.ส.บัญชีรายชื่อ</h3>
