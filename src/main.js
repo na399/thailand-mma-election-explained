@@ -150,13 +150,13 @@ function runElection(electionConfig) {
   const partyNames = [
     'แดง',
     'ฟ้า',
-    'เขียวเข้ม',
+    'เขียว',
     'ส้ม',
-    'แดงอ่อน',
+    'ชมพู',
     'น้ำเงิน',
     'เขียวอ่อน',
     'ส้มอ่อน',
-    'ม่วงเข้ม',
+    'ม่วง',
     'น้ำตาล',
     'ม่วงอ่อน',
     'เหลือง'
@@ -681,7 +681,8 @@ function getAllocationConfig(electionResult, electionConfig, stage) {
   const height =
     stage == 'initial'
       ? electionConfig.nParty * 80
-      : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) * 100;
+      : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) *
+        100;
   const margin = { top: 20, right: 20, bottom: 40, left: 60 };
 
   return {
@@ -722,7 +723,7 @@ function getAllocationScales(electionResult, config, stage) {
     .scaleBand()
     .domain(partyNames)
     .range([height - margin.bottom, margin.top])
-    .padding(0.2)
+    .padding(0.5)
     .round(true);
 
   return { xScale, yScale, xMax };
@@ -812,7 +813,10 @@ function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
   // draw constituent seats won by each party
   let seatData = electionResult.parliamentSeat['constituent'];
   // remove filled parties
-  seatData = stage == 'initial' ? seatData : _.filter(seatData, 'party.bPartyListNeeded')
+  seatData =
+    stage == 'initial'
+      ? seatData
+      : _.filter(seatData, 'party.bPartyListNeeded');
 
   const seats = svg
     .append('g')
@@ -822,17 +826,20 @@ function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
   seats
     .enter()
     .append('circle')
-    .attr('cy', d => yScale(d.name) + yScale.bandwidth() / 2)
+    // .attr('cy', d => yScale(d.name) + yScale.bandwidth() / 2)
+    .attr('cy', d => yScale(d.name))
     .attr('cx', d => xScale(nVotePerSeat * (d.iOfParty + 0.5)))
     .attr('r', markSize / 2)
-    .attr('fill', d => d3.color(d.color).brighter(2))
+    // .attr('fill', d => d3.color(d.color).brighter(2))
+    .attr('fill', 'white')
     .attr('stroke', d => d3.color(d.color).darker())
     .attr('stroke-width', 2);
 
   seats
     .enter()
     .append('text')
-    .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
+    // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
+    .attr('y', d => yScale(d.name) + markSize * 0.25)
     .attr('x', d => xScale(nVotePerSeat * (d.iOfParty + 0.5)))
     .attr('text-anchor', 'middle')
     .attr('font-size', markSize * 0.7)
@@ -850,27 +857,31 @@ function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
     seatsPL
       .enter()
       .append('rect')
-      .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2)
+      // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2)
+      .attr('y', d => yScale(d.name) + yScale.bandwidth() - markSize / 2)
       .attr('x', d =>
         xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5))
       )
       .attr('width', markSize * 0.8)
       .attr('height', markSize * 0.8)
       .attr('transform', d => {
-        const cy = yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2;
+        // const cy = yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2;
+        const cy = yScale(d.name) + yScale.bandwidth() - markSize / 2;
         const cx = xScale(
           nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5)
         );
         return `rotate(45 ${cx} ${cy})`;
       })
-      .attr('fill', d => d3.color(d.color).brighter(2))
+      // .attr('fill', d => d3.color(d.color).brighter(2))
+      .attr('fill', 'white')
       .attr('stroke', d => d3.color(d.color).darker())
       .attr('stroke-width', 2);
 
     seatsPL
       .enter()
       .append('text')
-      .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
+      // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
+      .attr('y', d => yScale(d.name) + yScale.bandwidth() + markSize * 0.25)
       .attr('x', d =>
         xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5))
       )
