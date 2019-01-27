@@ -18,6 +18,7 @@ main.addIntroText(
   'เพื่อลดความสับสน จึงขอเริ่มต้นกันด้วยแบบจำลองฉบับย่อกันก่อน'
 );
 main.drawResultConstituents(starterResult, starterConfig);
+main.drawWaffle(starterResult, starterConfig, "#parliament-seats", "constituent")
 main.addConstituentText(starterResult, starterConfig);
 main.drawInitialAllocation(starterResult, starterConfig);
 main.addAllocatedText(starterResult, starterConfig);

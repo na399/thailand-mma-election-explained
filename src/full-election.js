@@ -10,6 +10,7 @@ let fullConfig = new main.ElectionConfig({
 const fullResult = main.runElection(fullConfig);
 
 main.drawResultConstituents(fullResult, fullConfig);
+main.drawWaffle(fullResult, fullConfig, "#parliament-seats", "constituent")
 main.drawInitialAllocation(fullResult, fullConfig);
 main.drawFinalAllocation(fullResult, fullConfig);
 

@@ -34,7 +34,8 @@ class ElectionResult {
     nTotalInitialAllocatedSeat,
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
-    nTotalPartyListSeat
+    nTotalPartyListSeat,
+    parliamentSeat
   ) {
     this.parties = parties;
     this.resultConstituents = resultConstituents;
@@ -48,6 +49,7 @@ class ElectionResult {
     this.nTotalAllocatedSeat = nTotalAllocatedSeat;
     this.nTotalConstituentSeat = nTotalConstituentSeat;
     this.nTotalPartyListSeat = nTotalPartyListSeat;
+    this.parliamentSeat = parliamentSeat;
   }
 }
 
@@ -62,6 +64,7 @@ class Party {
     nPartyListSeat = 0,
     nInitialAllocatedSeat = 0,
     nAllocatedSeat = 0,
+    nTotalSeat = 0,
     bPartyListNeeded = true,
     nRemainderVote = 0
   } = {}) {
@@ -73,6 +76,7 @@ class Party {
     this.nPartyListSeat = nPartyListSeat;
     this.nInitialAllocatedSeat = nInitialAllocatedSeat;
     this.nAllocatedSeat = nAllocatedSeat;
+    this.nTotalSeat = nTotalSeat;
     this.bPartyListNeeded = bPartyListNeeded;
     this.nRemainderVote = nRemainderVote;
     this.nExpectedConstituentSeat = nExpectedConstituentSeat;
@@ -143,21 +147,40 @@ function runElection(electionConfig) {
 
   pParties = pParties.map(p => p / _.sum(pParties));
 
+  const partyNames = [
+    'แดง',
+    'ฟ้า',
+    'เขียวเข้ม',
+    'ส้ม',
+    'แดงอ่อน',
+    'น้ำเงิน',
+    'เขียวอ่อน',
+    'ส้มอ่อน',
+    'ม่วงเข้ม',
+    'น้ำตาล',
+    'ม่วงอ่อน',
+    'เหลือง'
+  ];
+
   const partyColors = [
-    'Red',
-    'SkyBlue',
-    'Green',
-    'Orange',
-    'Pink',
-    'Blue',
-    'Lime',
-    'Yellow'
+    '#e31a1c',
+    '#a6cee3',
+    '#33a02c',
+    '#ff7f00',
+    '#fb9a99',
+    '#1f78b4',
+    '#b2df8a',
+    '#fdbf6f',
+    '#6a3d9a',
+    '#b15928',
+    '#cab2d6',
+    '#ffff99'
   ]; // must be unique
 
   // assign winning propabilities and party names, i.e., colours
   let parties = pParties.map((p, i) => {
     let party = new Party({
-      name: partyColors[i],
+      name: partyNames[i],
       color: partyColors[i],
       pParty: p,
       nExpectedConstituentSeat: _.round(p * electionConfig.nConstituentSeat)
@@ -262,6 +285,14 @@ function runElection(electionConfig) {
   ]).length;
 
   if (_.filter(parties, ['bPartyListNeeded', false]).length > 0) {
+    const nRemainingSeat = _.filter(parties, [
+      'bPartyListNeeded',
+      false
+    ]).reduce(
+      (nRemainingSeat, party) => nRemainingSeat - party.nConstituentSeat,
+      electionConfig.nTotalSeat
+    );
+
     let nTotalRemainingVote = parties.reduce((nTotalRemainingVote, party) => {
       if (party.bPartyListNeeded) {
         nTotalRemainingVote += party.nTotalVote;
@@ -270,7 +301,8 @@ function runElection(electionConfig) {
     }, 0);
 
     var nVotePerRemainingSeat = Math.floor(
-      nTotalRemainingVote / electionConfig.nPartyListSeat
+      //nTotalRemainingVote / electionConfig.nPartyListSeat
+      nTotalRemainingVote / nRemainingSeat
     );
   } else {
     var nVotePerRemainingSeat = nVotePerSeat;
@@ -311,6 +343,12 @@ function runElection(electionConfig) {
     parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
   }
 
+  // calculate final total seat numbers
+  parties = parties.map(party => {
+    party.nTotalSeat = party.nConstituentSeat + party.nPartyListSeat;
+    return party;
+  });
+
   const nTotalInitialAllocatedSeat = parties.reduce(
     (n, party) => n + party.nInitialAllocatedSeat,
     0
@@ -331,6 +369,59 @@ function runElection(electionConfig) {
     0
   );
 
+  // fill parliament seats
+  const partyNamesBySeat = _.orderBy(
+    parties,
+    ['nTotalSeat', 'nConstituentSeat', 'nTotalVote'],
+    ['desc', 'desc', 'desc']
+  ).map(party => party.name);
+
+  let parliamentSeat = { all: [], constituent: [], partyList: [] };
+
+  let iAll = 0;
+  let iConstituent = 0;
+  let iPartyList = 0;
+
+  for (let partyName of partyNamesBySeat) {
+    const party = _.find(parties, ['name', partyName]);
+
+    for (let i of _.range(iAll, iAll + party.nTotalSeat)) {
+      parliamentSeat.all.push({
+        i: i,
+        iOfParty: i - iAll,
+        name: party.name,
+        color: party.color,
+        party: party
+      });
+    }
+    iAll += party.nTotalSeat;
+
+    for (let i of _.range(
+      iConstituent,
+      iConstituent + party.nConstituentSeat
+    )) {
+      parliamentSeat.constituent.push({
+        i: i,
+        iOfParty: i - iConstituent,
+        name: party.name,
+        color: party.color,
+        party: party
+      });
+    }
+    iConstituent += party.nConstituentSeat;
+
+    for (let i of _.range(iPartyList, iPartyList + party.nPartyListSeat)) {
+      parliamentSeat.partyList.push({
+        i: i,
+        iOfParty: i - iPartyList,
+        name: party.name,
+        color: party.color,
+        party: party
+      });
+    }
+    iPartyList += party.nPartyListSeat;
+  }
+
   let electionResult = new ElectionResult(
     parties,
     resultConstituents,
@@ -343,7 +434,8 @@ function runElection(electionConfig) {
     nTotalInitialAllocatedSeat,
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
-    nTotalPartyListSeat
+    nTotalPartyListSeat,
+    parliamentSeat
   );
 
   return electionResult;
@@ -353,6 +445,9 @@ function numberWithCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
+/*******************************
+ Bar plots for votes from each constituent
+********************************/
 function getResultConstituentConfig() {
   const width = 400;
   const height = 400;
@@ -390,7 +485,9 @@ function getResultConstituentScales(electionResult, config) {
     .scaleBand()
     .domain(partyNames)
     .range([margin.left, width - margin.right])
-    .padding(0.2);
+    .paddingOuter(0.4)
+    .paddingInner(0.8)
+    .round(true);
 
   return { xScale, yScale };
 }
@@ -427,6 +524,28 @@ function drawResultConstituent(
       const p = _.find(electionResult.parties, ['name', d.name]);
       return p.color;
     });
+
+  // draw circle on the winner
+  const maxVote = _.max(_.map(resultConstituent, d => d.nVote));
+  for (let party of resultConstituent) {
+    if (party.nVote == maxVote) {
+      svg
+        .datum(party)
+        .append('circle')
+        .attr('cx', d => xScale(d.name) + xScale.bandwidth() / 2)
+        .attr('cy', d => yScale(d.nVote) + xScale.bandwidth())
+        .attr('r', xScale.bandwidth())
+        .attr('fill', d => {
+          const p = _.find(electionResult.parties, ['name', d.name]);
+          return p.color;
+        })
+        .attr('stroke', d => {
+          const p = _.find(electionResult.parties, ['name', d.name]);
+          return d3.color(p.color).darker();
+        })
+        .attr('stroke-width', 3);
+    }
+  }
 
   // // paint losing parties with white
   //   const maxVote = _.max(_.map(resultConstituent, d => d.nVote));
@@ -485,13 +604,84 @@ function drawResultConstituents(electionResult, electionConfig) {
   }
 }
 
+/*******************************
+ Waffle Plots for parliament seats 
+********************************/
+// https://stackoverflow.com/questions/12303989/cartesian-product-of-multiple-arrays-in-javascript
+const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
+const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
+
+function drawWaffle(electionResult, electionConfig, selector, seatType) {
+  const seatData = electionResult.parliamentSeat[seatType]; // 'all', 'constituent', 'partyList'
+
+  const nCol = 25;
+  const nRow = Math.ceil(seatData.length / nCol);
+
+  const grid = cartesian(d3.range(nRow), d3.range(nCol));
+
+  const gridSize = 15;
+  const padding = 5;
+
+  const width = nCol * (gridSize + padding);
+  const height = nRow * (gridSize + padding);
+  const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+
+  const svg = d3
+    .select(selector)
+    .attr('width', width)
+    .attr('height', height)
+    .style('overflow', 'visible');
+
+  const seats = svg
+    .append('g')
+    .selectAll('rect')
+    .data(seatData);
+
+  // circle
+  seats
+    .enter()
+    .append('circle')
+    .attr('cx', gridSize / 2)
+    .attr('cy', gridSize / 2)
+    .attr('r', gridSize / 2)
+    .attr('fill', d => d.color)
+    .attr('stroke', d => d3.color(d.color).darker())
+    .attr('stroke-width', gridSize / 10)
+    .attr(
+      'transform',
+      (d, i) =>
+        `translate(${grid[i][1] * (gridSize + padding)}, 
+        ${grid[i][0] * (gridSize + padding)})`
+    );
+
+  // // diamond
+  // seats
+  //   .enter()
+  //   .append('rect')
+  //   .attr('width', gridSize)
+  //   .attr('height', gridSize)
+  //   .attr('fill', d => d.color)
+  //   .attr('stroke', d => d3.color(d.color).darker())
+  //   .attr('stroke-width', gridSize / 10)
+  //   .attr(
+  //     'transform',
+  //     (d, i) =>
+  //       `translate(${grid[i][1] * (gridSize + padding)},
+  //       ${grid[i][0] * (gridSize + padding)})
+  //       rotate(45 ${gridSize / 2} ${gridSize / 2})
+  //       scale(0.6)`
+  //   );
+}
+
+/*******************************
+ Bar plots for votes from entire country 
+********************************/
 function getAllocationConfig(electionResult, electionConfig, stage) {
-  const width = 800;
+  const width = 1000;
   const height =
     stage == 'initial'
-      ? electionConfig.nParty * 100
-      : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) *
-        100;
+      ? electionConfig.nParty * 80
+      : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) * 100;
   const margin = { top: 20, right: 20, bottom: 40, left: 60 };
 
   return {
@@ -524,7 +714,7 @@ function getAllocationScales(electionResult, config, stage) {
 
   const xScale = d3
     .scaleLinear()
-    .domain([0, xMax * 1.1])
+    .domain([0, xMax])
     .range([margin.left, width - margin.right])
     .nice();
 
@@ -532,7 +722,8 @@ function getAllocationScales(electionResult, config, stage) {
     .scaleBand()
     .domain(partyNames)
     .range([height - margin.bottom, margin.top])
-    .padding(0.2);
+    .padding(0.2)
+    .round(true);
 
   return { xScale, yScale, xMax };
 }
@@ -560,13 +751,10 @@ function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
     .enter()
     .append('rect')
     .attr('y', d => yScale(d.name))
-    .attr('x', d => margin.left)
+    .attr('x', margin.left)
     .attr('height', yScale.bandwidth())
-    .attr('width', d => xScale(d.nTotalVote))
-    .attr('fill', d => {
-      const p = _.find(electionResult.parties, ['name', d.name]);
-      return p.color;
-    });
+    .attr('width', d => xScale(d.nTotalVote) - xScale(0))
+    .attr('fill', d => d.color);
 
   const xAxis = d3
     .axisBottom()
@@ -591,30 +779,104 @@ function drawAllocationChart(electionResult, idSvg, config, scales, stage) {
     .attr('transform', `translate(${margin.left}, 0)`)
     .call(yAxis);
 
-  // nVotePerSeat
+  // seat allocation
+  const nVotePerSeat =
+    stage == 'initial'
+      ? electionResult.nVotePerSeat
+      : electionResult.nVotePerRemainingSeat;
+
+  const blockWidth = xScale(nVotePerSeat) - xScale(0);
+  const markSize = blockWidth < 20 ? Math.floor(blockWidth) : 20;
+
   let i = 1;
-  if (stage == 'initial') {
-    while (electionResult.nVotePerSeat * i < xMax) {
-      svg
-        .append('line')
-        .attr('x1', xScale(electionResult.nVotePerSeat * i))
-        .attr('x2', xScale(electionResult.nVotePerSeat * i))
-        .attr('y1', margin.top)
-        .attr('y2', height - margin.bottom)
-        .attr('stroke', 'black');
-      i++;
-    }
-  } else {
-    while (electionResult.nVotePerRemainingSeat * i < xMax) {
-      svg
-        .append('line')
-        .attr('x1', xScale(electionResult.nVotePerRemainingSeat * i))
-        .attr('x2', xScale(electionResult.nVotePerRemainingSeat * i))
-        .attr('y1', margin.top)
-        .attr('y2', height - margin.bottom)
-        .attr('stroke', 'black');
-      i++;
-    }
+  while (nVotePerSeat * i <= xMax) {
+    svg
+      .append('line')
+      .attr('x1', xScale(nVotePerSeat * i))
+      .attr('x2', xScale(nVotePerSeat * i))
+      .attr('y1', margin.top)
+      .attr('y2', height - margin.bottom)
+      .attr('stroke', 'white')
+      .attr('stroke-width', 3);
+
+    svg
+      .append('text')
+      .attr('y', margin.top)
+      .attr('x', xScale(nVotePerSeat * (i - 0.5)))
+      .attr('text-anchor', 'middle')
+      .attr('font-size', markSize * 0.8)
+      .text(i);
+    i++;
+  }
+
+  // draw constituent seats won by each party
+  let seatData = electionResult.parliamentSeat['constituent'];
+  // remove filled parties
+  seatData = stage == 'initial' ? seatData : _.filter(seatData, 'party.bPartyListNeeded')
+
+  const seats = svg
+    .append('g')
+    .selectAll('circle')
+    .data(seatData);
+
+  seats
+    .enter()
+    .append('circle')
+    .attr('cy', d => yScale(d.name) + yScale.bandwidth() / 2)
+    .attr('cx', d => xScale(nVotePerSeat * (d.iOfParty + 0.5)))
+    .attr('r', markSize / 2)
+    .attr('fill', d => d3.color(d.color).brighter(2))
+    .attr('stroke', d => d3.color(d.color).darker())
+    .attr('stroke-width', 2);
+
+  seats
+    .enter()
+    .append('text')
+    .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
+    .attr('x', d => xScale(nVotePerSeat * (d.iOfParty + 0.5)))
+    .attr('text-anchor', 'middle')
+    .attr('font-size', markSize * 0.7)
+    .text(d => d.iOfParty + 1);
+
+  // draw party list seats
+  if (stage != 'initial') {
+    const seatDataPL = electionResult.parliamentSeat['partyList'];
+
+    const seatsPL = svg
+      .append('g')
+      .selectAll('circle')
+      .data(seatDataPL);
+
+    seatsPL
+      .enter()
+      .append('rect')
+      .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2)
+      .attr('x', d =>
+        xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5))
+      )
+      .attr('width', markSize * 0.8)
+      .attr('height', markSize * 0.8)
+      .attr('transform', d => {
+        const cy = yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2;
+        const cx = xScale(
+          nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5)
+        );
+        return `rotate(45 ${cx} ${cy})`;
+      })
+      .attr('fill', d => d3.color(d.color).brighter(2))
+      .attr('stroke', d => d3.color(d.color).darker())
+      .attr('stroke-width', 2);
+
+    seatsPL
+      .enter()
+      .append('text')
+      .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
+      .attr('x', d =>
+        xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5))
+      )
+      .attr('text-anchor', 'middle')
+      .attr('font-size', markSize * 0.7)
+      .text(d => d.iOfParty + 1);
   }
 }
 
@@ -642,6 +904,9 @@ function drawFinalAllocation(electionResult, electionConfig) {
   );
 }
 
+/*******************************
+ Descriptions
+********************************/
 function addIntroText(electionConfig, additionalText) {
   const introText = `
     <p>การเลือกตั้งที่จะถึงนี้ มีการเปลี่ยนแปลงบัตรลงคะแนนจนเหลือเพียงใบเดียวคือ ผู้มีสิทธิ์สามารถลงคะแนนเลือกได้แค่แบบแบ่งเขตเลือกตั้ง จากเดิมสามารถเลือกได้ทั้งผู้สมัครแบบแบ่งเขตเลือกตั้ง และผู้สมัครแบบบัญชีรายชื่อ</p>
@@ -650,11 +915,11 @@ function addIntroText(electionConfig, additionalText) {
     <p>ต่อไปนี้จะไปการแสดงแบบจำลองสมมติของการเลือกตั้ง และการนับจำนวนส.ส. เพื่อเราจะได้เข้าใจระบบการเลือกตั้งพิสดารนี้ดียิ่งขึ้น</p>
     <br />
     <p>${additionalText}</p>
-    <p>กำหนดให้ในสภามีจำนวน ส.ส. ทั้งหมด ${
-      electionConfig.nTotalSeat
-    } ที่นั่ง แบ่งเป็นแบบแบ่งเขต ${
-    electionConfig.nConstituentSeat
-  } ที่นั่ง และแบบบัญชีรายชื่อ ${electionConfig.nPartyListSeat} ที่นั่ง</p>
+    <p>กำหนดให้ในสภามีจำนวน ส.ส. ทั้งหมด 
+    ${electionConfig.nTotalSeat} 
+    ที่นั่ง แบ่งเป็นแบบแบ่งเขต ${
+      electionConfig.nConstituentSeat
+    } ที่นั่ง และแบบบัญชีรายชื่อ ${electionConfig.nPartyListSeat} ที่นั่ง</p>
     <p>ดังนั้นจึงมีเขตเลือกตั้งทั้งหมด ${
       electionConfig.nConstituentSeat
     } เขต โดยสมมติว่าทุกเขตมีผู้ลงสมัครครบทุกพรรค รวม ${
@@ -705,10 +970,11 @@ function addConstituentText(electionResult, electionConfig, additionalText) {
   } ที่นั่ง ได้ผลลัพธ์ว่าต้องใช้ ${numberWithCommas(
     electionResult.nVotePerSeat
   )} เสียงต่อ 1 ที่นั่งในสภา</p>
-  <p>จำนวนดังกล่าวแทนด้วยเส้นแนวตั้งสีดำในกราฟด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี ตามจำนวนเสียงที่ได้มากกว่าแต่ละเส้น จนครบกว่าจะครบทั้ง ${
+  <p>จำนวนดังกล่าวแทนด้วยแต่ละบล็อกในกราฟแท่งด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี ตามจำนวนเสียงที่ได้เต็มบล็อก จนครบกว่าจะครบทั้ง ${
     electionConfig.nTotalSeat
   } ในสภา</p>
-  <p>หากไม่ครบ จะจัดที่นั่งดังกล่าวให้พรรคที่มีจำนวนเสียงเป็นเศษมากที่สุดก่อน เรียงลำดับต่อไปจนกว่าจะครบ</p>
+  <p>หากไม่ครบ จะจัดที่นั่งดังกล่าวให้พรรคที่มีจำนวนเสียงเป็นเศษมากที่สุดก่อน (บล็อกกว้างสุด แต่ยังไม่เต็มบล็อก) เรียงลำดับต่อไปจนกว่าจะครบ</p>
+  <p>แต่ถ้าหากมีพรรคใดได้รับส.ส.แบบแบ่งเขตเลือกตั้งเป็นจำนวนเท่ากับหรือมากกว่าส.ส.พึงมี ให้นำพรรคนั้นออกจากการคำนวณ และไม่ได้รับส.ส.แบบบัญชีรายชื่อ ส่วนพรรคที่เหลือนำไปคำนวณส.ส.พึงมีใหม่อีกครั้งตามจำนวนส.ส.ที่เหลืออยู่</p>
   `;
 
   const div = d3.select('#constituent-seats').html(constituentText);
@@ -734,11 +1000,10 @@ function addAllocatedText(electionResult, electionConfig, additionalText) {
   <p>จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมีให้แต่ละพรรคดังต่อไปนี้</p>
   <ul>${text}</ul>
   <br />
-  <p>เนื่องจากมี ${
-    electionResult.nPartyWithoutPartyListNeeded
-  } พรรค ได้รับจำนวนส.ส.แบบเบ่งเขต ไปครบจำนวนส.ส.พึงมีแล้ว จึงกำหนดให้ ${
-    electionResult.nPartyWithoutPartyListNeeded
-  } พรรคนี้ได้รับส.ส.ตามที่ชนะมาจากแบบแบ่งเขตเลือกตั้ง แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อได้อีก</p>
+  <p>เนื่องจากมี ${electionResult.nPartyWithoutPartyListNeeded} 
+  พรรค ได้รับจำนวนส.ส.แบบเบ่งเขต ไปครบจำนวนส.ส.พึงมีแล้ว จึงกำหนดให้ 
+  ${electionResult.nPartyWithoutPartyListNeeded} 
+  พรรคนี้ได้รับส.ส.ตามที่ชนะมาจากแบบแบ่งเขตเลือกตั้ง แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อได้อีก</p>
   <p>ดังนั้นการจัดสรรส.ส.พึงมีจึงพิจารณจาก ${electionConfig.nParty -
     electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น</p>
   <br />
@@ -751,7 +1016,7 @@ function addAllocatedText(electionResult, electionConfig, additionalText) {
 function addPartyListText(electionResult, electionConfig, additionalText) {
   const parties = _.orderBy(
     electionResult.parties,
-    ['nPartyListSeat', 'nTotalVote'],
+    ['nAllocatedSeat', 'nTotalVote'],
     ['desc', 'desc']
   );
 
@@ -794,6 +1059,7 @@ export {
   runElection,
   ElectionConfig,
   drawResultConstituents,
+  drawWaffle,
   drawInitialAllocation,
   drawFinalAllocation,
   addIntroText,
