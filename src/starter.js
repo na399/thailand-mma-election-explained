@@ -15,12 +15,18 @@ const starterResult = main.runElection(starterConfig);
 
 main.addIntroText(
   starterConfig,
+  '#intro',
   'เพื่อลดความสับสน จึงขอเริ่มต้นกันด้วยแบบจำลองฉบับย่อกันก่อน'
 );
-main.drawResultConstituents(starterResult, starterConfig);
-main.drawWaffle(starterResult, starterConfig, "#parliament-seats", "constituent")
-main.addConstituentText(starterResult, starterConfig);
-main.drawInitialAllocation(starterResult, starterConfig);
-main.addAllocatedText(starterResult, starterConfig);
-main.drawFinalAllocation(starterResult, starterConfig);
-main.addPartyListText(starterResult, starterConfig);
+main.drawResultConstituents(starterResult, starterConfig, '#constituents');
+main.drawWaffle(
+  starterResult,
+  starterConfig,
+  '#parliament-seats',
+  'constituent'
+);
+main.addConstituentText(starterResult, starterConfig, '#constituent-seats');
+main.drawInitialAllocation(starterResult, starterConfig, '#initial-allocation');
+main.addAllocatedText(starterResult, starterConfig, '#allocated-seats');
+main.drawFinalAllocation(starterResult, starterConfig, '#final-allocation');
+main.addPartyListText(starterResult, starterConfig, '#party-list-seats');
