@@ -66,7 +66,9 @@ class Party {
     nAllocatedSeat = 0,
     nTotalSeat = 0,
     bPartyListNeeded = true,
-    nRemainderVote = 0
+    bAllocationFilled = false,
+    nRemainderVote = 0,
+    side,
   } = {}) {
     this.name = name;
     this.color = color;
@@ -78,8 +80,10 @@ class Party {
     this.nAllocatedSeat = nAllocatedSeat;
     this.nTotalSeat = nTotalSeat;
     this.bPartyListNeeded = bPartyListNeeded;
+    this.bAllocationFilled = bAllocationFilled,
     this.nRemainderVote = nRemainderVote;
     this.nExpectedConstituentSeat = nExpectedConstituentSeat;
+    this.side = side;
   }
 }
 
@@ -177,13 +181,19 @@ function runElection(electionConfig) {
     '#ffff99'
   ]; // must be unique
 
+  const sides = [
+    'ฝ่ายรัฐบาล',
+    'ฝ่ายค้าน'
+  ]
+
   // assign winning propabilities and party names, i.e., colours
   let parties = pParties.map((p, i) => {
     let party = new Party({
       name: partyNames[i],
       color: partyColors[i],
       pParty: p,
-      nExpectedConstituentSeat: _.round(p * electionConfig.nConstituentSeat)
+      nExpectedConstituentSeat: _.round(p * electionConfig.nConstituentSeat),
+      side: sides[i % 2]
     });
     return party;
   });
@@ -264,17 +274,38 @@ function runElection(electionConfig) {
   }, 0);
 
   // calculate allocated seats
-  let nVotePerSeat = Math.round(nTotalVote / electionConfig.nTotalSeat);
+  let nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
 
   parties = parties.map(party => {
-    party.nInitialAllocatedSeat = Math.round(party.nTotalVote / nVotePerSeat);
+    party.nInitialAllocatedSeat = Math.floor(party.nTotalVote / nVotePerSeat);
     return party;
   });
+
+  parties = parties.map(party => {
+    party.nInitialRemainderVote =
+        party.nTotalVote % (party.nInitialAllocatedSeat * nVotePerSeat) ||
+        party.nTotalVote; // in case of party.nInitialAllocatedSeat == 0
+        return party;
+  });
+
+  parties = _.orderBy(parties, 'nInitialRemainderVote', 'desc');
+
+  const nInitialUnallocatedSeat = parties.reduce(
+    (nInitialUnallocatedSeat, party) =>
+      nInitialUnallocatedSeat - (party.nInitialAllocatedSeat),
+    electionConfig.nTotalSeat
+  );
+
+  for (let i = 0; i < nInitialUnallocatedSeat ; i++) {
+    parties[i % electionConfig.nParty].nInitialAllocatedSeat += 1;
+  }
+
 
   // check whether nConstituentSeat exceeds nInitialAllocatedSeats
   for (let party of parties) {
     if (party.nConstituentSeat >= party.nInitialAllocatedSeat) {
       party.bPartyListNeeded = false;
+      party.bAllocationFilled = true;
     }
   }
 
@@ -301,7 +332,6 @@ function runElection(electionConfig) {
     }, 0);
 
     var nVotePerRemainingSeat = Math.floor(
-      //nTotalRemainingVote / electionConfig.nPartyListSeat
       nTotalRemainingVote / nRemainingSeat
     );
   } else {

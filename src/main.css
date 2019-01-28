@@ -15,3 +15,8 @@ body {
 .y-axis {
   font-size: 14px;
 }
+
+.table {
+  margin: 20px 0px;
+  width: 80%;
+}

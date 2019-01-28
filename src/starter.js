@@ -1,4 +1,5 @@
 import * as main from './main';
+import * as table from './table';
 import seedrandom from 'seedrandom';
 
 seedrandom('starter', { global: true });
@@ -30,3 +31,9 @@ main.drawInitialAllocation(starterResult, starterConfig, '#initial-allocation');
 main.addAllocatedText(starterResult, starterConfig, '#allocated-seats');
 main.drawFinalAllocation(starterResult, starterConfig, '#final-allocation');
 main.addPartyListText(starterResult, starterConfig, '#party-list-seats');
+
+table.addTable(starterResult, '#table-constituent', 'constituent');
+table.addTable(starterResult, '#table-initial-allocation', 'initial-allocation');
+table.addTable(starterResult, '#table-final-allocation', 'final-allocation');
+table.addTable(starterResult, '#table-conclusion', 'conclusion');
+table.addTable(starterResult, '#table-all', 'all');

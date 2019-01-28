@@ -5149,6 +5149,11 @@ svgo@^1.0.0, svgo@^1.0.5:
     unquote "~1.1.1"
     util.promisify "~1.0.0"
 
+tabulator-tables@^4.1.5:
+  version "4.1.5"
+  resolved "https://registry.yarnpkg.com/tabulator-tables/-/tabulator-tables-4.1.5.tgz#41ba870e58a7c71007a9d2e0e30d7cd176c65d7a"
+  integrity sha512-SyXCNjbC+lSGTzoJK6/mzRcWuO0TPdvSe8kw692Jir0QJUTYpyaalvNzQB9K8lbM5LN3IIy66OjQwmhGkZrDaA==
+
 tar@^4:
   version "4.4.8"
   resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.8.tgz#b19eec3fde2a96e64666df9fdb40c5ca1bc3747d"
