@@ -2,26 +2,29 @@ import * as main from './main';
 import * as table from './table';
 import seedrandom from 'seedrandom';
 
-seedrandom('full', { global: true });
+// seedrandom('full', { global: true });
 
-let fullConfig = new main.ElectionConfig({
+let config = new main.ElectionConfig({
   nParty: 8
 });
 
-const fullResult = main.runElection(fullConfig);
+const result = main.runElection(config);
 
-main.addIntroText(fullConfig, '#intro', '');
-main.drawResultConstituents(fullResult, fullConfig, '#constituents');
-main.drawWaffle(fullResult, fullConfig, '#parliament-seats', 'constituent');
-main.addConstituentText(fullResult, fullConfig, '#constituent-seats');
-main.drawInitialAllocation(fullResult, fullConfig, '#initial-allocation');
-main.addAllocatedText(fullResult, fullConfig, '#allocated-seats');
-main.drawFinalAllocation(fullResult, fullConfig, '#final-allocation');
-main.addPartyListText(fullResult, fullConfig, '#party-list-seats');
+main.drawResultConstituents(result, config, '#result-constituents');
+main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');
+main.drawInitialAllocation(result, config, '#initial-allocation');
+main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
+main.drawFinalAllocation(result, config, '#final-allocation');
 
-table.addTable(fullResult, '#table-constituent', 'constituent');
-table.addTable(fullResult, '#table-initial-allocation', 'initial-allocation');
-table.addTable(fullResult, '#table-final-allocation', 'final-allocation');
-table.addTable(fullResult, '#table-conclusion', 'conclusion');
-table.addTable(fullResult, '#table-sides', 'sides');
-table.addTable(fullResult, '#table-all', 'all');
+main.addIntroText(config, '#text-intro', '');
+main.addConstituentText(result, config, '#text-constituent-seats');
+main.addInitialAllocationText(result, config, '#text-initial-allocation');
+main.addInitialAllocatedText(result, config, '#text-initial-allocated-seats');
+main.addFinalAllocationText(result, config, '#text-final-allocation');
+
+table.addTable(result, '#table-constituent', 'constituent');
+table.addTable(result, '#table-initial-allocation', 'initial-allocation');
+table.addTable(result, '#table-final-allocation', 'final-allocation');
+table.addTable(result, '#table-conclusion', 'conclusion');
+table.addTable(result, '#table-sides', 'sides');
+// table.addTable(result, '#table-all', 'all');

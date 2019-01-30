@@ -4,7 +4,7 @@ import seedrandom from 'seedrandom';
 
 seedrandom('starter', { global: true });
 
-let starterConfig = new main.ElectionConfig({
+let config = new main.ElectionConfig({
   nTotalSeat: 5,
   nConstituentSeat: 3,
   nVoter: 500000,
@@ -12,28 +12,23 @@ let starterConfig = new main.ElectionConfig({
   nParty: 4
 });
 
-const starterResult = main.runElection(starterConfig);
+const result = main.runElection(config);
 
-main.addIntroText(
-  starterConfig,
-  '#intro',
-  'เพื่อลดความสับสน จึงขอเริ่มต้นกันด้วยแบบจำลองฉบับย่อกันก่อน'
-);
-main.drawResultConstituents(starterResult, starterConfig, '#constituents');
-main.drawWaffle(
-  starterResult,
-  starterConfig,
-  '#parliament-seats',
-  'constituent'
-);
-main.addConstituentText(starterResult, starterConfig, '#constituent-seats');
-main.drawInitialAllocation(starterResult, starterConfig, '#initial-allocation');
-main.addAllocatedText(starterResult, starterConfig, '#allocated-seats');
-main.drawFinalAllocation(starterResult, starterConfig, '#final-allocation');
-main.addPartyListText(starterResult, starterConfig, '#party-list-seats');
+main.drawResultConstituents(result, config, '#result-constituents');
+main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');
+main.drawInitialAllocation(result, config, '#initial-allocation');
+main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
+main.drawFinalAllocation(result, config, '#final-allocation');
 
-table.addTable(starterResult, '#table-constituent', 'constituent');
-table.addTable(starterResult, '#table-initial-allocation', 'initial-allocation');
-table.addTable(starterResult, '#table-final-allocation', 'final-allocation');
-table.addTable(starterResult, '#table-conclusion', 'conclusion');
-table.addTable(starterResult, '#table-all', 'all');
+main.addIntroText(config, '#text-intro', '');
+main.addConstituentText(result, config, '#text-constituent-seats');
+main.addInitialAllocationText(result, config, '#text-initial-allocation');
+main.addInitialAllocatedText(result, config, '#text-initial-allocated-seats');
+main.addFinalAllocationText(result, config, '#text-final-allocation');
+
+table.addTable(result, '#table-constituent', 'constituent');
+table.addTable(result, '#table-initial-allocation', 'initial-allocation');
+table.addTable(result, '#table-final-allocation', 'final-allocation');
+table.addTable(result, '#table-conclusion', 'conclusion');
+// table.addTable(result, '#table-sides', 'sides');
+// table.addTable(result, '#table-all', 'all');

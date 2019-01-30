@@ -1,4 +1,3 @@
-import * as main from './main';
 import Tabulator from 'tabulator-tables';
 import _ from 'lodash';
 
