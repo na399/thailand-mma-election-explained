@@ -417,7 +417,8 @@ function runElection(electionConfig) {
         iOfParty: i - iAll,
         name: party.name,
         color: party.color,
-        party: party
+        party: party,
+        type: i - iAll < party.nConstituentSeat ? 'constituent' : 'partyList'
       });
     }
     iAll += party.nTotalSeat;
@@ -431,7 +432,8 @@ function runElection(electionConfig) {
         iOfParty: i - iConstituent,
         name: party.name,
         color: party.color,
-        party: party
+        party: party,
+        type: 'constituent'
       });
     }
     iConstituent += party.nConstituentSeat;
@@ -442,7 +444,8 @@ function runElection(electionConfig) {
         iOfParty: i - iPartyList,
         name: party.name,
         color: party.color,
-        party: party
+        party: party,
+        type: 'partyList'
       });
     }
     iPartyList += party.nPartyListSeat;
@@ -638,7 +641,7 @@ const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
 const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
 
 function drawWaffle(electionResult, electionConfig, selector, seatType) {
-  const seatData = electionResult.parliamentSeat[seatType]; // 'all', 'constituent', 'partyList'
+  let seatData = electionResult.parliamentSeat[seatType]; // 'all', 'constituent', 'partyList'
 
   const nCol = 25;
   const nRow = Math.ceil(seatData.length / nCol);
@@ -652,6 +655,14 @@ function drawWaffle(electionResult, electionConfig, selector, seatType) {
   const height = nRow * (gridSize + padding);
   const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
+  seatData = seatData.map(seat => {
+    seat.grid = {
+      x: grid[seat.i][1] * (gridSize + padding),
+      y: grid[seat.i][0] * (gridSize + padding)
+    };
+    return seat;
+  });
+
   const svg = d3
     .select(selector)
     .append('svg')
@@ -659,50 +670,36 @@ function drawWaffle(electionResult, electionConfig, selector, seatType) {
     .attr('height', height)
     .style('overflow', 'visible');
 
-  const seats = svg
-    .append('g')
-    .selectAll('rect')
-    .data(seatData);
+  const seats = svg.append('g').selectAll('rect');
 
-  switch (seatType) {
-    case 'constituent':
-      // circle
-      seats
-        .enter()
-        .append('circle')
-        .attr('cx', gridSize / 2)
-        .attr('cy', gridSize / 2)
-        .attr('r', gridSize / 2)
-        .attr('fill', d => d.color)
-        .attr('stroke', d => d3.color(d.color).darker())
-        .attr('stroke-width', gridSize / 10)
-        .attr(
-          'transform',
-          (d, i) =>
-            `translate(${grid[i][1] * (gridSize + padding)}, 
-            ${grid[i][0] * (gridSize + padding)})`
-        );
-      break;
-    case 'partyList':
-      // diamond
-      seats
-        .enter()
-        .append('rect')
-        .attr('width', gridSize)
-        .attr('height', gridSize)
-        .attr('fill', d => d.color)
-        .attr('stroke', d => d3.color(d.color).darker())
-        .attr('stroke-width', gridSize / 10 / 0.7)
-        .attr(
-          'transform',
-          (d, i) =>
-            `translate(${grid[i][1] * (gridSize + padding)},
-            ${grid[i][0] * (gridSize + padding)})
-            rotate(45 ${gridSize / 2} ${gridSize / 2})
-            scale(0.7)`
-        );
-      break;
-  }
+  seats
+    .data(seatData.filter(d => d.type == 'constituent'))
+    .enter()
+    .append('circle')
+    .attr('cx', gridSize / 2)
+    .attr('cy', gridSize / 2)
+    .attr('r', gridSize / 2)
+    .attr('fill', d => d.color)
+    .attr('stroke', d => d3.color(d.color).darker())
+    .attr('stroke-width', gridSize / 10)
+    .attr('transform', d => `translate(${d.grid.x}, ${d.grid.y})`);
+
+  seats
+    .data(seatData.filter(d => d.type == 'partyList'))
+    .enter()
+    .append('rect')
+    .attr('width', gridSize)
+    .attr('height', gridSize)
+    .attr('fill', d => d.color)
+    .attr('stroke', d => d3.color(d.color).darker())
+    .attr('stroke-width', gridSize / 10 / 0.7)
+    .attr(
+      'transform',
+      d =>
+        `translate(${d.grid.x}, ${d.grid.y + gridSize / 5}) 
+      rotate(45 ${gridSize / 2} ${gridSize / 2}) 
+      scale(0.7)`
+    );
 }
 
 /*******************************
@@ -961,7 +958,7 @@ function addIntroText(electionConfig, selector, additionalText) {
     ${numberWithCommas(electionConfig.nVote)} คน 
     โดยสมมติว่าบัตรเลือกตั้งทุกใบเป็นบัตรดีและลงคะแนนเสียง</p>
     <p>(จำนวนเสียงในแต่ละเขตนั้นเป็นจำนวนสุ่ม 
-      ไม่ได้อ้างอิงมาจากการเลือกตั้งครั้งก่อนหรือผลโพลในปัจจุบันแต่อย่างใด)</p>
+      ไม่ได้อ้างอิงมาจากการเลือกตั้งครั้งก่อนหรือผลโพลแต่อย่างใด)</p>
     <br />
     <h3>ผลการนับคะแนนแบบแบ่งเขตเลือกตั้ง</h3>
     <p>กราฟแท่งด้านล่างแสดงคะแนนของผู้สมัครแต่ละเขตเลือกตั้ง
@@ -975,7 +972,8 @@ function addIntroText(electionConfig, selector, additionalText) {
 
 function addConstituentText(electionResult, electionConfig, selector) {
   const constituentText = `
-  <p>จากเขตเลือกตั้ง ${electionConfig.nConstituentSeat} เขต มีผู้ชนะดังนี้</p>
+  <p>จากเขตเลือกตั้ง ${electionConfig.nConstituentSeat} เขต 
+  มีผู้ได้รับเลือกเป็นส.ส.แบบแบ่งเขต ● จากพรรคดังต่อไปนี้</p>
   <br />
   `;
 
@@ -988,10 +986,9 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
     return nTotalVote;
   }, 0);
 
-
   const allocationText = `
   <h3>ผลคะแนนรวมทั่วประเทศ</h3>
-  <p>ขั้นตอนต่อไปของคือการจัดสรรจำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี (แทนด้วยสัญลักษณ์ ■)
+  <p>ขั้นตอนต่อไปคือการจัดสรรจำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี (แทนด้วยสัญลักษณ์ ■)
   โดยคิดคำนวณจากสัดส่วนคะแนนรวมทั้งประเทศของแต่ละพรรค จากการเลือกตั้งแบบแบ่งเขตในขั้นตอนแรก</p>
   <p>จำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี ■ ได้นั้น มาจากจำนวนเสียงทั้งหมด 
   ${numberWithCommas(nTotalVote)} เสียง 
@@ -1000,7 +997,7 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
   ต่อ 1 ที่นั่งในสภา</p>
   <p>จำนวนดังกล่าวแทนด้วยแต่ละบล็อกสี่เหลี่ยม ■ ในกราฟแท่งด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี
   ตามจำนวนเสียงที่ได้เต็มบล็อก ■ จนครบกว่าจะครบทั้ง ${electionConfig.nTotalSeat}
-  ที่นั่งในสภา เมื่อรวมทุกพรรคแล้ว</p>
+  ที่นั่งในสภา เมื่อรวมกันทุกพรรคแล้ว</p>
   <p>หากยังไม่ครบจำนวนทั้ง ${electionConfig.nTotalSeat} ที่นั่ง 
   จะจัดที่นั่งที่เหลืออยู่ให้พรรคที่มีจำนวนเสียงเป็นเศษมากที่สุดก่อน 
   (บล็อก ■ กว้างสุด แต่ยังไม่เต็มบล็อก) เรียงลำดับต่อไปจนกว่าจะครบ</p>
@@ -1015,7 +1012,7 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
 function addInitialAllocatedText(electionResult, electionConfig, selector) {
   const initialAllocatedText = `
   <h4>จำนวนส.ส.พึงมี</h4>
-  <p>จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมีให้แต่ละพรรคดังต่อไปนี้</p>
+  <p>จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมี ■ ให้แต่ละพรรคดังต่อไปนี้</p>
   `;
 
   d3.select(selector).html(initialAllocatedText);
@@ -1045,7 +1042,6 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
 
   d3.select(selector).html(FinalAllocationText);
 }
-
 
 export {
   runElection,

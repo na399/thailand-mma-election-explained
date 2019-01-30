@@ -19,8 +19,13 @@ main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');
 main.drawInitialAllocation(result, config, '#initial-allocation');
 main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
 main.drawFinalAllocation(result, config, '#final-allocation');
+main.drawWaffle(result, config, '#parliament-seats-all', 'all');
 
-main.addIntroText(config, '#text-intro', '');
+main.addIntroText(
+  config,
+  '#text-intro',
+  'เพื่อให้เข้าใจง่ายขึ้น เรามาเริ่มต้นกันด้วยแบบจำลองฉบับย่อกันก่อน'
+);
 main.addConstituentText(result, config, '#text-constituent-seats');
 main.addInitialAllocationText(result, config, '#text-initial-allocation');
 main.addInitialAllocatedText(result, config, '#text-initial-allocated-seats');

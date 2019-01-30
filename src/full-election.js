@@ -2,7 +2,7 @@ import * as main from './main';
 import * as table from './table';
 import seedrandom from 'seedrandom';
 
-// seedrandom('full', { global: true });
+seedrandom('full', { global: true });
 
 let config = new main.ElectionConfig({
   nParty: 8
@@ -15,6 +15,7 @@ main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');
 main.drawInitialAllocation(result, config, '#initial-allocation');
 main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
 main.drawFinalAllocation(result, config, '#final-allocation');
+main.drawWaffle(result, config, '#parliament-seats-all', 'all');
 
 main.addIntroText(config, '#text-intro', '');
 main.addConstituentText(result, config, '#text-constituent-seats');
