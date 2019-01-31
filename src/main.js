@@ -9,7 +9,7 @@ class ElectionConfig {
     nVoter = 50000000,
     pVoterTurnout = 0.7,
     nVote,
-    nParty = 5
+    nParty
   } = {}) {
     this.nTotalSeat = nTotalSeat;
     this.nConstituentSeat = nConstituentSeat;
@@ -56,7 +56,7 @@ class ElectionResult {
 class Party {
   constructor({
     name = '',
-    color = '',
+    color = '#777777',
     pParty = 0,
     nTotalVote = 0,
     nConstituentSeat = 0,
@@ -69,7 +69,7 @@ class Party {
     bAllocationFilled = false,
     nVotePerAllocatedSeat = 0,
     nRemainderVote = 0,
-    side
+    side = 'ฝ่ายรัฐบาล'
   } = {}) {
     this.name = name;
     this.color = color;
@@ -145,7 +145,7 @@ function simulateResultConstituent(parties, nVote, expectedConstituentSeats) {
   return resultConstituent;
 }
 
-function runElection(electionConfig) {
+function runVote(electionConfig) {
   // get party winning propablities
   let pParties = Array.from({ length: electionConfig.nParty }, () =>
     Math.random()
@@ -181,7 +181,7 @@ function runElection(electionConfig) {
     '#b15928',
     '#cab2d6',
     '#ffff99'
-  ]; 
+  ];
 
   const sides = ['ฝ่ายรัฐบาล', 'ฝ่ายค้าน'];
 
@@ -264,6 +264,14 @@ function runElection(electionConfig) {
     );
   });
 
+  console.log('parties :', parties);
+
+  return { parties, resultConstituents, constituentSeatsNames };
+}
+
+function runAllocation(electionConfig, voteResult) {
+  let { parties, resultConstituents, constituentSeatsNames } = voteResult;
+
   // find total votes from all constituents
   const nTotalVote = parties.reduce((nTotalVote, party) => {
     nTotalVote += party.nTotalVote;
@@ -291,8 +299,10 @@ function runElection(electionConfig) {
     electionConfig.nTotalSeat
   );
 
+  const nParty = parties.length;
+
   for (let i = 0; i < nInitialUnallocatedSeat; i++) {
-    parties[i % electionConfig.nParty].nInitialAllocatedSeat += 1;
+    parties[i % nParty].nInitialAllocatedSeat += 1;
   }
 
   // check whether nConstituentSeat exceeds nInitialAllocatedSeats
@@ -351,17 +361,23 @@ function runElection(electionConfig) {
   });
 
   parties.forEach(party => {
-    party.nVotePerAllocatedSeat = party.nTotalVote / party.nAllocatedSeat
-  })
+    if (party.bPartyListNeeded && party.nAllocatedSeat > 0) {
+      party.nVotePerAllocatedSeat = party.nTotalVote / party.nAllocatedSeat;
+    }
+  });
 
-  // assing unallocated seats
+  // assigning unallocated seats
   const nUnallocatedSeat = parties.reduce(
     (nUnallocatedSeat, party) =>
       nUnallocatedSeat - (party.nConstituentSeat + party.nPartyListSeat),
     electionConfig.nTotalSeat
   );
 
-  parties = _.orderBy(parties, ['nRemainderVote', 'nVotePerAllocatedSeat'], ['desc', 'desc']);
+  parties = _.orderBy(
+    parties,
+    ['nRemainderVote', 'nVotePerAllocatedSeat'],
+    ['desc', 'desc']
+  );
   let nPartiesGettingPartyList = _.filter(parties, 'bPartyListNeeded').length;
 
   for (let i = 0; i < nUnallocatedSeat; i++) {
@@ -467,6 +483,10 @@ function runElection(electionConfig) {
   );
 
   return electionResult;
+}
+
+function runFullElection(electionConfig) {
+  return runAllocation(electionConfig, runVote(electionConfig));
 }
 
 function numberWithCommas(x) {
@@ -711,7 +731,7 @@ function getAllocationConfig(electionResult, electionConfig, stage) {
       ? electionConfig.nParty * 80
       : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) *
         100;
-  const margin = { top: 20, right: 20, bottom: 40, left: 60 };
+  const margin = { top: 20, right: 20, bottom: 40, left: 140 };
 
   return {
     width,
@@ -837,15 +857,17 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
       .attr('y1', margin.top)
       .attr('y2', height - margin.bottom)
       .attr('stroke', 'white')
-      .attr('stroke-width', 3);
+      .attr('stroke-width', markSize >= 6 ? 3 : markSize / 3);
 
-    svg
-      .append('text')
-      .attr('y', margin.top)
-      .attr('x', xScale(nVotePerSeat * (i - 0.5)))
-      .attr('text-anchor', 'middle')
-      .attr('font-size', markSize * 0.8)
-      .text(i);
+    if (markSize > 6) {
+      svg
+        .append('text')
+        .attr('y', margin.top)
+        .attr('x', xScale(nVotePerSeat * (i - 0.5)))
+        .attr('text-anchor', 'middle')
+        .attr('font-size', markSize * 0.8)
+        .text(i);
+    }
   }
 
   // draw constituent seats won by each party
@@ -864,24 +886,23 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
   seats
     .enter()
     .append('circle')
-    // .attr('cy', d => yScale(d.name) + yScale.bandwidth() / 2)
     .attr('cy', d => yScale(d.name))
     .attr('cx', d => xScale(nVotePerSeat * (d.iOfParty + 0.5)))
     .attr('r', markSize / 2)
-    // .attr('fill', d => d3.color(d.color).brighter(2))
-    .attr('fill', 'white')
+    .attr('fill', d => (markSize >= 6 ? 'white' : d3.color(d.color).darker()))
     .attr('stroke', d => d3.color(d.color).darker())
-    .attr('stroke-width', 2);
+    .attr('stroke-width', markSize >= 6 ? 2 : markSize / 3);
 
-  seats
-    .enter()
-    .append('text')
-    // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
-    .attr('y', d => yScale(d.name) + markSize * 0.25)
-    .attr('x', d => xScale(nVotePerSeat * (d.iOfParty + 0.5)))
-    .attr('text-anchor', 'middle')
-    .attr('font-size', markSize * 0.7)
-    .text(d => d.iOfParty + 1);
+  if (markSize > 6) {
+    seats
+      .enter()
+      .append('text')
+      .attr('y', d => yScale(d.name) + markSize * 0.25)
+      .attr('x', d => xScale(nVotePerSeat * (d.iOfParty + 0.5)))
+      .attr('text-anchor', 'middle')
+      .attr('font-size', markSize * 0.7)
+      .text(d => d.iOfParty + 1);
+  }
 
   // draw party list seats
   if (stage != 'initial') {
@@ -895,7 +916,6 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
     seatsPL
       .enter()
       .append('rect')
-      // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2)
       .attr('y', d => yScale(d.name) + yScale.bandwidth() - markSize / 2)
       .attr('x', d =>
         xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5))
@@ -903,29 +923,28 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
       .attr('width', markSize * 0.8)
       .attr('height', markSize * 0.8)
       .attr('transform', d => {
-        // const cy = yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2;
         const cy = yScale(d.name) + yScale.bandwidth() - markSize / 2;
         const cx = xScale(
           nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5)
         );
         return `rotate(45 ${cx} ${cy})`;
       })
-      // .attr('fill', d => d3.color(d.color).brighter(2))
-      .attr('fill', 'white')
+      .attr('fill', d => (markSize >= 6 ? 'white' : d3.color(d.color).darker()))
       .attr('stroke', d => d3.color(d.color).darker())
-      .attr('stroke-width', 2);
+      .attr('stroke-width', markSize >= 6 ? 2 : markSize / 3);
 
-    seatsPL
-      .enter()
-      .append('text')
-      // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
-      .attr('y', d => yScale(d.name) + yScale.bandwidth() + markSize * 0.25)
-      .attr('x', d =>
-        xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5))
-      )
-      .attr('text-anchor', 'middle')
-      .attr('font-size', markSize * 0.7)
-      .text(d => d.iOfParty + 1);
+    if (markSize > 6) {
+      seatsPL
+        .enter()
+        .append('text')
+        .attr('y', d => yScale(d.name) + yScale.bandwidth() + markSize * 0.25)
+        .attr('x', d =>
+          xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5))
+        )
+        .attr('text-anchor', 'middle')
+        .attr('font-size', markSize * 0.7)
+        .text(d => d.iOfParty + 1);
+    }
   }
 }
 
@@ -944,7 +963,22 @@ function drawFinalAllocation(electionResult, electionConfig, selector) {
 /*******************************
  Descriptions
 ********************************/
-function addIntroText(electionConfig, selector, additionalText) {
+function addIntroText(
+  electionConfig,
+  selector,
+  additionalText,
+  constituentResult = true
+) {
+  const constituentResultText = `
+    <p>(จำนวนเสียงในแต่ละเขตนั้นเป็นจำนวนสุ่ม 
+    ไม่ได้อ้างอิงมาจากการเลือกตั้งครั้งก่อนหรือผลโพลแต่อย่างใด)</p>
+    <br />
+    <h3>ผลการนับคะแนนแบบแบ่งเขตเลือกตั้ง</h3>
+    <p>กราฟแท่งด้านล่างแสดงคะแนนของผู้สมัครแต่ละเขตเลือกตั้ง
+    ทั้ง ${electionConfig.nConstituentSeat} เขต 
+    โดยผู้สมัครที่ได้คะแนนสูงสุดเป็นผู้ได้รับเลือกตั้งในเขตนั้นไป 
+    ซึ่งแทนด้วยสัญลักษณ์วงกลม ●</p>`;
+
   const introText = `
     <p>${additionalText}</p>
     <p>กำหนดให้ในสภามีจำนวน ส.ส. ทั้งหมด ${electionConfig.nTotalSeat} ที่นั่ง 
@@ -956,14 +990,7 @@ function addIntroText(electionConfig, selector, additionalText) {
     <p>และมีผู้มาใช้สิทธิ์เลือกตั้ง จำนวน 
     ${numberWithCommas(electionConfig.nVote)} คน 
     โดยสมมติว่าบัตรเลือกตั้งทุกใบเป็นบัตรดีและลงคะแนนเสียง</p>
-    <p>(จำนวนเสียงในแต่ละเขตนั้นเป็นจำนวนสุ่ม 
-      ไม่ได้อ้างอิงมาจากการเลือกตั้งครั้งก่อนหรือผลโพลแต่อย่างใด)</p>
-    <br />
-    <h3>ผลการนับคะแนนแบบแบ่งเขตเลือกตั้ง</h3>
-    <p>กราฟแท่งด้านล่างแสดงคะแนนของผู้สมัครแต่ละเขตเลือกตั้ง
-    ทั้ง ${electionConfig.nConstituentSeat} เขต 
-    โดยผู้สมัครที่ได้คะแนนสูงสุดเป็นผู้ได้รับเลือกตั้งในเขตนั้นไป 
-    ซึ่งแทนด้วยสัญลักษณ์วงกลม ●</p>
+    ${constituentResult ? constituentResultText : ''}
   `;
 
   d3.select(selector).html(introText);
@@ -971,6 +998,7 @@ function addIntroText(electionConfig, selector, additionalText) {
 
 function addConstituentText(electionResult, electionConfig, selector) {
   const constituentText = `
+  <h3>ผลผู้ได้รับเลือกเป็นส.ส.แบบแบ่งเขตเลือกตั้ง</h3>
   <p>จากเขตเลือกตั้ง ${electionConfig.nConstituentSeat} เขต 
   มีผู้ได้รับเลือกเป็นส.ส.แบบแบ่งเขต ● จากพรรคดังต่อไปนี้</p>
   <br />
@@ -1043,8 +1071,11 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
 }
 
 export {
-  runElection,
   ElectionConfig,
+  Party,
+  runVote,
+  runAllocation,
+  runFullElection,
   drawResultConstituents,
   drawWaffle,
   drawInitialAllocation,

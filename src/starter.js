@@ -12,7 +12,7 @@ let config = new main.ElectionConfig({
   nParty: 4
 });
 
-const result = main.runElection(config);
+const result = main.runFullElection(config)
 
 main.drawResultConstituents(result, config, '#result-constituents');
 main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');

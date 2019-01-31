@@ -3,7 +3,6 @@
   <head>
     <title>[WIP] Thailand MMA Election Explained</title>
     <meta charset="UTF-8" />
-    <!-- <meta name="viewport" content="width=device-width, initial-scale=1" /> -->
     <link rel="stylesheet" href="src/vendor/tabulator_bootstrap4.css" />
     <link rel="stylesheet" href="src/main.css" />
   </head>
@@ -11,7 +10,7 @@
   <body>
     <div class="container">
       <h1>Thailand MMA Election Explained -- Work In Progress</h1>
-      <h2>Starter simulation</h2>
+      <h2>User Defined</h2>
 
       <div class="text">
         <p>
@@ -42,7 +41,7 @@
       </div>
       <div id="text-intro" class="text"></div>
 
-      <div id="result-constituents" class="plot"></div>
+      <!-- <div id="result-constituents" class="plot"></div> -->
       <div id="text-constituent-seats" class="text"></div>
       <div id="parliament-seats-constituent"></div>
       <div id="table-constituent" class="table"></div>
@@ -72,43 +71,36 @@
       <div id="parliament-seats-all"></div>
       <div id="table-conclusion" class="table"></div>
 
-      <hr />
-      <h3>To-do list</h3>
-      <ol>
-        <li style="text-decoration: line-through;">Narrative</li>
-        <li style="text-decoration: line-through;">
-          Fix glitches in full election
-        </li>
-        <li style="text-decoration: line-through;">
-          Add parliament compositions as waffle charts
-        </li>
-        <li>Annotations</li>
-        <li>Legend</li>
-        <li>Aesthetic: readability, major details</li>
-        <li>Interactive: Hover on chart items</li>
-        <li>Put on Obseravable</li>
-        <li>
-          Interactive: User-defined parameters e.g. number of parties, chances
-          of winning of parties
-        </li>
-        <li>Simulate the party splitting strategy</li>
-        <li>Review by friends</li>
-        <li>Review by experts</li>
-        <li>Aesthetic: Final touch</li>
-        <li>Release</li>
-        <li>Add English translation</li>
-      </ol>
-      <hr />
-      <a href="full-election.html">Full election simulation</a>
-      <a href="user-defined.html">User defined election</a>
-      <p>
-        Built with D3.js and Parcel.js | Code available on
-        <a href="https://github.com/na399/thailand-mma-election-explained"
-          >GitHub</a
-        >
-      </p>
+      <div class="text">
+        <h3>การจัดตั้งฝ่ายรัฐบาลและฝ่ายค้าน</h3>
+        <p>
+          พรรคหรือการรวมกันของพรรคที่มีจำนวนที่นั่งส.ส.ในสภารวมกันได้เกินกึงหนึ่ง
+          หรือ 251 ที่นั่งขึ้นไป มีโอกาสจัดตั้งเป็นฝ่ายรัฐบาล
+        </p>
+        <p>
+          แต่การได้มาซึ่งนายกรัฐมนตรีนั้นมาจากการลงคะแนนเสียงของทั้งรัฐสภา
+          (ส.ส.) จำนวน 500 เสียง และวุฒิสภา (ส.ว.) อีกจำนวน 250 เสียง
+          ดั้งนั้นจึงต้องใช้เสียงเกินกึ่งหนึ่ง หรือ 376 เสียงขึ้นไป
+        </p>
+        <p>
+          ด้วยเหตุนี้ หากเกรงว่า
+          ส.ว.ทั้งหมดจะออกเสียงไม่ตรงกับฝ่ายรัฐบาลในการเลือกนายกรัฐมนตรี
+          ฝ่ายรัฐบาลจึงต้องการส.ส.ถึง 376 ที่นั่ง แทนที่จะเป็น 251 ที่นั่ง
+          เพื่อให้แน่ใจว่าจะได้เลือกนายกรัฐมนตรีที่ฝ่ายรัฐบาลเองต้องการ
+          มาดำรงตำแหน่ง
+        </p>
+        <p>
+          หากคุณเปิดเว็บไซต์นี้บนคอมพิวเตอร์
+          คุณสามารถลองจัดฝ่ายรัฐบาลและฝ่ายค้านใหม่ได้ในตารางด้านล่าง
+          โดยการเลื่อนแต่ละพรรค ไปอยู่ในกลุ่มฝ่ายรัฐบาลหรือฝ่ายค้าน (ขออภัยครับ
+          กำลังพัฒนาส่วนนี้สำหรับมือถือและจอสัมผัส)
+        </p>
+      </div>
+      <div id="table-sides" class="table"></div>
+
+      <a href="index.html">Return to Index</a>
     </div>
 
-    <script src="src/starter.js"></script>
+    <script src="src/user-defined.js"></script>
   </body>
 </html>
