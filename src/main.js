@@ -67,6 +67,7 @@ class Party {
     nTotalSeat = 0,
     bPartyListNeeded = true,
     bAllocationFilled = false,
+    nVotePerAllocatedSeat = 0,
     nRemainderVote = 0,
     side
   } = {}) {
@@ -81,6 +82,7 @@ class Party {
     this.nTotalSeat = nTotalSeat;
     this.bPartyListNeeded = bPartyListNeeded;
     this.bAllocationFilled = bAllocationFilled;
+    this.nVotePerAllocatedSeat = nVotePerAllocatedSeat;
     this.nRemainderVote = nRemainderVote;
     this.nExpectedConstituentSeat = nExpectedConstituentSeat;
     this.side = side;
@@ -354,6 +356,12 @@ function runElection(electionConfig) {
     return party;
   });
 
+  parties.forEach(party => {
+    party.nVotePerAllocatedSeat = party.nTotalVote / party.nAllocatedSeat
+  })
+
+  console.log('parties :', parties);
+
   // assing unallocated seats
   const nUnallocatedSeat = parties.reduce(
     (nUnallocatedSeat, party) =>
@@ -361,7 +369,7 @@ function runElection(electionConfig) {
     electionConfig.nTotalSeat
   );
 
-  parties = _.orderBy(parties, 'nRemainderVote', 'desc');
+  parties = _.orderBy(parties, ['nRemainderVote', 'nVotePerAllocatedSeat'], ['desc', 'desc']);
   let nPartiesGettingPartyList = _.filter(parties, 'bPartyListNeeded').length;
 
   for (let i = 0; i < nUnallocatedSeat; i++) {
