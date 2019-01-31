@@ -166,7 +166,7 @@ function runElection(electionConfig) {
     'น้ำตาล',
     'ม่วงอ่อน',
     'เหลือง'
-  ];
+  ]; // must be unique
 
   const partyColors = [
     '#e31a1c',
@@ -181,7 +181,7 @@ function runElection(electionConfig) {
     '#b15928',
     '#cab2d6',
     '#ffff99'
-  ]; // must be unique
+  ]; 
 
   const sides = ['ฝ่ายรัฐบาล', 'ฝ่ายค้าน'];
 
@@ -245,15 +245,14 @@ function runElection(electionConfig) {
   const constituentSeatsNames = constituentSeats.map(party => party.name);
 
   // count constituentSeats won by party
-  parties = parties.map(party => {
+  parties.forEach(party => {
     party.nConstituentSeat = constituentSeatsNames.filter(
       name => name == party.name
     ).length;
-    return party;
   });
 
   // find total votes from all constituents by party
-  parties = parties.map(party => {
+  parties.forEach(party => {
     party.nTotalVote = resultConstituents.reduce(
       (nTotalPartyVote, resultConstituent) => {
         nTotalPartyVote += resultConstituent.filter(
@@ -263,7 +262,6 @@ function runElection(electionConfig) {
       },
       0
     );
-    return party;
   });
 
   // find total votes from all constituents
@@ -275,16 +273,14 @@ function runElection(electionConfig) {
   // calculate allocated seats
   let nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
 
-  parties = parties.map(party => {
+  parties.forEach(party => {
     party.nInitialAllocatedSeat = Math.floor(party.nTotalVote / nVotePerSeat);
-    return party;
   });
 
-  parties = parties.map(party => {
+  parties.forEach(party => {
     party.nInitialRemainderVote =
       party.nTotalVote % (party.nInitialAllocatedSeat * nVotePerSeat) ||
       party.nTotalVote; // in case of party.nInitialAllocatedSeat == 0
-    return party;
   });
 
   parties = _.orderBy(parties, 'nInitialRemainderVote', 'desc');
@@ -336,7 +332,7 @@ function runElection(electionConfig) {
     var nVotePerRemainingSeat = nVotePerSeat;
   }
 
-  parties = parties.map(party => {
+  parties.forEach(party => {
     if (party.bPartyListNeeded) {
       party.nAllocatedSeat = Math.floor(
         party.nTotalVote / nVotePerRemainingSeat
@@ -347,20 +343,16 @@ function runElection(electionConfig) {
     } else {
       party.nAllocatedSeat = party.nConstituentSeat;
     }
-    return party;
   });
 
   // allocate party list seats
-  parties = parties.map(party => {
+  parties.forEach(party => {
     party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
-    return party;
   });
 
   parties.forEach(party => {
     party.nVotePerAllocatedSeat = party.nTotalVote / party.nAllocatedSeat
   })
-
-  console.log('parties :', parties);
 
   // assing unallocated seats
   const nUnallocatedSeat = parties.reduce(
@@ -378,9 +370,8 @@ function runElection(electionConfig) {
   }
 
   // calculate final total seat numbers
-  parties = parties.map(party => {
+  parties.forEach(party => {
     party.nTotalSeat = party.nConstituentSeat + party.nPartyListSeat;
-    return party;
   });
 
   const nTotalInitialAllocatedSeat = parties.reduce(
@@ -663,7 +654,7 @@ function drawWaffle(electionResult, electionConfig, selector, seatType) {
   const height = nRow * (gridSize + padding);
   const margin = { top: 20, right: 20, bottom: 20, left: 20 };
 
-  seatData = seatData.map(seat => {
+  seatData.forEach(seat => {
     seat.grid = {
       x: grid[seat.i][1] * (gridSize + padding),
       y: grid[seat.i][0] * (gridSize + padding)
