@@ -47012,7 +47012,9 @@ var define;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.runElection = runElection;
+exports.runVote = runVote;
+exports.runAllocation = runAllocation;
+exports.runFullElection = runFullElection;
 exports.drawResultConstituents = drawResultConstituents;
 exports.drawWaffle = drawWaffle;
 exports.drawInitialAllocation = drawInitialAllocation;
@@ -47022,7 +47024,7 @@ exports.addConstituentText = addConstituentText;
 exports.addInitialAllocationText = addInitialAllocationText;
 exports.addInitialAllocatedText = addInitialAllocatedText;
 exports.addFinalAllocationText = addFinalAllocationText;
-exports.ElectionConfig = void 0;
+exports.Party = exports.ElectionConfig = void 0;
 
 var d3 = _interopRequireWildcard(require("d3"));
 
@@ -47054,8 +47056,7 @@ var ElectionConfig = function ElectionConfig() {
       _ref$pVoterTurnout = _ref.pVoterTurnout,
       pVoterTurnout = _ref$pVoterTurnout === void 0 ? 0.7 : _ref$pVoterTurnout,
       nVote = _ref.nVote,
-      _ref$nParty = _ref.nParty,
-      nParty = _ref$nParty === void 0 ? 5 : _ref$nParty;
+      nParty = _ref.nParty;
 
   _classCallCheck(this, ElectionConfig);
 
@@ -47093,7 +47094,7 @@ var Party = function Party() {
       _ref2$name = _ref2.name,
       name = _ref2$name === void 0 ? '' : _ref2$name,
       _ref2$color = _ref2.color,
-      color = _ref2$color === void 0 ? '' : _ref2$color,
+      color = _ref2$color === void 0 ? '#777777' : _ref2$color,
       _ref2$pParty = _ref2.pParty,
       pParty = _ref2$pParty === void 0 ? 0 : _ref2$pParty,
       _ref2$nTotalVote = _ref2.nTotalVote,
@@ -47114,9 +47115,12 @@ var Party = function Party() {
       bPartyListNeeded = _ref2$bPartyListNeede === void 0 ? true : _ref2$bPartyListNeede,
       _ref2$bAllocationFill = _ref2.bAllocationFilled,
       bAllocationFilled = _ref2$bAllocationFill === void 0 ? false : _ref2$bAllocationFill,
+      _ref2$nVotePerAllocat = _ref2.nVotePerAllocatedSeat,
+      nVotePerAllocatedSeat = _ref2$nVotePerAllocat === void 0 ? 0 : _ref2$nVotePerAllocat,
       _ref2$nRemainderVote = _ref2.nRemainderVote,
       nRemainderVote = _ref2$nRemainderVote === void 0 ? 0 : _ref2$nRemainderVote,
-      side = _ref2.side;
+      _ref2$side = _ref2.side,
+      side = _ref2$side === void 0 ? 'ฝ่ายรัฐบาล' : _ref2$side;
 
   _classCallCheck(this, Party);
 
@@ -47131,6 +47135,7 @@ var Party = function Party() {
   this.nTotalSeat = nTotalSeat;
   this.bPartyListNeeded = bPartyListNeeded;
   this.bAllocationFilled = bAllocationFilled;
+  this.nVotePerAllocatedSeat = nVotePerAllocatedSeat;
   this.nRemainderVote = nRemainderVote;
   this.nExpectedConstituentSeat = nExpectedConstituentSeat;
   this.side = side;
@@ -47141,6 +47146,8 @@ var Party = function Party() {
  * from https://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array
  */
 
+
+exports.Party = Party;
 
 function shuffle(a) {
   for (var i = a.length - 1; i > 0; i--) {
@@ -47195,7 +47202,7 @@ function simulateResultConstituent(parties, nVote, expectedConstituentSeats) {
   return resultConstituent;
 }
 
-function runElection(electionConfig) {
+function runVote(electionConfig) {
   // get party winning propablities
   var pParties = Array.from({
     length: electionConfig.nParty
@@ -47205,9 +47212,9 @@ function runElection(electionConfig) {
   pParties = pParties.map(function (p) {
     return p / _lodash.default.sum(pParties);
   });
-  var partyNames = ['แดง', 'ฟ้า', 'เขียว', 'ส้ม', 'ชมพู', 'น้ำเงิน', 'เขียวอ่อน', 'ส้มอ่อน', 'ม่วง', 'น้ำตาล', 'ม่วงอ่อน', 'เหลือง'];
-  var partyColors = ['#e31a1c', '#a6cee3', '#33a02c', '#ff7f00', '#fb9a99', '#1f78b4', '#b2df8a', '#fdbf6f', '#6a3d9a', '#b15928', '#cab2d6', '#ffff99']; // must be unique
+  var partyNames = ['แดง', 'ฟ้า', 'เขียว', 'ส้ม', 'ชมพู', 'น้ำเงิน', 'เขียวอ่อน', 'ส้มอ่อน', 'ม่วง', 'น้ำตาล', 'ม่วงอ่อน', 'เหลือง']; // must be unique
 
+  var partyColors = ['#e31a1c', '#a6cee3', '#33a02c', '#ff7f00', '#fb9a99', '#1f78b4', '#b2df8a', '#fdbf6f', '#6a3d9a', '#b15928', '#cab2d6', '#ffff99'];
   var sides = ['ฝ่ายรัฐบาล', 'ฝ่ายค้าน']; // assign winning propabilities and party names, i.e., colours
 
   var parties = pParties.map(function (p, i) {
@@ -47259,22 +47266,32 @@ function runElection(electionConfig) {
     return party.name;
   }); // count constituentSeats won by party
 
-  parties = parties.map(function (party) {
+  parties.forEach(function (party) {
     party.nConstituentSeat = constituentSeatsNames.filter(function (name) {
       return name == party.name;
     }).length;
-    return party;
   }); // find total votes from all constituents by party
 
-  parties = parties.map(function (party) {
+  parties.forEach(function (party) {
     party.nTotalVote = resultConstituents.reduce(function (nTotalPartyVote, resultConstituent) {
       nTotalPartyVote += resultConstituent.filter(function (i) {
         return i.name == party.name;
       })[0].nVote;
       return nTotalPartyVote;
     }, 0);
-    return party;
-  }); // find total votes from all constituents
+  });
+  console.log('parties :', parties);
+  return {
+    parties: parties,
+    resultConstituents: resultConstituents,
+    constituentSeatsNames: constituentSeatsNames
+  };
+}
+
+function runAllocation(electionConfig, voteResult) {
+  var parties = voteResult.parties,
+      resultConstituents = voteResult.resultConstituents,
+      constituentSeatsNames = voteResult.constituentSeatsNames; // find total votes from all constituents
 
   var nTotalVote = parties.reduce(function (nTotalVote, party) {
     nTotalVote += party.nTotalVote;
@@ -47282,22 +47299,20 @@ function runElection(electionConfig) {
   }, 0); // calculate allocated seats
 
   var nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
-  parties = parties.map(function (party) {
+  parties.forEach(function (party) {
     party.nInitialAllocatedSeat = Math.floor(party.nTotalVote / nVotePerSeat);
-    return party;
   });
-  parties = parties.map(function (party) {
+  parties.forEach(function (party) {
     party.nInitialRemainderVote = party.nTotalVote % (party.nInitialAllocatedSeat * nVotePerSeat) || party.nTotalVote; // in case of party.nInitialAllocatedSeat == 0
-
-    return party;
   });
   parties = _lodash.default.orderBy(parties, 'nInitialRemainderVote', 'desc');
   var nInitialUnallocatedSeat = parties.reduce(function (nInitialUnallocatedSeat, party) {
     return nInitialUnallocatedSeat - party.nInitialAllocatedSeat;
   }, electionConfig.nTotalSeat);
+  var nParty = parties.length;
 
   for (var i = 0; i < nInitialUnallocatedSeat; i++) {
-    parties[i % electionConfig.nParty].nInitialAllocatedSeat += 1;
+    parties[i % nParty].nInitialAllocatedSeat += 1;
   } // check whether nConstituentSeat exceeds nInitialAllocatedSeats
 
 
@@ -47349,26 +47364,28 @@ function runElection(electionConfig) {
     var nVotePerRemainingSeat = nVotePerSeat;
   }
 
-  parties = parties.map(function (party) {
+  parties.forEach(function (party) {
     if (party.bPartyListNeeded) {
       party.nAllocatedSeat = Math.floor(party.nTotalVote / nVotePerRemainingSeat);
       party.nRemainderVote = party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat) || party.nTotalVote; // in case of party.nAllocatedSeat == 0
     } else {
       party.nAllocatedSeat = party.nConstituentSeat;
     }
-
-    return party;
   }); // allocate party list seats
 
-  parties = parties.map(function (party) {
+  parties.forEach(function (party) {
     party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
-    return party;
-  }); // assing unallocated seats
+  });
+  parties.forEach(function (party) {
+    if (party.bPartyListNeeded && party.nAllocatedSeat > 0) {
+      party.nVotePerAllocatedSeat = party.nTotalVote / party.nAllocatedSeat;
+    }
+  }); // assigning unallocated seats
 
   var nUnallocatedSeat = parties.reduce(function (nUnallocatedSeat, party) {
     return nUnallocatedSeat - (party.nConstituentSeat + party.nPartyListSeat);
   }, electionConfig.nTotalSeat);
-  parties = _lodash.default.orderBy(parties, 'nRemainderVote', 'desc');
+  parties = _lodash.default.orderBy(parties, ['nRemainderVote', 'nVotePerAllocatedSeat'], ['desc', 'desc']);
 
   var nPartiesGettingPartyList = _lodash.default.filter(parties, 'bPartyListNeeded').length;
 
@@ -47378,9 +47395,8 @@ function runElection(electionConfig) {
   } // calculate final total seat numbers
 
 
-  parties = parties.map(function (party) {
+  parties.forEach(function (party) {
     party.nTotalSeat = party.nConstituentSeat + party.nPartyListSeat;
-    return party;
   });
   var nTotalInitialAllocatedSeat = parties.reduce(function (n, party) {
     return n + party.nInitialAllocatedSeat;
@@ -47531,6 +47547,10 @@ function runElection(electionConfig) {
 
   var electionResult = new ElectionResult(parties, resultConstituents, constituentSeatsNames, nTotalVote, nVotePerSeat, nPartyWithoutPartyListNeeded, nVotePerRemainingSeat, nUnallocatedSeat, nTotalInitialAllocatedSeat, nTotalAllocatedSeat, nTotalConstituentSeat, nTotalPartyListSeat, parliamentSeat);
   return electionResult;
+}
+
+function runFullElection(electionConfig) {
+  return runAllocation(electionConfig, runVote(electionConfig));
 }
 
 function numberWithCommas(x) {
@@ -47715,7 +47735,7 @@ function drawWaffle(electionResult, electionConfig, selector, seatType) {
     bottom: 20,
     left: 20
   };
-  seatData = seatData.map(function (seat) {
+  seatData.forEach(function (seat) {
     seat.grid = {
       x: grid[seat.i][1] * (gridSize + padding),
       y: grid[seat.i][0] * (gridSize + padding)
@@ -47755,7 +47775,7 @@ function getAllocationConfig(electionResult, electionConfig, stage) {
     top: 20,
     right: 20,
     bottom: 40,
-    left: 60
+    left: 140
   };
   return {
     width: width,
@@ -47831,8 +47851,11 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
 
   while (nVotePerSeat * i <= xMax) {
     i++;
-    svg.append('line').attr('x1', xScale(nVotePerSeat * i)).attr('x2', xScale(nVotePerSeat * i)).attr('y1', margin.top).attr('y2', height - margin.bottom).attr('stroke', 'white').attr('stroke-width', 3);
-    svg.append('text').attr('y', margin.top).attr('x', xScale(nVotePerSeat * (i - 0.5))).attr('text-anchor', 'middle').attr('font-size', markSize * 0.8).text(i);
+    svg.append('line').attr('x1', xScale(nVotePerSeat * i)).attr('x2', xScale(nVotePerSeat * i)).attr('y1', margin.top).attr('y2', height - margin.bottom).attr('stroke', 'white').attr('stroke-width', markSize >= 6 ? 3 : markSize / 3);
+
+    if (markSize > 6) {
+      svg.append('text').attr('y', margin.top).attr('x', xScale(nVotePerSeat * (i - 0.5))).attr('text-anchor', 'middle').attr('font-size', markSize * 0.8).text(i);
+    }
   } // draw constituent seats won by each party
 
 
@@ -47840,49 +47863,53 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
 
   seatData = stage == 'initial' ? seatData : _lodash.default.filter(seatData, 'party.bPartyListNeeded');
   var seats = svg.append('g').selectAll('circle').data(seatData);
-  seats.enter().append('circle') // .attr('cy', d => yScale(d.name) + yScale.bandwidth() / 2)
-  .attr('cy', function (d) {
+  seats.enter().append('circle').attr('cy', function (d) {
     return yScale(d.name);
   }).attr('cx', function (d) {
     return xScale(nVotePerSeat * (d.iOfParty + 0.5));
-  }).attr('r', markSize / 2) // .attr('fill', d => d3.color(d.color).brighter(2))
-  .attr('fill', 'white').attr('stroke', function (d) {
+  }).attr('r', markSize / 2).attr('fill', function (d) {
+    return markSize >= 6 ? 'white' : d3.color(d.color).darker();
+  }).attr('stroke', function (d) {
     return d3.color(d.color).darker();
-  }).attr('stroke-width', 2);
-  seats.enter().append('text') // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
-  .attr('y', function (d) {
-    return yScale(d.name) + markSize * 0.25;
-  }).attr('x', function (d) {
-    return xScale(nVotePerSeat * (d.iOfParty + 0.5));
-  }).attr('text-anchor', 'middle').attr('font-size', markSize * 0.7).text(function (d) {
-    return d.iOfParty + 1;
-  }); // draw party list seats
+  }).attr('stroke-width', markSize >= 6 ? 2 : markSize / 3);
+
+  if (markSize > 6) {
+    seats.enter().append('text').attr('y', function (d) {
+      return yScale(d.name) + markSize * 0.25;
+    }).attr('x', function (d) {
+      return xScale(nVotePerSeat * (d.iOfParty + 0.5));
+    }).attr('text-anchor', 'middle').attr('font-size', markSize * 0.7).text(function (d) {
+      return d.iOfParty + 1;
+    });
+  } // draw party list seats
+
 
   if (stage != 'initial') {
     var seatDataPL = electionResult.parliamentSeat['partyList'];
     var seatsPL = svg.append('g').selectAll('circle').data(seatDataPL);
-    seatsPL.enter().append('rect') // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2)
-    .attr('y', function (d) {
+    seatsPL.enter().append('rect').attr('y', function (d) {
       return yScale(d.name) + yScale.bandwidth() - markSize / 2;
     }).attr('x', function (d) {
       return xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5));
     }).attr('width', markSize * 0.8).attr('height', markSize * 0.8).attr('transform', function (d) {
-      // const cy = yScale(d.name) + yScale.bandwidth() / 2 - markSize / 2;
       var cy = yScale(d.name) + yScale.bandwidth() - markSize / 2;
       var cx = xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5));
       return "rotate(45 ".concat(cx, " ").concat(cy, ")");
-    }) // .attr('fill', d => d3.color(d.color).brighter(2))
-    .attr('fill', 'white').attr('stroke', function (d) {
+    }).attr('fill', function (d) {
+      return markSize >= 6 ? 'white' : d3.color(d.color).darker();
+    }).attr('stroke', function (d) {
       return d3.color(d.color).darker();
-    }).attr('stroke-width', 2);
-    seatsPL.enter().append('text') // .attr('y', d => yScale(d.name) + yScale.bandwidth() / 2 + markSize * 0.25)
-    .attr('y', function (d) {
-      return yScale(d.name) + yScale.bandwidth() + markSize * 0.25;
-    }).attr('x', function (d) {
-      return xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5));
-    }).attr('text-anchor', 'middle').attr('font-size', markSize * 0.7).text(function (d) {
-      return d.iOfParty + 1;
-    });
+    }).attr('stroke-width', markSize >= 6 ? 2 : markSize / 3);
+
+    if (markSize > 6) {
+      seatsPL.enter().append('text').attr('y', function (d) {
+        return yScale(d.name) + yScale.bandwidth() + markSize * 0.25;
+      }).attr('x', function (d) {
+        return xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5));
+      }).attr('text-anchor', 'middle').attr('font-size', markSize * 0.7).text(function (d) {
+        return d.iOfParty + 1;
+      });
+    }
   }
 }
 
@@ -47903,12 +47930,14 @@ function drawFinalAllocation(electionResult, electionConfig, selector) {
 
 
 function addIntroText(electionConfig, selector, additionalText) {
-  var introText = "\n    <p>".concat(additionalText, "</p>\n    <p>\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E43\u0E2B\u0E49\u0E43\u0E19\u0E2A\u0E20\u0E32\u0E21\u0E35\u0E08\u0E33\u0E19\u0E27\u0E19 \u0E2A.\u0E2A. \u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14 ").concat(electionConfig.nTotalSeat, " \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \n    \u0E41\u0E1A\u0E48\u0E07\u0E40\u0E1B\u0E47\u0E19\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 ").concat(electionConfig.nConstituentSeat, " \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \n    \u0E41\u0E25\u0E30\u0E41\u0E1A\u0E1A\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D ").concat(electionConfig.nPartyListSeat, " \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07</p>\n    <p>\u0E14\u0E31\u0E07\u0E19\u0E31\u0E49\u0E19\u0E08\u0E36\u0E07\u0E21\u0E35\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14 ").concat(electionConfig.nConstituentSeat, " \u0E40\u0E02\u0E15 \n    \u0E42\u0E14\u0E22\u0E2A\u0E21\u0E21\u0E15\u0E34\u0E27\u0E48\u0E32\u0E17\u0E38\u0E01\u0E40\u0E02\u0E15\u0E21\u0E35\u0E1C\u0E39\u0E49\u0E25\u0E07\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E04\u0E23\u0E1A\u0E17\u0E38\u0E01\u0E1E\u0E23\u0E23\u0E04 \u0E23\u0E27\u0E21 ").concat(electionConfig.nParty, " \u0E1E\u0E23\u0E23\u0E04 \n    \u0E41\u0E15\u0E48\u0E25\u0E30\u0E1E\u0E23\u0E23\u0E04\u0E41\u0E17\u0E19\u0E14\u0E49\u0E27\u0E22\u0E2A\u0E35\u0E17\u0E35\u0E48\u0E2A\u0E21\u0E21\u0E15\u0E34\u0E02\u0E36\u0E49\u0E19\u0E21\u0E32</p>\n    <p>\u0E41\u0E25\u0E30\u0E21\u0E35\u0E1C\u0E39\u0E49\u0E21\u0E32\u0E43\u0E0A\u0E49\u0E2A\u0E34\u0E17\u0E18\u0E34\u0E4C\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07 \u0E08\u0E33\u0E19\u0E27\u0E19 \n    ").concat(numberWithCommas(electionConfig.nVote), " \u0E04\u0E19 \n    \u0E42\u0E14\u0E22\u0E2A\u0E21\u0E21\u0E15\u0E34\u0E27\u0E48\u0E32\u0E1A\u0E31\u0E15\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E17\u0E38\u0E01\u0E43\u0E1A\u0E40\u0E1B\u0E47\u0E19\u0E1A\u0E31\u0E15\u0E23\u0E14\u0E35\u0E41\u0E25\u0E30\u0E25\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07</p>\n    <p>(\u0E08\u0E33\u0E19\u0E27\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E43\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30\u0E40\u0E02\u0E15\u0E19\u0E31\u0E49\u0E19\u0E40\u0E1B\u0E47\u0E19\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A\u0E38\u0E48\u0E21 \n      \u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E2D\u0E49\u0E32\u0E07\u0E2D\u0E34\u0E07\u0E21\u0E32\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E04\u0E23\u0E31\u0E49\u0E07\u0E01\u0E48\u0E2D\u0E19\u0E2B\u0E23\u0E37\u0E2D\u0E1C\u0E25\u0E42\u0E1E\u0E25\u0E41\u0E15\u0E48\u0E2D\u0E22\u0E48\u0E32\u0E07\u0E43\u0E14)</p>\n    <br />\n    <h3>\u0E1C\u0E25\u0E01\u0E32\u0E23\u0E19\u0E31\u0E1A\u0E04\u0E30\u0E41\u0E19\u0E19\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07</h3>\n    <p>\u0E01\u0E23\u0E32\u0E1F\u0E41\u0E17\u0E48\u0E07\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\u0E41\u0E2A\u0E14\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E02\u0E2D\u0E07\u0E1C\u0E39\u0E49\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E41\u0E15\u0E48\u0E25\u0E30\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\n    \u0E17\u0E31\u0E49\u0E07 ").concat(electionConfig.nConstituentSeat, " \u0E40\u0E02\u0E15 \n    \u0E42\u0E14\u0E22\u0E1C\u0E39\u0E49\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E17\u0E35\u0E48\u0E44\u0E14\u0E49\u0E04\u0E30\u0E41\u0E19\u0E19\u0E2A\u0E39\u0E07\u0E2A\u0E38\u0E14\u0E40\u0E1B\u0E47\u0E19\u0E1C\u0E39\u0E49\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E43\u0E19\u0E40\u0E02\u0E15\u0E19\u0E31\u0E49\u0E19\u0E44\u0E1B \n    \u0E0B\u0E36\u0E48\u0E07\u0E41\u0E17\u0E19\u0E14\u0E49\u0E27\u0E22\u0E2A\u0E31\u0E0D\u0E25\u0E31\u0E01\u0E29\u0E13\u0E4C\u0E27\u0E07\u0E01\u0E25\u0E21 \u25CF</p>\n  ");
+  var constituentResult = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+  var constituentResultText = "\n    <p>(\u0E08\u0E33\u0E19\u0E27\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E43\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30\u0E40\u0E02\u0E15\u0E19\u0E31\u0E49\u0E19\u0E40\u0E1B\u0E47\u0E19\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A\u0E38\u0E48\u0E21 \n    \u0E44\u0E21\u0E48\u0E44\u0E14\u0E49\u0E2D\u0E49\u0E32\u0E07\u0E2D\u0E34\u0E07\u0E21\u0E32\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E04\u0E23\u0E31\u0E49\u0E07\u0E01\u0E48\u0E2D\u0E19\u0E2B\u0E23\u0E37\u0E2D\u0E1C\u0E25\u0E42\u0E1E\u0E25\u0E41\u0E15\u0E48\u0E2D\u0E22\u0E48\u0E32\u0E07\u0E43\u0E14)</p>\n    <br />\n    <h3>\u0E1C\u0E25\u0E01\u0E32\u0E23\u0E19\u0E31\u0E1A\u0E04\u0E30\u0E41\u0E19\u0E19\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07</h3>\n    <p>\u0E01\u0E23\u0E32\u0E1F\u0E41\u0E17\u0E48\u0E07\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\u0E41\u0E2A\u0E14\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E02\u0E2D\u0E07\u0E1C\u0E39\u0E49\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E41\u0E15\u0E48\u0E25\u0E30\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\n    \u0E17\u0E31\u0E49\u0E07 ".concat(electionConfig.nConstituentSeat, " \u0E40\u0E02\u0E15 \n    \u0E42\u0E14\u0E22\u0E1C\u0E39\u0E49\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E17\u0E35\u0E48\u0E44\u0E14\u0E49\u0E04\u0E30\u0E41\u0E19\u0E19\u0E2A\u0E39\u0E07\u0E2A\u0E38\u0E14\u0E40\u0E1B\u0E47\u0E19\u0E1C\u0E39\u0E49\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E43\u0E19\u0E40\u0E02\u0E15\u0E19\u0E31\u0E49\u0E19\u0E44\u0E1B \n    \u0E0B\u0E36\u0E48\u0E07\u0E41\u0E17\u0E19\u0E14\u0E49\u0E27\u0E22\u0E2A\u0E31\u0E0D\u0E25\u0E31\u0E01\u0E29\u0E13\u0E4C\u0E27\u0E07\u0E01\u0E25\u0E21 \u25CF</p>");
+  var introText = "\n    <p>".concat(additionalText, "</p>\n    <p>\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E43\u0E2B\u0E49\u0E43\u0E19\u0E2A\u0E20\u0E32\u0E21\u0E35\u0E08\u0E33\u0E19\u0E27\u0E19 \u0E2A.\u0E2A. \u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14 ").concat(electionConfig.nTotalSeat, " \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \n    \u0E41\u0E1A\u0E48\u0E07\u0E40\u0E1B\u0E47\u0E19\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 ").concat(electionConfig.nConstituentSeat, " \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \n    \u0E41\u0E25\u0E30\u0E41\u0E1A\u0E1A\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D ").concat(electionConfig.nPartyListSeat, " \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07</p>\n    <p>\u0E14\u0E31\u0E07\u0E19\u0E31\u0E49\u0E19\u0E08\u0E36\u0E07\u0E21\u0E35\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14 ").concat(electionConfig.nConstituentSeat, " \u0E40\u0E02\u0E15 \n    \u0E42\u0E14\u0E22\u0E2A\u0E21\u0E21\u0E15\u0E34\u0E27\u0E48\u0E32\u0E17\u0E38\u0E01\u0E40\u0E02\u0E15\u0E21\u0E35\u0E1C\u0E39\u0E49\u0E25\u0E07\u0E2A\u0E21\u0E31\u0E04\u0E23\u0E04\u0E23\u0E1A\u0E17\u0E38\u0E01\u0E1E\u0E23\u0E23\u0E04 \u0E23\u0E27\u0E21 ").concat(electionConfig.nParty, " \u0E1E\u0E23\u0E23\u0E04 \n    \u0E41\u0E15\u0E48\u0E25\u0E30\u0E1E\u0E23\u0E23\u0E04\u0E41\u0E17\u0E19\u0E14\u0E49\u0E27\u0E22\u0E2A\u0E35\u0E17\u0E35\u0E48\u0E2A\u0E21\u0E21\u0E15\u0E34\u0E02\u0E36\u0E49\u0E19\u0E21\u0E32</p>\n    <p>\u0E41\u0E25\u0E30\u0E21\u0E35\u0E1C\u0E39\u0E49\u0E21\u0E32\u0E43\u0E0A\u0E49\u0E2A\u0E34\u0E17\u0E18\u0E34\u0E4C\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07 \u0E08\u0E33\u0E19\u0E27\u0E19 \n    ").concat(numberWithCommas(electionConfig.nVote), " \u0E04\u0E19 \n    \u0E42\u0E14\u0E22\u0E2A\u0E21\u0E21\u0E15\u0E34\u0E27\u0E48\u0E32\u0E1A\u0E31\u0E15\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E17\u0E38\u0E01\u0E43\u0E1A\u0E40\u0E1B\u0E47\u0E19\u0E1A\u0E31\u0E15\u0E23\u0E14\u0E35\u0E41\u0E25\u0E30\u0E25\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07</p>\n    ").concat(constituentResult ? constituentResultText : '', "\n  ");
   d3.select(selector).html(introText);
 }
 
 function addConstituentText(electionResult, electionConfig, selector) {
-  var constituentText = "\n  <p>\u0E08\u0E32\u0E01\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07 ".concat(electionConfig.nConstituentSeat, " \u0E40\u0E02\u0E15 \n  \u0E21\u0E35\u0E1C\u0E39\u0E49\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E40\u0E1B\u0E47\u0E19\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 \u25CF \u0E08\u0E32\u0E01\u0E1E\u0E23\u0E23\u0E04\u0E14\u0E31\u0E07\u0E15\u0E48\u0E2D\u0E44\u0E1B\u0E19\u0E35\u0E49</p>\n  <br />\n  ");
+  var constituentText = "\n  <h3>\u0E1C\u0E25\u0E1C\u0E39\u0E49\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E40\u0E1B\u0E47\u0E19\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07</h3>\n  <p>\u0E08\u0E32\u0E01\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07 ".concat(electionConfig.nConstituentSeat, " \u0E40\u0E02\u0E15 \n  \u0E21\u0E35\u0E1C\u0E39\u0E49\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E40\u0E1B\u0E47\u0E19\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 \u25CF \u0E08\u0E32\u0E01\u0E1E\u0E23\u0E23\u0E04\u0E14\u0E31\u0E07\u0E15\u0E48\u0E2D\u0E44\u0E1B\u0E19\u0E35\u0E49</p>\n  <br />\n  ");
   d3.select(selector).html(constituentText);
 }
 
@@ -68934,7 +68963,7 @@ var config = new main.ElectionConfig({
   pVoterTurnout: 0.7,
   nParty: 4
 });
-var result = main.runElection(config);
+var result = main.runFullElection(config);
 main.drawResultConstituents(result, config, '#result-constituents');
 main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');
 main.drawInitialAllocation(result, config, '#initial-allocation');
@@ -68978,7 +69007,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53212" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61651" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);

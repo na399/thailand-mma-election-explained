@@ -68940,7 +68940,7 @@ sr.tychei = tychei;
 
 module.exports = sr;
 
-},{"./lib/alea":"node_modules/seedrandom/lib/alea.js","./lib/xor128":"node_modules/seedrandom/lib/xor128.js","./lib/xorwow":"node_modules/seedrandom/lib/xorwow.js","./lib/xorshift7":"node_modules/seedrandom/lib/xorshift7.js","./lib/xor4096":"node_modules/seedrandom/lib/xor4096.js","./lib/tychei":"node_modules/seedrandom/lib/tychei.js","./seedrandom":"node_modules/seedrandom/seedrandom.js"}],"src/full-election.js":[function(require,module,exports) {
+},{"./lib/alea":"node_modules/seedrandom/lib/alea.js","./lib/xor128":"node_modules/seedrandom/lib/xor128.js","./lib/xorwow":"node_modules/seedrandom/lib/xorwow.js","./lib/xorshift7":"node_modules/seedrandom/lib/xorshift7.js","./lib/xor4096":"node_modules/seedrandom/lib/xor4096.js","./lib/tychei":"node_modules/seedrandom/lib/tychei.js","./seedrandom":"node_modules/seedrandom/seedrandom.js"}],"src/user-defined.js":[function(require,module,exports) {
 "use strict";
 
 var main = _interopRequireWildcard(require("./main"));
@@ -68956,17 +68956,67 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 (0, _seedrandom.default)('full', {
   global: true
 });
+var parties = [new main.Party({
+  name: 'เพื่อไทย',
+  color: 'red',
+  nTotalVote: 14125219,
+  nConstituentSeat: 204
+}), new main.Party({
+  name: 'ประชาธิปัตย์',
+  color: 'skyblue',
+  nTotalVote: 10095250,
+  nConstituentSeat: 115,
+  side: 'ฝ่ายค้าน'
+}), new main.Party({
+  name: 'ภูมิใจไทย',
+  color: 'green',
+  nTotalVote: 3485153,
+  nConstituentSeat: 29,
+  side: 'ฝ่ายค้าน'
+}), new main.Party({
+  name: 'ชาติไทยพัฒนา',
+  color: 'orange',
+  nTotalVote: 1515320,
+  nConstituentSeat: 15
+}), new main.Party({
+  name: 'ชาติพัฒนาเพื่อแผ่นดิน',
+  color: 'yellow',
+  nTotalVote: 1242084,
+  nConstituentSeat: 5
+}), new main.Party({
+  name: 'มาตุภูมิ',
+  color: 'pink',
+  nTotalVote: 369526,
+  nConstituentSeat: 1
+}), new main.Party({
+  name: 'พลังชล',
+  color: 'blue',
+  nTotalVote: 246879,
+  nConstituentSeat: 6
+}), new main.Party({
+  name: 'รักษ์สันติ',
+  color: 'lime',
+  nTotalVote: 138758,
+  nConstituentSeat: 0
+}), new main.Party({
+  name: 'อื่นๆ',
+  color: 'grey',
+  nTotalVote: 278175,
+  nConstituentSeat: 0
+})];
 var config = new main.ElectionConfig({
-  nParty: 8
+  nConstituentSeat: 375,
+  nParty: parties.length
 });
-var result = main.runFullElection(config);
-main.drawResultConstituents(result, config, '#result-constituents');
+var result = main.runAllocation(config, {
+  parties: parties
+});
 main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');
 main.drawInitialAllocation(result, config, '#initial-allocation');
 main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
 main.drawFinalAllocation(result, config, '#final-allocation');
 main.drawWaffle(result, config, '#parliament-seats-all', 'all');
-main.addIntroText(config, '#text-intro', '');
+main.addIntroText(config, '#text-intro', '', false);
 main.addConstituentText(result, config, '#text-constituent-seats');
 main.addInitialAllocationText(result, config, '#text-initial-allocation');
 main.addInitialAllocatedText(result, config, '#text-initial-allocated-seats');
@@ -69145,5 +69195,5 @@ function hmrAccept(bundle, id) {
     return hmrAccept(global.parcelRequire, id);
   });
 }
-},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","src/full-election.js"], null)
-//# sourceMappingURL=/full-election.044db93f.map
+},{}]},{},["node_modules/parcel-bundler/src/builtins/hmr-runtime.js","src/user-defined.js"], null)
+//# sourceMappingURL=/user-defined.b40111d0.map
