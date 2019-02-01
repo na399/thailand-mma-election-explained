@@ -114,8 +114,8 @@ function addTable(electionResult, selector, type) {
       table.showColumn('nTotalSeat');
       // table.setGroupBy(data => data.side);
       table.setSort([
-        { column: 'nTotalSeat', dir: 'desc' },
-        { column: 'nConstituentSeat', dir: 'desc' }
+        { column: 'nConstituentSeat', dir: 'desc' },
+        { column: 'nTotalSeat', dir: 'desc' }
       ]);
       break;
     case 'sides':
@@ -126,8 +126,8 @@ function addTable(electionResult, selector, type) {
       table.showColumn('nTotalSeat');
       table.showColumn('nTotalVote');
       table.setSort([
-        { column: 'nTotalSeat', dir: 'desc' },
-        { column: 'nConstituentSeat', dir: 'desc' }
+        { column: 'nConstituentSeat', dir: 'desc' },
+        { column: 'nTotalSeat', dir: 'desc' }
       ]);
       table.addColumn({
         rowHandle: true,
@@ -151,8 +151,8 @@ function addTable(electionResult, selector, type) {
       table.showColumn('nTotalVote');
       table.setGroupBy(data => data.side);
       table.setSort([
-        { column: 'nTotalSeat', dir: 'desc' },
-        { column: 'nConstituentSeat', dir: 'desc' }
+        { column: 'nConstituentSeat', dir: 'desc' },
+        { column: 'nTotalSeat', dir: 'desc' }
       ]);
       break;
   }
