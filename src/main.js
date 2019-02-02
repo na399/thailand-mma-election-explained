@@ -725,7 +725,7 @@ function drawWaffle(electionResult, electionConfig, selector, seatType) {
  Bar plots for votes from entire country 
 ********************************/
 function getAllocationConfig(electionResult, electionConfig, stage) {
-  const width = 1000;
+  const width = 1200;
   const height =
     stage == 'initial'
       ? electionConfig.nParty * 80
@@ -743,7 +743,11 @@ function getAllocationConfig(electionResult, electionConfig, stage) {
 function getAllocationScales(electionResult, config, stage) {
   const { width, height, margin } = config;
 
-  const xMax = _.max(electionResult.parties.map(party => party.nTotalVote));
+  const maxTotalVote = _.max(electionResult.parties.map(party => party.nTotalVote));
+  const maxSeat = _.max(electionResult.parties.map(party => party.nConstituentSeat)) * electionResult.nVotePerSeat;
+
+  const xMax = _.max([maxTotalVote, maxSeat])
+
   let partyNames;
 
   if (stage == 'initial') {
