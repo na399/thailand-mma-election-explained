@@ -264,8 +264,6 @@ function runVote(electionConfig) {
     );
   });
 
-  console.log('parties :', parties);
-
   return { parties, resultConstituents, constituentSeatsNames };
 }
 
@@ -556,6 +554,8 @@ function drawResultConstituent(
     .attr('height', height)
     .style('overflow', 'visible');
 
+  svg.selectAll('*').remove();
+
   const bars = svg
     .append('g')
     .selectAll('.bar')
@@ -638,9 +638,11 @@ function drawResultConstituents(electionResult, electionConfig, selector) {
   const config = getResultConstituentConfig();
   const scales = getResultConstituentScales(electionResult, config);
   for (let i = 0; i < electionConfig.nConstituentSeat; i++) {
-    d3.select(selector)
-      .append('svg')
-      .attr('id', `constituent${i}`);
+    if (d3.select(`#constituent${i}`).empty()) {
+      d3.select(selector)
+        .append('svg')
+        .attr('id', `constituent${i}`);
+    }
 
     drawResultConstituent(
       electionResult,
@@ -681,6 +683,10 @@ function drawWaffle(electionResult, electionConfig, selector, seatType) {
     };
     return seat;
   });
+
+  d3.select(selector)
+    .selectAll('*')
+    .remove();
 
   const svg = d3
     .select(selector)
@@ -731,7 +737,10 @@ function getAllocationConfig(electionResult, electionConfig, stage) {
       ? electionConfig.nParty * 80
       : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) *
         100;
-  const margin = { top: 20, right: 20, bottom: 40, left: 140 };
+
+  const maxNameLength = _.max(electionResult.parties.map(party => party.name.length))
+
+  const margin = { top: 20, right: 20, bottom: 40, left: 8 * maxNameLength };
 
   return {
     width,
@@ -743,10 +752,14 @@ function getAllocationConfig(electionResult, electionConfig, stage) {
 function getAllocationScales(electionResult, config, stage) {
   const { width, height, margin } = config;
 
-  const maxTotalVote = _.max(electionResult.parties.map(party => party.nTotalVote));
-  const maxSeat = _.max(electionResult.parties.map(party => party.nConstituentSeat)) * electionResult.nVotePerSeat;
+  const maxTotalVote = _.max(
+    electionResult.parties.map(party => party.nTotalVote)
+  );
+  const maxSeat =
+    _.max(electionResult.parties.map(party => party.nConstituentSeat)) *
+    electionResult.nVotePerSeat;
 
-  const xMax = _.max([maxTotalVote, maxSeat])
+  const xMax = _.max([maxTotalVote, maxSeat]);
 
   let partyNames;
 
@@ -784,6 +797,10 @@ function getAllocationScales(electionResult, config, stage) {
 function drawAllocationChart(electionResult, selector, config, scales, stage) {
   const { width, height, margin } = config;
   let { xScale, yScale, xMax } = scales;
+
+  d3.select(selector)
+  .selectAll('*')
+  .remove();
 
   const svg = d3
     .select(selector)
@@ -851,9 +868,8 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
           )
         );
 
-  let i = 0;
+  let i = 1;
   while (nVotePerSeat * i <= xMax) {
-    i++;
     svg
       .append('line')
       .attr('x1', xScale(nVotePerSeat * i))
@@ -872,6 +888,7 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
         .attr('font-size', markSize * 0.8)
         .text(i);
     }
+    i++;
   }
 
   // draw constituent seats won by each party

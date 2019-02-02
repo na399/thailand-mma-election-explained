@@ -39,6 +39,11 @@
           เพื่อเราจะได้เข้าใจระบบเลือกตั้งแบบจัดสรรปันส่วนผสมนี้ดียิ่งขึ้น
         </p>
         <br />
+        <button
+          onclick="app.runApp(app.config, app.randomSeed+=1, { starter: true })"
+        >
+          สุ่มผลการเลือกตั้งใหม่
+        </button>
       </div>
       <div id="text-intro" class="text"></div>
 
@@ -109,6 +114,9 @@
       </p>
     </div>
 
-    <script src="src/starter.js"></script>
+    <script src="src/app.js"></script>
+    <script>
+      app.runApp(app.config, app.randomSeed, { starter: true });
+    </script>
   </body>
 </html>

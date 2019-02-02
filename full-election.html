@@ -38,6 +38,11 @@
           เพื่อเราจะได้เข้าใจระบบเลือกตั้งแบบจัดสรรปันส่วนผสมนี้ดียิ่งขึ้น
         </p>
         <br />
+        <button
+          onclick="app.runApp(app.configFull, app.randomSeed+='full', { side: true })"
+        >
+          สุ่มผลการเลือกตั้งใหม่
+        </button>
       </div>
       <div id="text-intro" class="text"></div>
 
@@ -101,6 +106,9 @@
       <a href="index.html">Return to Index</a>
     </div>
 
-    <script src="src/full-election.js"></script>
+    <script src="src/app.js"></script>
+    <script>
+      app.runApp(app.configFull, 'full', { side: true });
+    </script>
   </body>
 </html>

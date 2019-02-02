@@ -6,9 +6,9 @@
   "author": "Natthawut Adulyanukosol <na399@cantab.net>",
   "license": "MIT",
   "scripts": {
-    "start": "parcel index.html --open",
-    "build": "parcel build index.html",
-    "deploy": "parcel build index.html --public-url /thailand-mma-election-explained/ && gh-pages -b gh-pages -d dist"
+    "start": "parcel index.html --open --global app",
+    "build": "parcel build index.html --global app",
+    "deploy": "parcel build index.html --public-url /thailand-mma-election-explained/ --global app && gh-pages -b gh-pages -d dist"
   },
   "dependencies": {
     "d3": "^5.5.0",
