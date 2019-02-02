@@ -108,7 +108,13 @@
 
     <script src="src/app.js"></script>
     <script>
-      app.runApp(app.configFull, 'full', { side: true });
+      const config = new app.ElectionConfig({
+        nParty: 8
+      });
+
+      let randomSeed = 'starter'
+
+      app.runApp(config, { randomSeed: 'full', side: true });
     </script>
   </body>
 </html>

@@ -1,26 +1,25 @@
 import * as main from './main';
+import { ElectionConfig, Party } from './main';
 import * as table from './table';
 import seedrandom from 'seedrandom';
 
-let config = new main.ElectionConfig({
-  nTotalSeat: 5,
-  nConstituentSeat: 3,
-  nVoter: 500000,
-  pVoterTurnout: 0.7,
-  nParty: 4
-});
+function runApp(config, option) {
+  seedrandom(option.randomSeed, { global: true });
 
-let configFull = new main.ElectionConfig({
-  nParty: 8
-});
+  /*******************************
+  Election Simulation or Allocation
+  ********************************/
+  let result;
 
-let randomSeed = 'starter';
+  if (option.onlyAllocation) {
+    result = main.runAllocation(config, { parties });
+  } else {
+    result = main.runFullElection(config);
+  }
 
-function runApp(config, randomSeed, option) {
-  seedrandom(randomSeed, { global: true });
-
-  const result = main.runFullElection(config);
-
+  /*******************************
+  Narration
+  ********************************/
   if (option.starter) {
     main.addIntroText(
       config,
@@ -28,7 +27,9 @@ function runApp(config, randomSeed, option) {
       'เพื่อให้เข้าใจง่ายขึ้น เรามาเริ่มต้นกันด้วยแบบจำลองฉบับย่อกันก่อน'
     );
   } else {
-    main.addIntroText(config, '#text-intro', '');
+    if (!option.onlyAllocation) {
+      main.addIntroText(config, '#text-intro', '');
+    }
   }
 
   main.addConstituentText(result, config, '#text-constituent-seats');
@@ -36,6 +37,9 @@ function runApp(config, randomSeed, option) {
   main.addInitialAllocatedText(result, config, '#text-initial-allocated-seats');
   main.addFinalAllocationText(result, config, '#text-final-allocation');
 
+  /*******************************
+  Tables
+  ********************************/
   table.addTable(result, '#table-constituent', 'constituent');
   table.addTable(result, '#table-initial-allocation', 'initial-allocation');
   table.addTable(result, '#table-final-allocation', 'final-allocation');
@@ -49,7 +53,12 @@ function runApp(config, randomSeed, option) {
     table.addTable(result, '#table-all', 'all');
   }
 
-  main.drawResultConstituents(result, config, '#result-constituents');
+  /*******************************
+  Plots
+  ********************************/
+  if (!option.onlyAllocation) {
+    main.drawResultConstituents(result, config, '#result-constituents');
+  }
   main.drawWaffle(
     result,
     config,
@@ -62,4 +71,4 @@ function runApp(config, randomSeed, option) {
   main.drawWaffle(result, config, '#parliament-seats-all', 'all');
 }
 
-export { runApp, config, configFull, randomSeed };
+export { runApp, ElectionConfig, Party };

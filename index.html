@@ -40,7 +40,7 @@
         </p>
         <br />
         <button
-          onclick="app.runApp(app.config, app.randomSeed+=1, { starter: true })"
+          onclick="app.runApp(config, randomSeed+=1, { starter: true })"
         >
           สุ่มผลการเลือกตั้งใหม่
         </button>
@@ -116,7 +116,17 @@
 
     <script src="src/app.js"></script>
     <script>
-      app.runApp(app.config, app.randomSeed, { starter: true });
+      const config = new app.ElectionConfig({
+        nTotalSeat: 5,
+        nConstituentSeat: 3,
+        nVoter: 500000,
+        pVoterTurnout: 0.7,
+        nParty: 4
+      });
+
+      let randomSeed = 'starter'
+
+      app.runApp(config, { randomSeed: randomSeed, starter: true });
     </script>
   </body>
 </html>
