@@ -47769,7 +47769,7 @@ function drawWaffle(electionResult, electionConfig, selector, seatType) {
 
 
 function getAllocationConfig(electionResult, electionConfig, stage) {
-  var width = 1000;
+  var width = 1200;
   var height = stage == 'initial' ? electionConfig.nParty * 80 : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) * 100;
   var margin = {
     top: 20,
@@ -47789,9 +47789,15 @@ function getAllocationScales(electionResult, config, stage) {
       height = config.height,
       margin = config.margin;
 
-  var xMax = _lodash.default.max(electionResult.parties.map(function (party) {
+  var maxTotalVote = _lodash.default.max(electionResult.parties.map(function (party) {
     return party.nTotalVote;
   }));
+
+  var maxSeat = _lodash.default.max(electionResult.parties.map(function (party) {
+    return party.nConstituentSeat;
+  })) * electionResult.nVotePerSeat;
+
+  var xMax = _lodash.default.max([maxTotalVote, maxSeat]);
 
   var partyNames;
 
@@ -67801,31 +67807,13 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function addTable(electionResult, selector, type) {
   var tableData = electionResult.parties;
-  var nTotalVoteColumn = {
-    title: 'จำนวนเสียงรวม',
-    field: 'nTotalVote',
-    align: 'center',
-    formatter: function formatter(cell) {
-      return cell.getValue().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    },
-    visible: false,
-    bottomCalc: function bottomCalc(values) {
-      var sum = _lodash.default.sum(values);
-
-      return sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    }
-  }; //create Tabulator on DOM element with id "example-table"
-
   var table = new _tabulatorTables.default(selector, {
     virtualDom: false,
     movableRows: true,
     movableColumns: true,
     data: tableData,
-    //assign data to table
     layout: 'fitDataFill',
-    //fit columns to width of table (optional)
-    columns: [//Define Table Columns
-    {
+    columns: [{
       title: 'พรรค',
       field: 'name'
     }, {
@@ -67833,54 +67821,69 @@ function addTable(electionResult, selector, type) {
       field: 'color',
       formatter: 'color',
       width: '46'
-    }, {
-      title: 'ส.ส.แบ่งเขต ●',
-      field: 'nConstituentSeat',
-      align: 'center',
-      visible: false,
-      bottomCalc: 'sum'
-    }, nTotalVoteColumn, {
-      title: 'ส.ส.พึงมี เริ่มต้น ■',
-      field: 'nInitialAllocatedSeat',
-      align: 'center',
-      visible: false,
-      bottomCalc: 'sum'
-    }, {
-      title: 'ส.ส.พึงมีครบแล้ว (● >= ■)',
-      field: 'bAllocationFilled',
-      formatter: 'tickCross',
-      align: 'center',
-      visible: false
-    }, {
-      title: 'ส.ส.พึงมียังไม่ครบ (● < ■)',
-      field: 'bPartyListNeeded',
-      formatter: 'tickCross',
-      align: 'center',
-      visible: false
-    }, {
-      title: 'ส.ส.พึงมี ■',
-      field: 'nAllocatedSeat',
-      align: 'center',
-      visible: false,
-      bottomCalc: 'sum'
-    }, {
-      title: 'ส.ส.บัญชีรายชื่อ ◆',
-      field: 'nPartyListSeat',
-      align: 'center',
-      visible: false,
-      bottomCalc: 'sum'
-    }, {
-      title: 'ส.ส.รวม ●◆',
-      field: 'nTotalSeat',
-      align: 'center',
-      visible: false,
-      bottomCalc: 'sum'
     }]
   });
+  var nTotalVote = {
+    title: 'จำนวนเสียงรวม',
+    field: 'nTotalVote',
+    align: 'center',
+    formatter: function formatter(cell) {
+      return cell.getValue().toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    },
+    bottomCalc: function bottomCalc(values) {
+      var sum = _lodash.default.sum(values);
+
+      return sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+  };
+  var nConstituentSeat = {
+    title: 'ส.ส.แบ่งเขต ●',
+    field: 'nConstituentSeat',
+    align: 'center',
+    bottomCalc: 'sum'
+  };
+  var nInitialAllocatedSeat = {
+    title: 'ส.ส.พึงมี เริ่มต้น ■',
+    field: 'nInitialAllocatedSeat',
+    align: 'center',
+    bottomCalc: 'sum'
+  };
+  var bAllocationFilled = {
+    title: 'ส.ส.พึงมีครบแล้ว (● >= ■)',
+    field: 'bAllocationFilled',
+    formatter: 'tickCross',
+    align: 'center'
+  };
+  var bPartyListNeeded = {
+    title: 'ส.ส.พึงมียังไม่ครบ (● < ■)',
+    field: 'bPartyListNeeded',
+    formatter: 'tickCross',
+    align: 'center'
+  };
+  var nAllocatedSeat = {
+    title: 'ส.ส.พึงมี ■',
+    field: 'nAllocatedSeat',
+    align: 'center',
+    bottomCalc: 'sum'
+  };
+  var nPartyListSeat = {
+    title: 'ส.ส.บัญชีรายชื่อ ◆',
+    field: 'nPartyListSeat',
+    align: 'center',
+    bottomCalc: 'sum'
+  };
+  var nTotalSeat = {
+    title: 'ส.ส.รวม ●◆',
+    field: 'nTotalSeat',
+    align: 'center',
+    bottomCalc: 'sum'
+  };
 
   switch (type) {
     case 'constituent':
-      table.showColumn('nConstituentSeat');
+      table.addColumn(nConstituentSeat);
+      table.addColumn(nTotalVote);
+      table.hideColumn('nTotalVote');
       table.setSort([{
         column: 'nTotalVote',
         dir: 'desc'
@@ -67891,10 +67894,10 @@ function addTable(electionResult, selector, type) {
       break;
 
     case 'initial-allocation':
-      table.showColumn('nConstituentSeat');
-      table.showColumn('nTotalVote');
-      table.showColumn('nInitialAllocatedSeat');
-      table.showColumn('bAllocationFilled');
+      table.addColumn(nConstituentSeat);
+      table.addColumn(nTotalVote);
+      table.addColumn(nInitialAllocatedSeat);
+      table.addColumn(bAllocationFilled);
       table.setSort([{
         column: 'nTotalVote',
         dir: 'desc'
@@ -67902,45 +67905,56 @@ function addTable(electionResult, selector, type) {
       break;
 
     case 'final-allocation':
-      table.showColumn('nConstituentSeat'); // table.showColumn('bAllocationFilled');
-
-      table.showColumn('nAllocatedSeat');
-      table.showColumn('nPartyListSeat');
+      table.addColumn(nAllocatedSeat);
+      table.addColumn(nConstituentSeat);
+      table.addColumn(nPartyListSeat);
+      table.addColumn(nTotalVote);
+      table.hideColumn('nTotalVote');
       table.setSort([{
         column: 'nTotalVote',
         dir: 'desc'
       }]);
-      table.setFilter('bPartyListNeeded', '=', true);
+      table.setGroupBy(function (data) {
+        return data.bAllocationFilled;
+      });
+      table.setGroupHeader(function (value) {
+        if (value) {
+          return 'ส.ส.พึงมีครบแล้ว (ไม่ได้รับส.ส.บัญชีรายชื่อเพิ่ม)';
+        } else {
+          return 'ส.ส.พึงมียังไม่ครบ';
+        }
+      }); // table.setFilter('bPartyListNeeded', '=', true);
+
       break;
 
     case 'conclusion':
-      table.showColumn('nConstituentSeat');
-      table.showColumn('nPartyListSeat');
-      table.showColumn('nTotalSeat'); // table.setGroupBy(data => data.side);
-
+      table.addColumn(nConstituentSeat);
+      table.addColumn(nPartyListSeat);
+      table.addColumn(nTotalSeat);
       table.setSort([{
-        column: 'nTotalSeat',
+        column: 'nConstituentSeat',
         dir: 'desc'
       }, {
-        column: 'nConstituentSeat',
+        column: 'nTotalSeat',
         dir: 'desc'
       }]);
       break;
 
     case 'sides':
-      table.deleteColumn('nTotalVote');
-      table.addColumn(nTotalVoteColumn);
-      table.showColumn('nConstituentSeat');
-      table.showColumn('nPartyListSeat');
-      table.showColumn('nTotalSeat');
-      table.showColumn('nTotalVote');
+      table.addColumn(nConstituentSeat);
+      table.addColumn(nPartyListSeat);
+      table.addColumn(nTotalSeat);
+      table.addColumn(nTotalVote);
       table.setSort([{
-        column: 'nTotalSeat',
-        dir: 'desc'
-      }, {
         column: 'nConstituentSeat',
         dir: 'desc'
+      }, {
+        column: 'nTotalSeat',
+        dir: 'desc'
       }]);
+      table.setGroupBy(function (data) {
+        return data.side;
+      });
       table.addColumn({
         rowHandle: true,
         formatter: 'handle',
@@ -67949,29 +67963,24 @@ function addTable(electionResult, selector, type) {
         width: 30,
         minWidth: 30
       });
-      table.setGroupBy(function (data) {
-        return data.side;
-      });
       break;
 
     case 'all':
-      table.deleteColumn('nTotalVote');
-      table.addColumn(nTotalVoteColumn);
-      table.showColumn('nConstituentSeat');
-      table.showColumn('nInitialAllocatedSeat');
-      table.showColumn('bAllocationFilled');
-      table.showColumn('nAllocatedSeat');
-      table.showColumn('nPartyListSeat');
-      table.showColumn('nTotalSeat');
-      table.showColumn('nTotalVote');
+      table.addColumn(nConstituentSeat);
+      table.addColumn(nInitialAllocatedSeat);
+      table.addColumn(bAllocationFilled);
+      table.addColumn(nAllocatedSeat);
+      table.addColumn(nPartyListSeat);
+      table.addColumn(nTotalSeat);
+      table.addColumn(nTotalVote);
       table.setGroupBy(function (data) {
         return data.side;
       });
       table.setSort([{
-        column: 'nTotalSeat',
+        column: 'nConstituentSeat',
         dir: 'desc'
       }, {
-        column: 'nConstituentSeat',
+        column: 'nTotalSeat',
         dir: 'desc'
       }]);
       break;
@@ -69007,7 +69016,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61651" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60885" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
