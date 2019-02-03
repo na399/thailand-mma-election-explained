@@ -68990,7 +68990,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
-function runApp(config, option) {
+function runApp(config, option, parties) {
   (0, _seedrandom.default)(option.randomSeed, {
     global: true
   });
@@ -69015,9 +69015,7 @@ function runApp(config, option) {
   if (option.starter) {
     main.addIntroText(config, '#text-intro', 'เพื่อให้เข้าใจง่ายขึ้น เรามาเริ่มต้นกันด้วยแบบจำลองฉบับย่อกันก่อน');
   } else {
-    if (option.onlyAllocation) {
-      main.addIntroText(config, '#text-intro', '', false);
-    } else {
+    if (!option.onlyAllocation) {
       main.addIntroText(config, '#text-intro', '');
     }
   }
@@ -69084,7 +69082,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56100" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57050" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
