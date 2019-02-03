@@ -39,9 +39,7 @@
           เพื่อเราจะได้เข้าใจระบบเลือกตั้งแบบจัดสรรปันส่วนผสมนี้ดียิ่งขึ้น
         </p>
         <br />
-        <button
-          onclick="app.runApp(config, randomSeed+=1, { starter: true })"
-        >
+        <button onclick="app.runApp(config, randomSeed+=1, { starter: true })">
           สุ่มผลการเลือกตั้งใหม่
         </button>
       </div>
@@ -124,7 +122,7 @@
         nParty: 4
       });
 
-      let randomSeed = 'starter'
+      let randomSeed = 'starter';
 
       app.runApp(config, { randomSeed: randomSeed, starter: true });
     </script>

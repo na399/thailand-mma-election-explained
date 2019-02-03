@@ -39,7 +39,7 @@
         </p>
         <br />
         <button
-          onclick="app.runApp(app.configFull, app.randomSeed+='full', { side: true })"
+          onclick="app.runApp(config, app.randomSeed+='full', { side: true })"
         >
           สุ่มผลการเลือกตั้งใหม่
         </button>
@@ -112,7 +112,7 @@
         nParty: 8
       });
 
-      let randomSeed = 'starter'
+      let randomSeed = 'starter';
 
       app.runApp(config, { randomSeed: 'full', side: true });
     </script>
