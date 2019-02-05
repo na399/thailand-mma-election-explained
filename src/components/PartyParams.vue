@@ -11,16 +11,17 @@
         :fetch-suggestions="querySearch"
         placeholder="ชื่อ"
         @select="handleSelect"
+        @change="changeParams"
       ></el-autocomplete>
-      <el-color-picker v-model="color" :predefine="predefinedColors"></el-color-picker>
-      <el-radio-group v-model="side" size="small">
+      <el-color-picker v-model="color" :predefine="predefinedColors" @change="changeParams"></el-color-picker>
+      <el-radio-group v-model="side" size="small" @change="changeParams">
         <el-radio-button label="ฝ่ายรัฐบาล"></el-radio-button>
         <el-radio-button label="ฝ่ายค้าน"></el-radio-button>
       </el-radio-group>
     </div>
     <div>
       <span>จำนวนส.ส.แบบแบ่งเขตเลือกตั้ง</span>
-      <el-slider v-model="nConstituentSeat" :max="350" show-input></el-slider>
+      <el-slider v-model="nConstituentSeat" :max="350" show-input @change="changeParams"></el-slider>
     </div>
     <div>
       <span>จำนวนเสียงที่ได้รับทั้งประเทศ</span>
@@ -29,12 +30,15 @@
         :max="35000000"
         show-input
         :format-tooltip="numberWithCommas"
+        @change="changeParams"
       ></el-slider>
     </div>
   </div>
 </template>
 
 <script>
+import { EventBus } from "../event-bus.js";
+
 export default {
   props: [
     "name-initial",
@@ -64,6 +68,9 @@ export default {
     this.parties = this.loadAll();
   },
   methods: {
+    changeParams() {
+      EventBus.$emit("params-changed", this.$data, this.$vnode.key);
+    },
     numberWithCommas(x) {
       return x ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
     },

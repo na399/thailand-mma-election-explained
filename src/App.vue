@@ -6,13 +6,13 @@
         <el-input-number v-model="nParty" :min="2" :max="30" @change="updateNParty"></el-input-number>
       </div>
       <div>
-        <p>จำนวนเสียง</p>
-        <el-input-number v-model="nVote" :min="1" :max="60000000" @change="updateNVote"></el-input-number>
+        <p>จำนวนเสียงรวม</p>
+        <p>{{ nVote }}</p>
       </div>
 
       <party-params
         v-for="n in nParty"
-        :key="n"
+        :key="n-1"
         :ref="`party${n-1}`"
         :name-initial="partyName[n-1]"
         :color-initial="partyColor[n-1]"
@@ -45,10 +45,52 @@ export default {
     };
   },
   created() {
-    EventBus.$on("update-params", () => {
-      // TODO: Update the parent data
-      // TODO: Given a fixed nConstituentSeat, adjust the nConstituentSeat of the last party and, if needed, other parties
-      // TODO: Given variable nTotalVote, adjust the nTotalVote of the parent data
+    EventBus.$on("params-changed", (data, key) => {
+      // Update the parent data
+      const toUpdate = {
+        partyName: "name",
+        partyColor: "color",
+        partySide: "side",
+        partyNConstituentSeat: "nConstituentSeat",
+        partyNTotalVote: "nTotalVote"
+      };
+
+      for (const [param, value] of Object.entries(toUpdate)) {
+        this[param][key] = data[value];
+      }
+
+      // adjust the nTotalVote of the parent data
+      this.nVote = _.sum(this.partyNTotalVote);
+
+      // Given a fixed nConstituentSeat, adjust the nConstituentSeat of the last party and, if needed, other parties
+      let nSeatDiff = this.nConstituentSeat - _.sum(this.partyNConstituentSeat);
+
+      let partyNConstituentSeatFiltered = {};
+
+      for (const n in _.range(this.nParty)) {
+        partyNConstituentSeatFiltered[n] = this.partyNConstituentSeat[n];
+      }
+
+      // ignore the current slider being dragged
+      delete partyNConstituentSeatFiltered[key];
+
+      _.keys(partyNConstituentSeatFiltered)
+        .reverse()
+        .forEach(n => {
+          if (nSeatDiff + partyNConstituentSeatFiltered[n] >= 0) {
+            partyNConstituentSeatFiltered[n] =
+              nSeatDiff + partyNConstituentSeatFiltered[n];
+            nSeatDiff = 0;
+          } else if (nSeatDiff + partyNConstituentSeatFiltered[n] < 0) {
+            nSeatDiff = nSeatDiff + partyNConstituentSeatFiltered[n];
+            partyNConstituentSeatFiltered[n] = 0;
+          }
+        });
+
+      for (const [n, value] of Object.entries(partyNConstituentSeatFiltered)) {
+        this.partyNConstituentSeat.splice(n, 1, value);
+        this.$set(this.$refs[`party${n}`][0], "nConstituentSeat", value);
+      }
     });
   },
   methods: {
@@ -84,12 +126,8 @@ export default {
           nTotalVote: this.partyNTotalVote[this.nParty - 2]
         };
 
-        for (let property in toUpdate) {
-          this.$set(
-            this.$refs[`party${this.nParty - 2}`][0],
-            property,
-            toUpdate[property]
-          );
+        for (const [key, value] of Object.entries(toUpdate)) {
+          this.$set(this.$refs[`party${this.nParty - 2}`][0], key, value);
         }
       } else if (this.nParty < this.partyName.length) {
         // when nParty decreases, delete a party before 'Other' party.
@@ -113,7 +151,7 @@ export default {
           nTotalVote: this.partyNTotalVote[this.nParty - 1]
         };
 
-        for (let property in toUpdate) {
+        for (const property in toUpdate) {
           this.$set(
             this.$refs[`party${this.nParty - 1}`][0],
             property,
@@ -122,13 +160,10 @@ export default {
         }
       }
     },
-    updateNVote() {
-      // TODO: Adjust nTotalVote of the last party
-    },
     clickStart() {
       let parties = [];
 
-      for (let n in _.range(this.nParty)) {
+      for (const n in _.range(this.nParty)) {
         parties.push(
           new app.Party({
             name: this.partyName[n],
