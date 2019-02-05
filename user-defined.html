@@ -33,15 +33,14 @@
           ซึ่งมีความสลับซับซ้อน สร้างความงุนงงให้กับทุกคน
         </p>
         <p>
-          ต่อไปนี้จะไปการแสดงแบบจำลองสมมติของการเลือกตั้ง และการนับจำนวนส.ส.
-          แบบต่าง ๆ
-          เพื่อเราจะได้เข้าใจระบบเลือกตั้งแบบจัดสรรปันส่วนผสมนี้ดียิ่งขึ้น
+          ต่อไปนี้คุณสามารถลองปรับจำนวนส.ส.แบบแบ่งเขตเลือกตั้งและจำนวนเสียงที่แต่ละพรรคได้รับ
+          เพื่อคำนวณว่าแต่ละพรรคจะได้รับส.ส.ทั้งหมดเท่าใดตามระบบเลือกตั้งแบบจัดสรรปันส่วนผสม
         </p>
         <br />
       </div>
-      <div id="text-intro" class="text"></div>
 
-      <!-- <div id="result-constituents" class="plot"></div> -->
+      <div id="app"></div>
+
       <div id="text-constituent-seats" class="text"></div>
       <div id="parliament-seats-constituent"></div>
       <div id="table-constituent" class="table"></div>
@@ -101,6 +100,74 @@
       <a href="index.html">Return to Index</a>
     </div>
 
-    <script src="src/user-defined.js"></script>
+    <script src="src/vue-main.js"></script>
+    <script src="src/app.js"></script>
+    <script>
+      const parties = [
+        new app.Party({
+          name: 'เพื่อไทย',
+          color: 'red',
+          nTotalVote: 14125219,
+          nConstituentSeat: 204
+        }),
+        new app.Party({
+          name: 'ประชาธิปัตย์',
+          color: 'skyblue',
+          nTotalVote: 10095250,
+          nConstituentSeat: 115,
+          side: 'ฝ่ายค้าน'
+        }),
+        new app.Party({
+          name: 'ภูมิใจไทย',
+          color: 'green',
+          nTotalVote: 3485153,
+          nConstituentSeat: 29,
+          side: 'ฝ่ายค้าน'
+        }),
+        new app.Party({
+          name: 'ชาติไทยพัฒนา',
+          color: 'orange',
+          nTotalVote: 1515320,
+          nConstituentSeat: 15
+        }),
+        new app.Party({
+          name: 'ชาติพัฒนาเพื่อแผ่นดิน',
+          color: 'yellow',
+          nTotalVote: 1242084,
+          nConstituentSeat: 5
+        }),
+        new app.Party({
+          name: 'มาตุภูมิ',
+          color: 'pink',
+          nTotalVote: 369526,
+          nConstituentSeat: 1
+        }),
+        new app.Party({
+          name: 'พลังชล',
+          color: 'blue',
+          nTotalVote: 246879,
+          nConstituentSeat: 6
+        }),
+        new app.Party({
+          name: 'รักษ์สันติ',
+          color: 'lime',
+          nTotalVote: 138758,
+          nConstituentSeat: 0
+        }),
+        new app.Party({
+          name: 'อื่นๆ',
+          color: 'grey',
+          nTotalVote: 278175,
+          nConstituentSeat: 0
+        })
+      ];
+
+      const config = new app.ElectionConfig({
+        nConstituentSeat: 375,
+        nParty: parties.length
+      });
+
+      app.runApp(config, { onlyAllocation: true, side: true }, parties);
+    </script>
   </body>
 </html>

@@ -3,7 +3,7 @@ import { ElectionConfig, Party } from './main';
 import * as table from './table';
 import seedrandom from 'seedrandom';
 
-function runApp(config, option) {
+function runApp(config, option, parties) {
   seedrandom(option.randomSeed, { global: true });
 
   /*******************************
