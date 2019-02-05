@@ -77515,33 +77515,14 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 var _default = {
   name: "UserDefinedParams",
   data: function data() {
@@ -77557,9 +77538,63 @@ var _default = {
     };
   },
   created: function created() {
-    _eventBus.EventBus.$on("update-params", function () {// TODO: Update the parent data
-      // TODO: Given a fixed nConstituentSeat, adjust the nConstituentSeat of the last party and, if needed, other parties
-      // TODO: Given variable nTotalVote, adjust the nTotalVote of the parent data
+    var _this = this;
+
+    _eventBus.EventBus.$on("params-changed", function (data, key) {
+      // Update the parent data
+      var toUpdate = {
+        partyName: "name",
+        partyColor: "color",
+        partySide: "side",
+        partyNConstituentSeat: "nConstituentSeat",
+        partyNTotalVote: "nTotalVote"
+      };
+
+      var _arr = Object.entries(toUpdate);
+
+      for (var _i = 0; _i < _arr.length; _i++) {
+        var _arr$_i = _slicedToArray(_arr[_i], 2),
+            param = _arr$_i[0],
+            value = _arr$_i[1];
+
+        _this[param][key] = data[value];
+      } // adjust the nTotalVote of the parent data
+
+
+      _this.nVote = _lodash.default.sum(_this.partyNTotalVote); // Given a fixed nConstituentSeat, adjust the nConstituentSeat of the last party and, if needed, other parties
+
+      var nSeatDiff = _this.nConstituentSeat - _lodash.default.sum(_this.partyNConstituentSeat);
+
+      var partyNConstituentSeatFiltered = {};
+
+      for (var n in _lodash.default.range(_this.nParty)) {
+        partyNConstituentSeatFiltered[n] = _this.partyNConstituentSeat[n];
+      } // ignore the current slider being dragged
+
+
+      delete partyNConstituentSeatFiltered[key];
+
+      _lodash.default.keys(partyNConstituentSeatFiltered).reverse().forEach(function (n) {
+        if (nSeatDiff + partyNConstituentSeatFiltered[n] >= 0) {
+          partyNConstituentSeatFiltered[n] = nSeatDiff + partyNConstituentSeatFiltered[n];
+          nSeatDiff = 0;
+        } else if (nSeatDiff + partyNConstituentSeatFiltered[n] < 0) {
+          nSeatDiff = nSeatDiff + partyNConstituentSeatFiltered[n];
+          partyNConstituentSeatFiltered[n] = 0;
+        }
+      });
+
+      var _arr2 = Object.entries(partyNConstituentSeatFiltered);
+
+      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+        var _arr2$_i = _slicedToArray(_arr2[_i2], 2),
+            _n2 = _arr2$_i[0],
+            value = _arr2$_i[1];
+
+        _this.partyNConstituentSeat.splice(_n2, 1, value);
+
+        _this.$set(_this.$refs["party".concat(_n2)][0], "nConstituentSeat", value);
+      }
     });
   },
   methods: {
@@ -77582,8 +77617,14 @@ var _default = {
           nTotalVote: this.partyNTotalVote[this.nParty - 2]
         };
 
-        for (var property in toUpdate) {
-          this.$set(this.$refs["party".concat(this.nParty - 2)][0], property, toUpdate[property]);
+        var _arr3 = Object.entries(toUpdate);
+
+        for (var _i3 = 0; _i3 < _arr3.length; _i3++) {
+          var _arr3$_i = _slicedToArray(_arr3[_i3], 2),
+              key = _arr3$_i[0],
+              value = _arr3$_i[1];
+
+          this.$set(this.$refs["party".concat(this.nParty - 2)][0], key, value);
         }
       } else if (this.nParty < this.partyName.length) {
         // when nParty decreases, delete a party before 'Other' party.
@@ -77601,12 +77642,10 @@ var _default = {
           nTotalVote: this.partyNTotalVote[this.nParty - 1]
         };
 
-        for (var _property in _toUpdate) {
-          this.$set(this.$refs["party".concat(this.nParty - 1)][0], _property, _toUpdate[_property]);
+        for (var property in _toUpdate) {
+          this.$set(this.$refs["party".concat(this.nParty - 1)][0], property, _toUpdate[property]);
         }
       }
-    },
-    updateNVote: function updateNVote() {// TODO: Adjust nTotalVote of the last party
     },
     clickStart: function clickStart() {
       var parties = [];
@@ -77675,29 +77714,15 @@ exports.default = _default;
           1
         ),
         _vm._v(" "),
-        _c(
-          "div",
-          [
-            _c("p", [_vm._v("จำนวนเสียง")]),
-            _vm._v(" "),
-            _c("el-input-number", {
-              attrs: { min: 1, max: 60000000 },
-              on: { change: _vm.updateNVote },
-              model: {
-                value: _vm.nVote,
-                callback: function($$v) {
-                  _vm.nVote = $$v
-                },
-                expression: "nVote"
-              }
-            })
-          ],
-          1
-        ),
+        _c("div", [
+          _c("p", [_vm._v("จำนวนเสียงรวม")]),
+          _vm._v(" "),
+          _c("p", [_vm._v(_vm._s(_vm.nVote))])
+        ]),
         _vm._v(" "),
         _vm._l(_vm.nParty, function(n) {
           return _c("party-params", {
-            key: n,
+            key: n - 1,
             ref: "party" + (n - 1),
             refInFor: true,
             attrs: {
@@ -128963,6 +128988,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _eventBus = require("../event-bus.js");
+
+//
+//
 //
 //
 //
@@ -129015,6 +129045,9 @@ var _default = {
     this.parties = this.loadAll();
   },
   methods: {
+    changeParams: function changeParams() {
+      _eventBus.EventBus.$emit("params-changed", this.$data, this.$vnode.key);
+    },
     numberWithCommas: function numberWithCommas(x) {
       return x ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
     },
@@ -129274,7 +129307,7 @@ exports.default = _default;
         _c("el-autocomplete", {
           staticClass: "inline-input",
           attrs: { "fetch-suggestions": _vm.querySearch, placeholder: "ชื่อ" },
-          on: { select: _vm.handleSelect },
+          on: { select: _vm.handleSelect, change: _vm.changeParams },
           model: {
             value: _vm.name,
             callback: function($$v) {
@@ -129286,6 +129319,7 @@ exports.default = _default;
         _vm._v(" "),
         _c("el-color-picker", {
           attrs: { predefine: _vm.predefinedColors },
+          on: { change: _vm.changeParams },
           model: {
             value: _vm.color,
             callback: function($$v) {
@@ -129299,6 +129333,7 @@ exports.default = _default;
           "el-radio-group",
           {
             attrs: { size: "small" },
+            on: { change: _vm.changeParams },
             model: {
               value: _vm.side,
               callback: function($$v) {
@@ -129325,6 +129360,7 @@ exports.default = _default;
         _vm._v(" "),
         _c("el-slider", {
           attrs: { max: 350, "show-input": "" },
+          on: { change: _vm.changeParams },
           model: {
             value: _vm.nConstituentSeat,
             callback: function($$v) {
@@ -129348,6 +129384,7 @@ exports.default = _default;
             "show-input": "",
             "format-tooltip": _vm.numberWithCommas
           },
+          on: { change: _vm.changeParams },
           model: {
             value: _vm.nTotalVote,
             callback: function($$v) {
@@ -129401,7 +129438,7 @@ render._withStripped = true
       
       }
     })();
-},{"_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js","vue-hot-reload-api":"node_modules/vue-hot-reload-api/dist/index.js","vue":"node_modules/vue/dist/vue.runtime.esm.js"}],"src/vue-main.js":[function(require,module,exports) {
+},{"../event-bus.js":"src/event-bus.js","_css_loader":"node_modules/parcel-bundler/src/builtins/css-loader.js","vue-hot-reload-api":"node_modules/vue-hot-reload-api/dist/index.js","vue":"node_modules/vue/dist/vue.runtime.esm.js"}],"src/vue-main.js":[function(require,module,exports) {
 "use strict";
 
 var _vue = _interopRequireDefault(require("vue"));
@@ -129459,7 +129496,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "54529" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49393" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
