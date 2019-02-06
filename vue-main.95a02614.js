@@ -1331,4 +1331,4 @@ module.exports=function(e){var t={};function i(n){if(t[n])return t[n].exports;va
 },{"../event-bus.js":"HCDf"}],"CoNJ":[function(require,module,exports) {
 "use strict";var e=l(require("vue")),u=l(require("./App.vue")),r=l(require("element-ui")),t=l(require("element-ui/lib/locale/lang/th"));require("element-ui/lib/theme-chalk/index.css");var a=l(require("./components/PartyParams.vue"));function l(e){return e&&e.__esModule?e:{default:e}}e.default.use(r.default,{locale:t.default}),e.default.component("PartyParams",a.default);var n=new e.default({el:"#app",render:function(e){return e(u.default)}});
 },{"vue":"4673","./App.vue":"6plK","element-ui":"kEDL","element-ui/lib/locale/lang/th":"dso2","element-ui/lib/theme-chalk/index.css":"F5xT","./components/PartyParams.vue":"JfKj"}]},{},["CoNJ"], "app")
-//# sourceMappingURL=/thailand-mma-election-explained/vue-main.b55821ef.map
+//# sourceMappingURL=/dist/vue-main.b55821ef.map

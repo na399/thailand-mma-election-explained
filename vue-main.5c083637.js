@@ -55503,7 +55503,13 @@ function runAllocation(electionConfig, voteResult) {
   }); // allocate party list seats
 
   parties.forEach(function (party) {
-    party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
+    if (party.nAllocatedSeat < party.nConstituentSeat) {
+      party.nPartyListSeat = 0;
+      party.nAllocatedSeat = party.nConstituentSeat;
+      party.nRemainderVote = 0;
+    } else {
+      party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
+    }
   });
   parties.forEach(function (party) {
     if (party.bPartyListNeeded && party.nAllocatedSeat > 0) {
@@ -77116,6 +77122,8 @@ var table = _interopRequireWildcard(require("./table"));
 
 var _seedrandom = _interopRequireDefault(require("seedrandom"));
 
+var d3 = _interopRequireWildcard(require("d3"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
@@ -77147,6 +77155,8 @@ function runApp(config, option, parties) {
   } else {
     if (!option.onlyAllocation) {
       main.addIntroText(config, '#text-intro', '');
+    } else {
+      d3.select('#text-intro').html('');
     }
   }
 
@@ -77154,6 +77164,8 @@ function runApp(config, option, parties) {
   main.addInitialAllocationText(result, config, '#text-initial-allocation');
   main.addInitialAllocatedText(result, config, '#text-initial-allocated-seats');
   main.addFinalAllocationText(result, config, '#text-final-allocation');
+  d3.select('#text-party-list').html("\n    <h4>\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D</h4>\n    <p>\n      \u0E08\u0E32\u0E01\u0E01\u0E23\u0E32\u0E1F\u0E02\u0E49\u0E32\u0E07\u0E1A\u0E19 \u0E41\u0E1A\u0E48\u0E07\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E1E\u0E36\u0E07\u0E21\u0E35 \u25A0 \u0E41\u0E25\u0E30 \u0E2A.\u0E2A.\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D \u25C6\n      (\u0E2A\u0E48\u0E27\u0E19\u0E15\u0E48\u0E32\u0E07\u0E23\u0E30\u0E2B\u0E27\u0E48\u0E32\u0E07\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E1E\u0E36\u0E07\u0E21\u0E35 \u25A0 - \u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 \u25CF)\n      \u0E43\u0E2B\u0E49\u0E41\u0E15\u0E48\u0E25\u0E30\u0E1E\u0E23\u0E23\u0E04\u0E44\u0E14\u0E49\u0E14\u0E31\u0E07\u0E15\u0E48\u0E2D\u0E44\u0E1B\u0E19\u0E35\u0E49\n    </p>");
+  d3.select('#text-conclusion').html("\n    <h3>\u0E2A\u0E23\u0E38\u0E1B\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14</h3>");
   /*******************************
   Tables
   ********************************/
@@ -77164,11 +77176,17 @@ function runApp(config, option, parties) {
   table.addTable(result, '#table-conclusion', 'conclusion');
 
   if (option.side) {
+    d3.select('#text-sides').html("\n      <h3>\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19</h3>\n      <p>\n        \u0E1E\u0E23\u0E23\u0E04\u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E32\u0E23\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E02\u0E2D\u0E07\u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48\u0E21\u0E35\u0E08\u0E33\u0E19\u0E27\u0E19\u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E2A.\u0E2A.\u0E43\u0E19\u0E2A\u0E20\u0E32\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E44\u0E14\u0E49\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07\n        \u0E2B\u0E23\u0E37\u0E2D 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B \u0E21\u0E35\u0E42\u0E2D\u0E01\u0E32\u0E2A\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E40\u0E1B\u0E47\u0E19\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\n      </p>\n      <p>\n        \u0E41\u0E15\u0E48\u0E01\u0E32\u0E23\u0E44\u0E14\u0E49\u0E21\u0E32\u0E0B\u0E36\u0E48\u0E07\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E19\u0E31\u0E49\u0E19\u0E21\u0E32\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E25\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E2D\u0E07\u0E17\u0E31\u0E49\u0E07\u0E23\u0E31\u0E10\u0E2A\u0E20\u0E32\n        (\u0E2A.\u0E2A.) \u0E08\u0E33\u0E19\u0E27\u0E19 500 \u0E40\u0E2A\u0E35\u0E22\u0E07 \u0E41\u0E25\u0E30\u0E27\u0E38\u0E12\u0E34\u0E2A\u0E20\u0E32 (\u0E2A.\u0E27.) \u0E2D\u0E35\u0E01\u0E08\u0E33\u0E19\u0E27\u0E19 250 \u0E40\u0E2A\u0E35\u0E22\u0E07\n        \u0E14\u0E31\u0E49\u0E07\u0E19\u0E31\u0E49\u0E19\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E43\u0E0A\u0E49\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E48\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07 \u0E2B\u0E23\u0E37\u0E2D 376 \u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B\n      </p>\n      <p>\n        \u0E14\u0E49\u0E27\u0E22\u0E40\u0E2B\u0E15\u0E38\u0E19\u0E35\u0E49 \u0E2B\u0E32\u0E01\u0E40\u0E01\u0E23\u0E07\u0E27\u0E48\u0E32\n        \u0E2A.\u0E27.\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14\u0E08\u0E30\u0E2D\u0E2D\u0E01\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E44\u0E21\u0E48\u0E15\u0E23\u0E07\u0E01\u0E31\u0E1A\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E43\u0E19\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\n        \u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2A.\u0E2A.\u0E16\u0E36\u0E07 376 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \u0E41\u0E17\u0E19\u0E17\u0E35\u0E48\u0E08\u0E30\u0E40\u0E1B\u0E47\u0E19 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\n        \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E43\u0E2B\u0E49\u0E41\u0E19\u0E48\u0E43\u0E08\u0E27\u0E48\u0E32\u0E08\u0E30\u0E44\u0E14\u0E49\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E17\u0E35\u0E48\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E40\u0E2D\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\n        \u0E21\u0E32\u0E14\u0E33\u0E23\u0E07\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\n      </p>\n      <p>\n        \u0E2B\u0E32\u0E01\u0E04\u0E38\u0E13\u0E40\u0E1B\u0E34\u0E14\u0E40\u0E27\u0E47\u0E1A\u0E44\u0E0B\u0E15\u0E4C\u0E19\u0E35\u0E49\u0E1A\u0E19\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\n        \u0E04\u0E38\u0E13\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E25\u0E2D\u0E07\u0E08\u0E31\u0E14\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19\u0E43\u0E2B\u0E21\u0E48\u0E44\u0E14\u0E49\u0E43\u0E19\u0E15\u0E32\u0E23\u0E32\u0E07\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\n        \u0E42\u0E14\u0E22\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E48\u0E2D\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30\u0E1E\u0E23\u0E23\u0E04 \u0E44\u0E1B\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E01\u0E25\u0E38\u0E48\u0E21\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E2B\u0E23\u0E37\u0E2D\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19 (\u0E02\u0E2D\u0E2D\u0E20\u0E31\u0E22\u0E04\u0E23\u0E31\u0E1A\n        \u0E01\u0E33\u0E25\u0E31\u0E07\u0E1E\u0E31\u0E12\u0E19\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E19\u0E35\u0E49\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E21\u0E37\u0E2D\u0E16\u0E37\u0E2D\u0E41\u0E25\u0E30\u0E08\u0E2D\u0E2A\u0E31\u0E21\u0E1C\u0E31\u0E2A)\n      </p>");
     table.addTable(result, '#table-sides', 'sides');
+  } else {
+    d3.select('#text-sides').html('');
+    d3.select('#table-sides').html('');
   }
 
   if (option.all) {
     table.addTable(result, '#table-all', 'all');
+  } else {
+    d3.select('#table-all').html('');
   }
   /*******************************
   Plots
@@ -77176,7 +77194,10 @@ function runApp(config, option, parties) {
 
 
   if (!option.onlyAllocation) {
+    d3.select('#result-constituents').html('');
     main.drawResultConstituents(result, config, '#result-constituents');
+  } else {
+    d3.select('#result-constituents').html('');
   }
 
   main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');
@@ -77185,7 +77206,7 @@ function runApp(config, option, parties) {
   main.drawFinalAllocation(result, config, '#final-allocation');
   main.drawWaffle(result, config, '#parliament-seats-all', 'all');
 }
-},{"./main":"src/main.js","./table":"src/table.js","seedrandom":"node_modules/seedrandom/index.js"}],"node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+},{"./main":"src/main.js","./table":"src/table.js","seedrandom":"node_modules/seedrandom/index.js","d3":"node_modules/d3/index.js"}],"node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
 var bundleURL = null;
 
 function getBundleURLCached() {
@@ -77534,7 +77555,8 @@ var _default = {
       partyColor: ["hsl(0, 90%, 60%)", "hsl(0, 0%, 60%)"],
       partySide: ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"],
       partyNConstituentSeat: [175, 175],
-      partyNTotalVote: [17500000, 17500000]
+      partyNTotalVote: [17500000, 17500000],
+      nSimulationRun: 0
     };
   },
   created: function created() {
@@ -77647,7 +77669,7 @@ var _default = {
         }
       }
     },
-    clickStart: function clickStart() {
+    runUserDefined: function runUserDefined() {
       var parties = [];
 
       for (var n in _lodash.default.range(this.nParty)) {
@@ -77674,6 +77696,44 @@ var _default = {
         message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
         duration: 2000
       });
+    },
+    runStarter: function runStarter() {
+      var config = new app.ElectionConfig({
+        nTotalSeat: 5,
+        nConstituentSeat: 3,
+        nVoter: 500000,
+        pVoterTurnout: 0.7,
+        nParty: 4
+      });
+      var randomSeed = "starter";
+      app.runApp(config, {
+        randomSeed: this.nSimulationRun += 1,
+        starter: true
+      });
+      this.$notify({
+        title: "การเลือกตั้งสำเร็จ!",
+        type: "success",
+        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
+        duration: 2000
+      });
+    },
+    runFull: function runFull() {
+      var config = new app.ElectionConfig({
+        nParty: 8
+      });
+      app.runApp(config, {
+        randomSeed: this.nSimulationRun += 1,
+        side: true
+      });
+      this.$notify({
+        title: "การเลือกตั้งสำเร็จ!",
+        type: "success",
+        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
+        duration: 2000
+      });
+    },
+    numberWithCommas: function numberWithCommas(x) {
+      return x ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
     }
   }
 };
@@ -77690,58 +77750,104 @@ exports.default = _default;
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "app" } }, [
-    _c(
-      "div",
-      [
-        _c(
-          "div",
-          [
-            _c("p", [_vm._v("จำนวนพรรค")]),
-            _vm._v(" "),
-            _c("el-input-number", {
-              attrs: { min: 2, max: 30 },
-              on: { change: _vm.updateNParty },
-              model: {
-                value: _vm.nParty,
-                callback: function($$v) {
-                  _vm.nParty = $$v
-                },
-                expression: "nParty"
-              }
-            })
-          ],
-          1
-        ),
-        _vm._v(" "),
-        _c("div", [
-          _c("p", [_vm._v("จำนวนเสียงรวม")]),
+  return _c(
+    "div",
+    { attrs: { id: "app" } },
+    [
+      _c(
+        "el-tabs",
+        { attrs: { type: "border-card" } },
+        [
+          _c(
+            "el-tab-pane",
+            { attrs: { label: "แบบจำลอง (ย่อ)" } },
+            [
+              _c(
+                "el-button",
+                { attrs: { type: "primary" }, on: { click: _vm.runStarter } },
+                [_vm._v("จำลองผลการเลือกตั้ง แบบย่อ")]
+              )
+            ],
+            1
+          ),
           _vm._v(" "),
-          _c("p", [_vm._v(_vm._s(_vm.nVote))])
-        ]),
-        _vm._v(" "),
-        _vm._l(_vm.nParty, function(n) {
-          return _c("party-params", {
-            key: n - 1,
-            ref: "party" + (n - 1),
-            refInFor: true,
-            attrs: {
-              "name-initial": _vm.partyName[n - 1],
-              "color-initial": _vm.partyColor[n - 1],
-              "side-initial": _vm.partySide[n - 1],
-              "n-constituent-seat-initial": _vm.partyNConstituentSeat[n - 1],
-              "n-total-vote-initial": _vm.partyNTotalVote[n - 1]
-            }
-          })
-        }),
-        _vm._v(" "),
-        _c("el-button", { on: { click: _vm.clickStart } }, [
-          _vm._v("ส่งผลการนับคะแนนใหม่")
-        ])
-      ],
-      2
-    )
-  ])
+          _c(
+            "el-tab-pane",
+            { attrs: { label: "แบบจำลอง (เต็ม)" } },
+            [
+              _c(
+                "el-button",
+                { attrs: { type: "primary" }, on: { click: _vm.runFull } },
+                [_vm._v("จำลองผลการเลือกตั้ง แบบเต็ม")]
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c("el-tab-pane", { attrs: { label: "กำหนดเอง" } }, [
+            _c(
+              "div",
+              [
+                _c(
+                  "div",
+                  [
+                    _c("p", [_vm._v("จำนวนพรรค")]),
+                    _vm._v(" "),
+                    _c("el-input-number", {
+                      attrs: { min: 2, max: 30 },
+                      on: { change: _vm.updateNParty },
+                      model: {
+                        value: _vm.nParty,
+                        callback: function($$v) {
+                          _vm.nParty = $$v
+                        },
+                        expression: "nParty"
+                      }
+                    })
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c("div", [
+                  _c("p", [_vm._v("จำนวนเสียงรวม")]),
+                  _vm._v(" "),
+                  _c("p", [_vm._v(_vm._s(_vm.numberWithCommas(_vm.nVote)))])
+                ]),
+                _vm._v(" "),
+                _vm._l(_vm.nParty, function(n) {
+                  return _c("party-params", {
+                    key: n - 1,
+                    ref: "party" + (n - 1),
+                    refInFor: true,
+                    attrs: {
+                      "name-initial": _vm.partyName[n - 1],
+                      "color-initial": _vm.partyColor[n - 1],
+                      "side-initial": _vm.partySide[n - 1],
+                      "n-constituent-seat-initial":
+                        _vm.partyNConstituentSeat[n - 1],
+                      "n-total-vote-initial": _vm.partyNTotalVote[n - 1]
+                    }
+                  })
+                }),
+                _vm._v(" "),
+                _c(
+                  "el-button",
+                  {
+                    attrs: { type: "primary" },
+                    on: { click: _vm.runUserDefined }
+                  },
+                  [_vm._v("ส่งผลการนับคะแนนใหม่")]
+                )
+              ],
+              2
+            )
+          ])
+        ],
+        1
+      )
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -129496,7 +129602,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49393" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62041" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
