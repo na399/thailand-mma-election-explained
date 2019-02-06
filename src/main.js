@@ -355,7 +355,13 @@ function runAllocation(electionConfig, voteResult) {
 
   // allocate party list seats
   parties.forEach(party => {
-    party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
+    if (party.nAllocatedSeat < party.nConstituentSeat) {
+      party.nPartyListSeat = 0;
+      party.nAllocatedSeat = party.nConstituentSeat;
+      party.nRemainderVote = 0;
+    } else {
+      party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
+    }
   });
 
   parties.forEach(party => {
@@ -376,6 +382,7 @@ function runAllocation(electionConfig, voteResult) {
     ['nRemainderVote', 'nVotePerAllocatedSeat'],
     ['desc', 'desc']
   );
+  
   let nPartiesGettingPartyList = _.filter(parties, 'bPartyListNeeded').length;
 
   for (let i = 0; i < nUnallocatedSeat; i++) {
@@ -738,7 +745,9 @@ function getAllocationConfig(electionResult, electionConfig, stage) {
       : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) *
         100;
 
-  const maxNameLength = _.max(electionResult.parties.map(party => party.name.length))
+  const maxNameLength = _.max(
+    electionResult.parties.map(party => party.name.length)
+  );
 
   const margin = { top: 20, right: 20, bottom: 40, left: 8 * maxNameLength };
 
@@ -799,8 +808,8 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
   let { xScale, yScale, xMax } = scales;
 
   d3.select(selector)
-  .selectAll('*')
-  .remove();
+    .selectAll('*')
+    .remove();
 
   const svg = d3
     .select(selector)
