@@ -1,27 +1,37 @@
 <template>
   <div id="app">
-    <div>
-      <div>
-        <p>จำนวนพรรค</p>
-        <el-input-number v-model="nParty" :min="2" :max="30" @change="updateNParty"></el-input-number>
-      </div>
-      <div>
-        <p>จำนวนเสียงรวม</p>
-        <p>{{ nVote }}</p>
-      </div>
+    <el-tabs type="border-card">
+      <el-tab-pane label="แบบจำลอง (ย่อ)">
+        <el-button type="primary" @click="runStarter">จำลองผลการเลือกตั้ง แบบย่อ</el-button>
+      </el-tab-pane>
+      <el-tab-pane label="แบบจำลอง (เต็ม)">
+        <el-button type="primary" @click="runFull">จำลองผลการเลือกตั้ง แบบเต็ม</el-button>
+      </el-tab-pane>
+      <el-tab-pane label="กำหนดเอง">
+        <div>
+          <div>
+            <p>จำนวนพรรค</p>
+            <el-input-number v-model="nParty" :min="2" :max="30" @change="updateNParty"></el-input-number>
+          </div>
+          <div>
+            <p>จำนวนเสียงรวม</p>
+            <p>{{ numberWithCommas(nVote) }}</p>
+          </div>
 
-      <party-params
-        v-for="n in nParty"
-        :key="n-1"
-        :ref="`party${n-1}`"
-        :name-initial="partyName[n-1]"
-        :color-initial="partyColor[n-1]"
-        :side-initial="partySide[n-1]"
-        :n-constituent-seat-initial="partyNConstituentSeat[n-1]"
-        :n-total-vote-initial="partyNTotalVote[n-1]"
-      ></party-params>
-      <el-button @click="clickStart">ส่งผลการนับคะแนนใหม่</el-button>
-    </div>
+          <party-params
+            v-for="n in nParty"
+            :key="n-1"
+            :ref="`party${n-1}`"
+            :name-initial="partyName[n-1]"
+            :color-initial="partyColor[n-1]"
+            :side-initial="partySide[n-1]"
+            :n-constituent-seat-initial="partyNConstituentSeat[n-1]"
+            :n-total-vote-initial="partyNTotalVote[n-1]"
+          ></party-params>
+          <el-button type="primary" @click="runUserDefined">ส่งผลการนับคะแนนใหม่</el-button>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
@@ -41,7 +51,8 @@ export default {
       partyColor: ["hsl(0, 90%, 60%)", "hsl(0, 0%, 60%)"],
       partySide: ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"],
       partyNConstituentSeat: [175, 175],
-      partyNTotalVote: [17500000, 17500000]
+      partyNTotalVote: [17500000, 17500000],
+      nSimulationRun: 0
     };
   },
   created() {
@@ -160,7 +171,7 @@ export default {
         }
       }
     },
-    clickStart() {
+    runUserDefined() {
       let parties = [];
 
       for (const n in _.range(this.nParty)) {
@@ -188,6 +199,49 @@ export default {
         message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
         duration: 2000
       });
+    },
+    runStarter() {
+      const config = new app.ElectionConfig({
+        nTotalSeat: 5,
+        nConstituentSeat: 3,
+        nVoter: 500000,
+        pVoterTurnout: 0.7,
+        nParty: 4
+      });
+
+      let randomSeed = "starter";
+
+      app.runApp(config, {
+        randomSeed: (this.nSimulationRun += 1),
+        starter: true
+      });
+
+      this.$notify({
+        title: "การเลือกตั้งสำเร็จ!",
+        type: "success",
+        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
+        duration: 2000
+      });
+    },
+    runFull() {
+      const config = new app.ElectionConfig({
+        nParty: 8
+      });
+
+      app.runApp(config, {
+        randomSeed: (this.nSimulationRun += 1),
+        side: true
+      });
+
+      this.$notify({
+        title: "การเลือกตั้งสำเร็จ!",
+        type: "success",
+        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
+        duration: 2000
+      });
+    },
+    numberWithCommas(x) {
+      return x ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
     }
   }
 };

@@ -11,7 +11,6 @@
   <body>
     <div class="container">
       <h1>Thailand MMA Election Explained -- Work In Progress</h1>
-      <h2>Starter simulation</h2>
 
       <div class="text">
         <p>
@@ -34,76 +33,43 @@
           ซึ่งมีความสลับซับซ้อน สร้างความงุนงงให้กับทุกคน
         </p>
         <p>
-          ต่อไปนี้จะไปการแสดงแบบจำลองสมมติของการเลือกตั้ง และการนับจำนวนส.ส.
-          แบบต่าง ๆ
-          เพื่อเราจะได้เข้าใจระบบเลือกตั้งแบบจัดสรรปันส่วนผสมนี้ดียิ่งขึ้น
+          ต่อไปนี้คุณสามารถจำลองผลการเลือกตั้ง
+          หรือลองปรับจำนวนส.ส.แบบแบ่งเขตเลือกตั้งและจำนวนเสียงที่แต่ละพรรคได้รับ
+          เพื่อคำนวณว่าแต่ละพรรคจะได้รับส.ส.ทั้งหมดเท่าใดตามระบบเลือกตั้งแบบจัดสรรปันส่วนผสม
         </p>
         <br />
-        <button onclick="app.runApp(config, randomSeed+=1, { starter: true })">
-          สุ่มผลการเลือกตั้งใหม่
-        </button>
       </div>
-      <div id="text-intro" class="text"></div>
 
+      <div id="app"></div>
+
+      <div id="text-intro" class="text"></div>
       <div id="result-constituents" class="plot"></div>
+
       <div id="text-constituent-seats" class="text"></div>
       <div id="parliament-seats-constituent"></div>
       <div id="table-constituent" class="table"></div>
 
       <div id="text-initial-allocation" class="text"></div>
       <div id="initial-allocation" class="plot"></div>
-      <div class="text">
-        <h4>จำนวนส.ส.พึงมี</h4>
-        <p>จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมีให้แต่ละพรรคดังต่อไปนี้</p>
-      </div>
+      <div id="text-initial-allocated-seats" class="text"></div>
       <div id="table-initial-allocation" class="table"></div>
 
       <div id="text-final-allocation" class="text"></div>
       <div id="final-allocation" class="plot"></div>
-      <div class="text">
-        <h4>จำนวนส.ส.บัญชีรายชื่อ</h4>
-        <p>
-          จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมี ■ และ ส.ส.บัญชีรายชื่อ ◆
-          (ส่วนต่างระหว่างจำนวนส.ส.พึงมี ■ - จำนวนส.ส.แบ่งเขต ●)
-          ให้แต่ละพรรคได้ดังต่อไปนี้
-        </p>
-      </div>
+      <div id="text-party-list" class="text"></div>
       <div id="parliament-seats-party-list"></div>
       <div id="table-final-allocation" class="table"></div>
 
-      <div class="text"><h3>สรุปจำนวนส.ส.ทั้งหมด</h3></div>
+      <div id="text-conclusion" class="text"></div>
       <div id="parliament-seats-all"></div>
       <div id="table-conclusion" class="table"></div>
 
+      <div id="text-sides" class="text"></div>
+      <div id="table-sides" class="table"></div>
+
+      <div id="table-all" class="table"></div>
+
       <hr />
-      <h3>To-do list</h3>
-      <ol>
-        <li style="text-decoration: line-through;">Narrative</li>
-        <li style="text-decoration: line-through;">
-          Fix glitches in full election
-        </li>
-        <li style="text-decoration: line-through;">
-          Add parliament compositions as waffle charts
-        </li>
-        <li>Annotations</li>
-        <li>Legend</li>
-        <li>Aesthetic: readability, major details</li>
-        <li>Interactive: Hover on chart items</li>
-        <li>Put on Obseravable</li>
-        <li>
-          Interactive: User-defined parameters e.g. number of parties, chances
-          of winning of parties
-        </li>
-        <li>Simulate the party splitting strategy</li>
-        <li>Review by friends</li>
-        <li>Review by experts</li>
-        <li>Aesthetic: Final touch</li>
-        <li>Release</li>
-        <li>Add English translation</li>
-      </ol>
-      <hr />
-      <a href="full-election.html">Full election simulation</a>
-      <a href="user-defined.html">User defined election</a>
       <p>
         Built with D3.js, Vue.js and Parcel.js | Code available on
         <a href="https://github.com/na399/thailand-mma-election-explained"
@@ -112,19 +78,7 @@
       </p>
     </div>
 
-    <script src="src/app.js"></script>
-    <script>
-      const config = new app.ElectionConfig({
-        nTotalSeat: 5,
-        nConstituentSeat: 3,
-        nVoter: 500000,
-        pVoterTurnout: 0.7,
-        nParty: 4
-      });
-
-      let randomSeed = 'starter';
-
-      app.runApp(config, { randomSeed: randomSeed, starter: true });
-    </script>
+    <script src="src/vue-main.js"></script>
+    <!-- <script src="src/app.js"></script> -->
   </body>
 </html>
