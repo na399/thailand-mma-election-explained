@@ -382,7 +382,7 @@ function runAllocation(electionConfig, voteResult) {
     ['nRemainderVote', 'nVotePerAllocatedSeat'],
     ['desc', 'desc']
   );
-  
+
   let nPartiesGettingPartyList = _.filter(parties, 'bPartyListNeeded').length;
 
   for (let i = 0; i < nUnallocatedSeat; i++) {
@@ -1084,7 +1084,8 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
     ${electionResult.nPartyWithoutPartyListNeeded} 
     พรรคนี้ได้รับส.ส.ตามที่ได้มาจากแบบแบ่งเขตเลือกตั้ง ● แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อ ◆ ได้อีก</p>
     <p>ดังนั้นการจัดสรรส.ส.พึงมีและส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
-      electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น</p>`;
+      electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น
+      โดยใช้เสียง ${numberWithCommas(electionResult.nVotePerRemainingSeat)} ต่อ 1 ที่นั่ง</p>`;
   } else {
     text = `<p>เนื่องจากไม่มีพรรคใด ได้รับจำนวนส.ส.แบบเบ่งเขต ● ไปครบจำนวนส.ส.พึงมี ■</p>
     <p>ดังนั้นทุกพรรคจะได้รับจำนวนส.ส.แบบบัญชีรายชื่อ ◆ รวมกับส.ส.แบบเบ่งเขต ● จนครบจำนวนส.ส.พึงมี ■</p>`;

@@ -3,11 +3,27 @@
     <el-tabs type="border-card">
       <el-tab-pane label="แบบจำลอง (ย่อ)">
         <el-button type="primary" @click="runStarter">จำลองผลการเลือกตั้ง แบบย่อ</el-button>
+        <p v-if="nSimulationRun > 0">
+          <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
+        </p>
       </el-tab-pane>
       <el-tab-pane label="แบบจำลอง (เต็ม)">
         <el-button type="primary" @click="runFull">จำลองผลการเลือกตั้ง แบบเต็ม</el-button>
+        <p v-if="nSimulationRun > 0">
+          <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
+        </p>
       </el-tab-pane>
       <el-tab-pane label="กำหนดเอง">
+        <div>
+          <p>ค่าเริ่มต้น</p>
+          <el-radio-group v-model="template" @change="reset(template)">
+            <el-radio-button label="เริ่มต้น"></el-radio-button>
+            <el-radio-button label="จำลอง พรรคใหญ่แยกพรรค"></el-radio-button>
+            <el-radio-button label="ผลการเลือกตั้งพ.ศ. 2554"></el-radio-button>
+            <el-radio-button label="พรรคเด่น พ.ศ. 2562"></el-radio-button>
+          </el-radio-group>
+        </div>
+        <hr>
         <div>
           <div>
             <p>จำนวนพรรค</p>
@@ -28,10 +44,19 @@
             :n-constituent-seat-initial="partyNConstituentSeat[n-1]"
             :n-total-vote-initial="partyNTotalVote[n-1]"
           ></party-params>
-          <el-button type="primary" @click="runUserDefined">ส่งผลการนับคะแนนใหม่</el-button>
+          <el-button type="primary" @click="runUserDefined">ส่งผลการนับคะแนน</el-button>
+          <el-button @click="reset(template)">เริ่มใหม่</el-button>
         </div>
       </el-tab-pane>
     </el-tabs>
+    <br>
+    <el-alert
+      v-if="paramChanged"
+      title="กรุณากดปุ่ม ส่งผลการนับคะแนน เพื่อดูผลใหม่"
+      type="warning"
+      center
+      show-icon
+    ></el-alert>
   </div>
 </template>
 
@@ -40,10 +65,38 @@ import { EventBus } from "./event-bus.js";
 import _ from "lodash";
 import * as app from "./app.js";
 
+function notify(t) {
+  t.$notify({
+    title: "การเลือกตั้งสำเร็จ!",
+    type: "success",
+    message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
+    duration: 2000
+  });
+  t.paramChanged = false;
+}
+
+function updateParams(t) {
+  t.paramChanged = true;
+  const toUpdate = {
+    name: t.partyName,
+    color: t.partyColor,
+    side: t.partySide,
+    nConstituentSeat: t.partyNConstituentSeat,
+    nTotalVote: t.partyNTotalVote
+  };
+  for (const n in _.range(t.nParty)) {
+    for (const [key, value] of Object.entries(toUpdate)) {
+      t.$set(t.$refs[`party${n}`][0], key, value[n]);
+    }
+  }
+}
+
 export default {
   name: "UserDefinedParams",
   data() {
     return {
+      nSimulationRun: 0,
+      template: "เริ่มต้น",
       nParty: 2,
       nConstituentSeat: 350,
       nVote: 35000000,
@@ -52,11 +105,12 @@ export default {
       partySide: ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"],
       partyNConstituentSeat: [175, 175],
       partyNTotalVote: [17500000, 17500000],
-      nSimulationRun: 0
+      paramChanged: false
     };
   },
   created() {
     EventBus.$on("params-changed", (data, key) => {
+      this.paramChanged = true;
       // Update the parent data
       const toUpdate = {
         partyName: "name",
@@ -113,7 +167,7 @@ export default {
         this.partyColor.splice(
           this.nParty - 2,
           0,
-          `hsl(${(95 * (this.nParty - 2)) % 360}, 90%, 60%)`
+          `hsl(${(95 * (this.nParty - 2)) % 360}, 90%, 50%)`
         );
 
         this.partySide.splice(this.nParty - 2, 0, "ฝ่ายค้าน");
@@ -193,12 +247,7 @@ export default {
 
       app.runApp(config, { onlyAllocation: true, side: true }, parties);
 
-      this.$notify({
-        title: "การเลือกตั้งสำเร็จ!",
-        type: "success",
-        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
-        duration: 2000
-      });
+      notify(this);
     },
     runStarter() {
       const config = new app.ElectionConfig({
@@ -216,12 +265,7 @@ export default {
         starter: true
       });
 
-      this.$notify({
-        title: "การเลือกตั้งสำเร็จ!",
-        type: "success",
-        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
-        duration: 2000
-      });
+      notify(this);
     },
     runFull() {
       const config = new app.ElectionConfig({
@@ -233,12 +277,211 @@ export default {
         side: true
       });
 
-      this.$notify({
-        title: "การเลือกตั้งสำเร็จ!",
-        type: "success",
-        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
-        duration: 2000
-      });
+      notify(this);
+    },
+    reset(template) {
+      switch (template) {
+        case "เริ่มต้น":
+          this.nParty = 2;
+          this.nConstituentSeat = 350;
+          this.nVote = 35000000;
+          this.partyName = ["พรรคที่ 1", "อื่นๆ"];
+          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(0, 0%, 60%)"];
+          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
+          this.partyNConstituentSeat = [175, 175];
+          this.partyNTotalVote = [17500000, 17500000];
+          break;
+        case "จำลอง พรรคใหญ่แยกพรรค":
+          this.nParty = 3;
+          this.nConstituentSeat = 350;
+          this.nVote = 35000000;
+          this.partyName = ["พรรคหลัก", "พรรครอง", "อื่นๆ"];
+          this.partyColor = [
+            "hsl(0, 90%, 50%)",
+            "hsl(0, 100%, 80%)",
+            "hsl(0, 0%, 60%)"
+          ];
+          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
+          this.partyNConstituentSeat = [150, 25, 175];
+          this.partyNTotalVote = [16500000, 2000000, 16500000];
+          break;
+        case "ผลการเลือกตั้งพ.ศ. 2554":
+          this.nParty = 17;
+          this.nConstituentSeat = 375;
+          this.nVote = 31760760;
+          this.partyName = [
+            "เพื่อไทย",
+            "ประชาธิปัตย์",
+            "ภูมิใจไทย",
+            "ชาติไทยพัฒนา",
+            "ชาติพัฒนาเพื่อแผ่นดิน",
+            "มาตุภูมิ",
+            "พลังชล",
+            "รักษ์สันติ",
+            "กิจสังคม",
+            "ความหวังใหม่",
+            "ประชาธรรม",
+            "เครือข่ายชาวนาแห่งประเทศไทย",
+            "ประชาสันติ",
+            "เพื่อฟ้าดิน",
+            "เพื่อเกษตรกรไทย",
+            "พลังคนกีฬา",
+            "อื่นๆ"
+          ];
+          this.partyColor = [
+            "hsl(0, 90%, 50%)",
+            "hsl(200, 90%, 50%)",
+            "hsl(220, 90%, 50%)",
+            "hsl(20, 90%, 50%)",
+            "hsl(330, 90%, 50%)",
+            "hsl(180, 90%, 50%)",
+            "hsl(240, 90%, 50%)",
+            "hsl(70, 90%, 50%)",
+            "hsl(0, 100%, 80%)",
+            "hsl(200, 100%, 80%)",
+            "hsl(220, 100%, 80%)",
+            "hsl(20, 100%, 80%)",
+            "hsl(330, 100%, 80%)",
+            "hsl(180, 100%, 80%)",
+            "hsl(240, 100%, 80%)",
+            "hsl(70, 100%, 80%)",
+            "hsl(0, 0%, 60%)"
+          ];
+          this.partySide = [
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายค้าน",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน",
+            "ฝ่ายค้าน"
+          ];
+          this.partyNConstituentSeat = [
+            204,
+            115,
+            29,
+            15,
+            5,
+            1,
+            6,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ];
+          this.partyNTotalVote = [
+            14272771,
+            10138045,
+            3523331,
+            1534027,
+            1258464,
+            369526,
+            246879,
+            138758,
+            114978,
+            31246,
+            26229,
+            20133,
+            20084,
+            13674,
+            13580,
+            13148,
+            25887
+          ];
+          break;
+        case "พรรคเด่น พ.ศ. 2562":
+          this.nParty = 12;
+          this.nConstituentSeat = 350;
+          this.nVote = 35000000;
+          this.partyName = [
+            "เพื่อไทย",
+            "ไทยรักษาชาติ",
+            "พลังประชารัฐ",
+            "ประชาธิปัตย์",
+            "อนาคตใหม่",
+            "เสรีรวมไทย",
+            "ประชาชาติ",
+            "ภูมิใจไทย",
+            "รวมพลังประชาชาติไทย",
+            "ชาติไทยพัฒนา",
+            "ชาติพัฒนา",
+            "อื่นๆ"
+          ];
+          this.partyColor = [
+            "hsl(0, 90%, 50%)",
+            "hsl(340, 100%, 70%)",
+            "hsl(240, 90%, 50%)",
+            "hsl(200, 90%, 50%)",
+            "hsl(30, 90%, 60%)",
+            "hsl(55, 90%, 50%)",
+            "hsl(70, 90%, 50%)",
+            "hsl(260, 90%, 50%)",
+            "hsl(220, 90%, 50%)",
+            "hsl(320, 90%, 50%)",
+            "hsl(25, 90%, 50%)",
+            "hsl(0, 0%, 60%)"
+          ];
+          this.partySide = [
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายค้าน"
+          ];
+          this.partyNConstituentSeat = [
+            30,
+            30,
+            30,
+            30,
+            30,
+            30,
+            30,
+            30,
+            30,
+            30,
+            30,
+            20
+          ];
+          this.partyNTotalVote = [
+            3000000,
+            3000000,
+            3000000,
+            3000000,
+            3000000,
+            3000000,
+            3000000,
+            3000000,
+            3000000,
+            3000000,
+            3000000,
+            2000000
+          ];
+          break;
+      }
+
+      updateParams(this);
     },
     numberWithCommas(x) {
       return x ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
