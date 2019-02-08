@@ -8,7 +8,13 @@ body {
 }
 
 .container {
-  margin: 40px;
+  margin: 10px;
+}
+
+@media only screen and (min-width: 768px) {
+  .container {
+    margin: 40px;
+  }
 }
 
 .x-axis,
@@ -19,22 +25,22 @@ body {
 .table {
   margin: 20px 0px;
   max-width: 95%;
-
-  @media only screen and (min-width: 768px) {
-    max-width: 80%;
-  }
 }
 
-.plot{
+.plot {
   overflow-x: scroll;
 }
 
 #result-constituents {
-  max-height: 80vh;
-  max-width: 95%;
-  overflow-y: scroll;
+  display: flex;
+}
 
-  @media only screen and (min-width: 768px) {
-    max-width: 80%;
-  }
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 7px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 7px;
+  background-color: rgba(42, 42, 42, 0.5);
+  -webkit-box-shadow: 0 0 1px rgba(172, 172, 172, 0.5);
 }
