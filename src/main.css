@@ -21,6 +21,16 @@ h3 {
   color: #004D7F;
 }
 
+a {
+  color: #004D7F;
+  text-decoration: none;
+}
+
+a:hover,a:active {
+  color: #0067c7;
+  text-decoration: underline;
+}
+
 .text {
   max-width: 700px;
 }

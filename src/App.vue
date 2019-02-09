@@ -1,19 +1,19 @@
 <template>
   <div id="app">
     <el-tabs type="border-card">
-      <el-tab-pane label="แบบจำลอง (ย่อ)">
+      <el-tab-pane label="1 แบบจำลอง (ย่อ)">
         <el-button type="primary" @click="runStarter">จำลองผลการเลือกตั้ง แบบย่อ</el-button>
         <p v-if="nSimulationRun > 0">
           <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
         </p>
       </el-tab-pane>
-      <el-tab-pane label="แบบจำลอง (เต็ม)">
+      <el-tab-pane label="2 แบบจำลอง (เต็ม)">
         <el-button type="primary" @click="runFull">จำลองผลการเลือกตั้ง แบบเต็ม</el-button>
         <p v-if="nSimulationRun > 0">
           <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
         </p>
       </el-tab-pane>
-      <el-tab-pane label="กำหนดเอง">
+      <el-tab-pane label="3 กำหนดเอง">
         <div>
           <p>ค่าเริ่มต้น</p>
           <el-radio-group v-model="template" @change="reset(template)">
