@@ -1,6 +1,24 @@
 body {
-  font-family: Helvetica, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   font-size: 16px;
+}
+
+h1 {
+  font-family: 'Mitr', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  color: #004D7F;
+}
+
+h2 {
+  font-family: 'Mitr', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  color: #004D7F;
+}
+
+h3 {
+  font-family: 'Mitr', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  color: #004D7F;
 }
 
 .text {
@@ -37,10 +55,10 @@ body {
 
 ::-webkit-scrollbar {
   -webkit-appearance: none;
-  width: 7px;
+  width: 6px;
 }
 ::-webkit-scrollbar-thumb {
-  border-radius: 7px;
+  border-radius: 6px;
   background-color: rgba(42, 42, 42, 0.5);
   -webkit-box-shadow: 0 0 1px rgba(172, 172, 172, 0.5);
 }

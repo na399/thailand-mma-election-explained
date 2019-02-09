@@ -23,6 +23,7 @@
             <el-radio-button label="พรรคเด่น พ.ศ. 2562"></el-radio-button>
           </el-radio-group>
         </div>
+        <br>
         <hr>
         <div>
           <div>
@@ -47,16 +48,16 @@
           <el-button type="primary" @click="runUserDefined">ส่งผลการนับคะแนน</el-button>
           <el-button @click="reset(template)">เริ่มใหม่</el-button>
         </div>
+        <br>
+        <el-alert
+          v-if="paramChanged"
+          title="กรุณากดปุ่ม ส่งผลการนับคะแนน เพื่อดูผลใหม่"
+          type="warning"
+          center
+          show-icon
+        ></el-alert>
       </el-tab-pane>
     </el-tabs>
-    <br>
-    <el-alert
-      v-if="paramChanged"
-      title="กรุณากดปุ่ม ส่งผลการนับคะแนน เพื่อดูผลใหม่"
-      type="warning"
-      center
-      show-icon
-    ></el-alert>
   </div>
 </template>
 
@@ -258,8 +259,6 @@ export default {
         nParty: 4
       });
 
-      let randomSeed = "starter";
-
       app.runApp(config, {
         randomSeed: (this.nSimulationRun += 1),
         starter: true
@@ -410,10 +409,10 @@ export default {
           this.nVote = 35000000;
           this.partyName = [
             "เพื่อไทย",
-            "ไทยรักษาชาติ",
-            "พลังประชารัฐ",
-            "ประชาธิปัตย์",
             "อนาคตใหม่",
+            "ประชาธิปัตย์",
+            "พลังประชารัฐ",
+            "ไทยรักษาชาติ",
             "เสรีรวมไทย",
             "ประชาชาติ",
             "ภูมิใจไทย",
@@ -424,13 +423,14 @@ export default {
           ];
           this.partyColor = [
             "hsl(0, 90%, 50%)",
-            "hsl(340, 100%, 70%)",
-            "hsl(240, 90%, 50%)",
+            "hsl(30, 90%, 60%)",
             "hsl(200, 90%, 50%)",
+            "hsl(240, 90%, 50%)",
+            "hsl(340, 100%, 70%)",
             "hsl(30, 90%, 60%)",
             "hsl(55, 90%, 50%)",
             "hsl(70, 90%, 50%)",
-            "hsl(260, 90%, 50%)",
+            "hsl(260, 100%, 50%)",
             "hsl(220, 90%, 50%)",
             "hsl(320, 90%, 50%)",
             "hsl(25, 90%, 50%)",
@@ -493,5 +493,11 @@ export default {
 <style>
 #app {
   text-align: center;
+}
+
+@media only screen and (min-width: 768px) {
+  #app {
+    max-width: 90%;
+  }
 }
 </style>
