@@ -10,7 +10,7 @@
         v-model="name"
         :fetch-suggestions="querySearch"
         placeholder="ชื่อ"
-        @select="handleSelect"
+        @select="changeParams"
         @change="changeParams"
       ></el-autocomplete>
       <el-color-picker v-model="color" :predefine="predefinedColors" @change="changeParams"></el-color-picker>
@@ -92,9 +92,6 @@ export default {
       return party => {
         return party.value.indexOf(queryString) === 0;
       };
-    },
-    handleSelect(item) {
-      console.log(item);
     },
     loadAll() {
       return [
