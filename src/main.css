@@ -19,6 +19,7 @@ h3 {
   font-family: 'Mitr', Helvetica, Arial, sans-serif;
   font-weight: 500;
   color: #004D7F;
+  margin: 40px 0px 20px;
 }
 
 a {
@@ -52,7 +53,12 @@ a:hover,a:active {
 
 .table {
   margin: 20px 0px;
-  max-width: 95%;
+}
+
+@media only screen and (min-width: 768px) {
+  .table {
+    max-width: 90%;
+  }
 }
 
 .plot {
@@ -71,4 +77,10 @@ a:hover,a:active {
   border-radius: 6px;
   background-color: rgba(42, 42, 42, 0.5);
   -webkit-box-shadow: 0 0 1px rgba(172, 172, 172, 0.5);
+}
+
+@media only screen and (max-width: 768px) {
+  .tabulator-row .tabulator-frozen {
+    visibility: hidden;
+  }
 }
