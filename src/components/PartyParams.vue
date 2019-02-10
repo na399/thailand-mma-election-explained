@@ -11,7 +11,7 @@
         :fetch-suggestions="querySearch"
         placeholder="ชื่อ"
         @select="changeParams"
-        @change="changeParams"
+        @keyup.native="changeParams"
       ></el-autocomplete>
       <el-color-picker v-model="color" :predefine="predefinedColors" @change="changeParams"></el-color-picker>
       <el-radio-group v-model="side" size="small" @change="changeParams">
