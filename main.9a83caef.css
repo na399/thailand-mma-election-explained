@@ -1,6 +1,35 @@
 body {
-  font-family: Helvetica, sans-serif;
+  font-family: Helvetica, Arial, sans-serif;
   font-size: 16px;
+}
+
+h1 {
+  font-family: 'Mitr', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  color: #004D7F;
+}
+
+h2 {
+  font-family: 'Mitr', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  color: #004D7F;
+}
+
+h3 {
+  font-family: 'Mitr', Helvetica, Arial, sans-serif;
+  font-weight: 500;
+  color: #004D7F;
+  margin: 40px 0px 20px;
+}
+
+a {
+  color: #004D7F;
+  text-decoration: none;
+}
+
+a:hover,a:active {
+  color: #0067c7;
+  text-decoration: underline;
 }
 
 .text {
@@ -8,7 +37,13 @@ body {
 }
 
 .container {
-  margin: 40px;
+  margin: 10px;
+}
+
+@media only screen and (min-width: 768px) {
+  .container {
+    margin: 40px;
+  }
 }
 
 .x-axis,
@@ -18,23 +53,34 @@ body {
 
 .table {
   margin: 20px 0px;
-  max-width: 95%;
+}
 
-  @media only screen and (min-width: 768px) {
-    max-width: 80%;
+@media only screen and (min-width: 768px) {
+  .table {
+    max-width: 90%;
   }
 }
 
-.plot{
+.plot {
   overflow-x: scroll;
 }
 
 #result-constituents {
-  max-height: 80vh;
-  max-width: 95%;
-  overflow-y: scroll;
+  display: flex;
+}
 
-  @media only screen and (min-width: 768px) {
-    max-width: 80%;
+::-webkit-scrollbar {
+  -webkit-appearance: none;
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background-color: rgba(42, 42, 42, 0.5);
+  -webkit-box-shadow: 0 0 1px rgba(172, 172, 172, 0.5);
+}
+
+@media only screen and (max-width: 768px) {
+  .tabulator-row .tabulator-frozen {
+    visibility: hidden;
   }
 }

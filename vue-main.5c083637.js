@@ -55741,7 +55741,7 @@ function drawResultConstituent(electionResult, resultConstituent, selector, conf
       margin = config.margin;
   var xScale = scales.xScale,
       yScale = scales.yScale;
-  var svg = d3.select(selector).attr('width', width).attr('height', height).style('overflow', 'visible');
+  var svg = d3.select(selector).attr('width', width).attr('height', height).style('overflow', 'visible').style('flex', "0 0 ".concat(width, "px"));
   svg.selectAll('*').remove();
   var bars = svg.append('g').selectAll('.bar').data(resultConstituent);
   bars.enter().append('rect').attr('x', function (d) {
@@ -56112,7 +56112,7 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
   var text = "";
 
   if (electionResult.nPartyWithoutPartyListNeeded > 0) {
-    text = "\n    <p>\u0E40\u0E19\u0E37\u0E48\u0E2D\u0E07\u0E08\u0E32\u0E01\u0E21\u0E35 ".concat(electionResult.nPartyWithoutPartyListNeeded, " \n    \u0E1E\u0E23\u0E23\u0E04 \u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E40\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 \u0E44\u0E1B\u0E04\u0E23\u0E1A\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E1E\u0E36\u0E07\u0E21\u0E35\u0E41\u0E25\u0E49\u0E27 (\u2713) \u0E08\u0E36\u0E07\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E43\u0E2B\u0E49 \n    ").concat(electionResult.nPartyWithoutPartyListNeeded, " \n    \u0E1E\u0E23\u0E23\u0E04\u0E19\u0E35\u0E49\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E2A.\u0E2A.\u0E15\u0E32\u0E21\u0E17\u0E35\u0E48\u0E44\u0E14\u0E49\u0E21\u0E32\u0E08\u0E32\u0E01\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07 \u25CF \u0E41\u0E15\u0E48\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E21\u0E35\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D \u25C6 \u0E44\u0E14\u0E49\u0E2D\u0E35\u0E01</p>\n    <p>\u0E14\u0E31\u0E07\u0E19\u0E31\u0E49\u0E19\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E2A\u0E23\u0E23\u0E2A.\u0E2A.\u0E1E\u0E36\u0E07\u0E21\u0E35\u0E41\u0E25\u0E30\u0E2A.\u0E2A.\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D\u0E08\u0E36\u0E07\u0E1E\u0E34\u0E08\u0E32\u0E23\u0E13\u0E32\u0E08\u0E32\u0E01 ").concat(electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded, " \u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48\u0E40\u0E2B\u0E25\u0E37\u0E2D\u0E40\u0E1E\u0E35\u0E22\u0E07\u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19</p>");
+    text = "\n    <p>\u0E40\u0E19\u0E37\u0E48\u0E2D\u0E07\u0E08\u0E32\u0E01\u0E21\u0E35 ".concat(electionResult.nPartyWithoutPartyListNeeded, " \n    \u0E1E\u0E23\u0E23\u0E04 \u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E40\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 \u0E44\u0E1B\u0E04\u0E23\u0E1A\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E1E\u0E36\u0E07\u0E21\u0E35\u0E41\u0E25\u0E49\u0E27 (\u2713) \u0E08\u0E36\u0E07\u0E01\u0E33\u0E2B\u0E19\u0E14\u0E43\u0E2B\u0E49 \n    ").concat(electionResult.nPartyWithoutPartyListNeeded, " \n    \u0E1E\u0E23\u0E23\u0E04\u0E19\u0E35\u0E49\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E2A.\u0E2A.\u0E15\u0E32\u0E21\u0E17\u0E35\u0E48\u0E44\u0E14\u0E49\u0E21\u0E32\u0E08\u0E32\u0E01\u0E41\u0E1A\u0E1A\u0E41\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07 \u25CF \u0E41\u0E15\u0E48\u0E44\u0E21\u0E48\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E21\u0E35\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D \u25C6 \u0E44\u0E14\u0E49\u0E2D\u0E35\u0E01</p>\n    <p>\u0E14\u0E31\u0E07\u0E19\u0E31\u0E49\u0E19\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E2A\u0E23\u0E23\u0E2A.\u0E2A.\u0E1E\u0E36\u0E07\u0E21\u0E35\u0E41\u0E25\u0E30\u0E2A.\u0E2A.\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D\u0E08\u0E36\u0E07\u0E1E\u0E34\u0E08\u0E32\u0E23\u0E13\u0E32\u0E08\u0E32\u0E01 ").concat(electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded, " \u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48\u0E40\u0E2B\u0E25\u0E37\u0E2D\u0E40\u0E1E\u0E35\u0E22\u0E07\u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19\n      \u0E42\u0E14\u0E22\u0E43\u0E0A\u0E49\u0E40\u0E2A\u0E35\u0E22\u0E07 ").concat(numberWithCommas(electionResult.nVotePerRemainingSeat), " \u0E15\u0E48\u0E2D 1 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07</p>");
   } else {
     text = "<p>\u0E40\u0E19\u0E37\u0E48\u0E2D\u0E07\u0E08\u0E32\u0E01\u0E44\u0E21\u0E48\u0E21\u0E35\u0E1E\u0E23\u0E23\u0E04\u0E43\u0E14 \u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E40\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 \u25CF \u0E44\u0E1B\u0E04\u0E23\u0E1A\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E1E\u0E36\u0E07\u0E21\u0E35 \u25A0</p>\n    <p>\u0E14\u0E31\u0E07\u0E19\u0E31\u0E49\u0E19\u0E17\u0E38\u0E01\u0E1E\u0E23\u0E23\u0E04\u0E08\u0E30\u0E44\u0E14\u0E49\u0E23\u0E31\u0E1A\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E1A\u0E31\u0E0D\u0E0A\u0E35\u0E23\u0E32\u0E22\u0E0A\u0E37\u0E48\u0E2D \u25C6 \u0E23\u0E27\u0E21\u0E01\u0E31\u0E1A\u0E2A.\u0E2A.\u0E41\u0E1A\u0E1A\u0E40\u0E1A\u0E48\u0E07\u0E40\u0E02\u0E15 \u25CF \u0E08\u0E19\u0E04\u0E23\u0E1A\u0E08\u0E33\u0E19\u0E27\u0E19\u0E2A.\u0E2A.\u0E1E\u0E36\u0E07\u0E21\u0E35 \u25A0</p>";
   }
@@ -77176,7 +77176,7 @@ function runApp(config, option, parties) {
   table.addTable(result, '#table-conclusion', 'conclusion');
 
   if (option.side) {
-    d3.select('#text-sides').html("\n      <h3>\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19</h3>\n      <p>\n        \u0E1E\u0E23\u0E23\u0E04\u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E32\u0E23\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E02\u0E2D\u0E07\u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48\u0E21\u0E35\u0E08\u0E33\u0E19\u0E27\u0E19\u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E2A.\u0E2A.\u0E43\u0E19\u0E2A\u0E20\u0E32\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E44\u0E14\u0E49\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07\n        \u0E2B\u0E23\u0E37\u0E2D 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B \u0E21\u0E35\u0E42\u0E2D\u0E01\u0E32\u0E2A\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E40\u0E1B\u0E47\u0E19\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\n      </p>\n      <p>\n        \u0E41\u0E15\u0E48\u0E01\u0E32\u0E23\u0E44\u0E14\u0E49\u0E21\u0E32\u0E0B\u0E36\u0E48\u0E07\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E19\u0E31\u0E49\u0E19\u0E21\u0E32\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E25\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E2D\u0E07\u0E17\u0E31\u0E49\u0E07\u0E23\u0E31\u0E10\u0E2A\u0E20\u0E32\n        (\u0E2A.\u0E2A.) \u0E08\u0E33\u0E19\u0E27\u0E19 500 \u0E40\u0E2A\u0E35\u0E22\u0E07 \u0E41\u0E25\u0E30\u0E27\u0E38\u0E12\u0E34\u0E2A\u0E20\u0E32 (\u0E2A.\u0E27.) \u0E2D\u0E35\u0E01\u0E08\u0E33\u0E19\u0E27\u0E19 250 \u0E40\u0E2A\u0E35\u0E22\u0E07\n        \u0E14\u0E31\u0E49\u0E07\u0E19\u0E31\u0E49\u0E19\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E43\u0E0A\u0E49\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E48\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07 \u0E2B\u0E23\u0E37\u0E2D 376 \u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B\n      </p>\n      <p>\n        \u0E14\u0E49\u0E27\u0E22\u0E40\u0E2B\u0E15\u0E38\u0E19\u0E35\u0E49 \u0E2B\u0E32\u0E01\u0E40\u0E01\u0E23\u0E07\u0E27\u0E48\u0E32\n        \u0E2A.\u0E27.\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14\u0E08\u0E30\u0E2D\u0E2D\u0E01\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E44\u0E21\u0E48\u0E15\u0E23\u0E07\u0E01\u0E31\u0E1A\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E43\u0E19\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\n        \u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2A.\u0E2A.\u0E16\u0E36\u0E07 376 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \u0E41\u0E17\u0E19\u0E17\u0E35\u0E48\u0E08\u0E30\u0E40\u0E1B\u0E47\u0E19 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\n        \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E43\u0E2B\u0E49\u0E41\u0E19\u0E48\u0E43\u0E08\u0E27\u0E48\u0E32\u0E08\u0E30\u0E44\u0E14\u0E49\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E17\u0E35\u0E48\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E40\u0E2D\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\n        \u0E21\u0E32\u0E14\u0E33\u0E23\u0E07\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\n      </p>\n      <p>\n        \u0E2B\u0E32\u0E01\u0E04\u0E38\u0E13\u0E40\u0E1B\u0E34\u0E14\u0E40\u0E27\u0E47\u0E1A\u0E44\u0E0B\u0E15\u0E4C\u0E19\u0E35\u0E49\u0E1A\u0E19\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\n        \u0E04\u0E38\u0E13\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E25\u0E2D\u0E07\u0E08\u0E31\u0E14\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19\u0E43\u0E2B\u0E21\u0E48\u0E44\u0E14\u0E49\u0E43\u0E19\u0E15\u0E32\u0E23\u0E32\u0E07\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\n        \u0E42\u0E14\u0E22\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E48\u0E2D\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30\u0E1E\u0E23\u0E23\u0E04 \u0E44\u0E1B\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E01\u0E25\u0E38\u0E48\u0E21\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E2B\u0E23\u0E37\u0E2D\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19 (\u0E02\u0E2D\u0E2D\u0E20\u0E31\u0E22\u0E04\u0E23\u0E31\u0E1A\n        \u0E01\u0E33\u0E25\u0E31\u0E07\u0E1E\u0E31\u0E12\u0E19\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E19\u0E35\u0E49\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E21\u0E37\u0E2D\u0E16\u0E37\u0E2D\u0E41\u0E25\u0E30\u0E08\u0E2D\u0E2A\u0E31\u0E21\u0E1C\u0E31\u0E2A)\n      </p>");
+    d3.select('#text-sides').html("\n      <h3>\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19</h3>\n      <p>\n        \u0E1E\u0E23\u0E23\u0E04\u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E32\u0E23\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E02\u0E2D\u0E07\u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48\u0E21\u0E35\u0E08\u0E33\u0E19\u0E27\u0E19\u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E2A.\u0E2A.\u0E43\u0E19\u0E2A\u0E20\u0E32\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E44\u0E14\u0E49\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E48\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07\n        \u0E2B\u0E23\u0E37\u0E2D 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B \u0E21\u0E35\u0E42\u0E2D\u0E01\u0E32\u0E2A\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E40\u0E1B\u0E47\u0E19\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\n      </p>\n      <p>\n        \u0E41\u0E15\u0E48\u0E01\u0E32\u0E23\u0E44\u0E14\u0E49\u0E21\u0E32\u0E0B\u0E36\u0E48\u0E07\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E19\u0E31\u0E49\u0E19\u0E21\u0E32\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E25\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E2D\u0E07\u0E17\u0E31\u0E49\u0E07\u0E2A\u0E20\u0E32\u0E1C\u0E39\u0E49\u0E41\u0E17\u0E19\u0E23\u0E32\u0E29\u0E0E\u0E23\n        (\u0E2A.\u0E2A.) \u0E08\u0E33\u0E19\u0E27\u0E19 500 \u0E40\u0E2A\u0E35\u0E22\u0E07 \u0E41\u0E25\u0E30\u0E27\u0E38\u0E12\u0E34\u0E2A\u0E20\u0E32 (\u0E2A.\u0E27.) \u0E2D\u0E35\u0E01\u0E08\u0E33\u0E19\u0E27\u0E19 250 \u0E40\u0E2A\u0E35\u0E22\u0E07\n        \u0E14\u0E31\u0E49\u0E07\u0E19\u0E31\u0E49\u0E19\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E43\u0E0A\u0E49\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E48\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07 \u0E2B\u0E23\u0E37\u0E2D 376 \u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B\n      </p>\n      <p>\n        \u0E14\u0E49\u0E27\u0E22\u0E40\u0E2B\u0E15\u0E38\u0E19\u0E35\u0E49 \u0E2B\u0E32\u0E01\u0E40\u0E01\u0E23\u0E07\u0E27\u0E48\u0E32\n        \u0E2A.\u0E27.\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14\u0E08\u0E30\u0E2D\u0E2D\u0E01\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E44\u0E21\u0E48\u0E15\u0E23\u0E07\u0E01\u0E31\u0E1A\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E43\u0E19\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\n        \u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2A.\u0E2A.\u0E16\u0E36\u0E07 376 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \u0E41\u0E17\u0E19\u0E17\u0E35\u0E48\u0E08\u0E30\u0E40\u0E1B\u0E47\u0E19 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\n        \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E43\u0E2B\u0E49\u0E41\u0E19\u0E48\u0E43\u0E08\u0E27\u0E48\u0E32\u0E08\u0E30\u0E44\u0E14\u0E49\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E17\u0E35\u0E48\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E40\u0E2D\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\n        \u0E21\u0E32\u0E14\u0E33\u0E23\u0E07\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\n      </p>\n      <p>\n        \u0E2B\u0E32\u0E01\u0E04\u0E38\u0E13\u0E40\u0E1B\u0E34\u0E14\u0E40\u0E27\u0E47\u0E1A\u0E44\u0E0B\u0E15\u0E4C\u0E19\u0E35\u0E49\u0E1A\u0E19\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\n        \u0E04\u0E38\u0E13\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E25\u0E2D\u0E07\u0E08\u0E31\u0E14\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19\u0E43\u0E2B\u0E21\u0E48\u0E44\u0E14\u0E49\u0E43\u0E19\u0E15\u0E32\u0E23\u0E32\u0E07\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\n        \u0E42\u0E14\u0E22\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E48\u0E2D\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30\u0E1E\u0E23\u0E23\u0E04 \u0E44\u0E1B\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E01\u0E25\u0E38\u0E48\u0E21\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E2B\u0E23\u0E37\u0E2D\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19 (\u0E02\u0E2D\u0E2D\u0E20\u0E31\u0E22\u0E04\u0E23\u0E31\u0E1A\n        \u0E01\u0E33\u0E25\u0E31\u0E07\u0E1E\u0E31\u0E12\u0E19\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E19\u0E35\u0E49\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E21\u0E37\u0E2D\u0E16\u0E37\u0E2D\u0E41\u0E25\u0E30\u0E08\u0E2D\u0E2A\u0E31\u0E21\u0E1C\u0E31\u0E2A)\n      </p>");
     table.addTable(result, '#table-sides', 'sides');
   } else {
     d3.select('#text-sides').html('');
@@ -77544,10 +77544,45 @@ function _iterableToArrayLimit(arr, i) { var _arr = []; var _n = true; var _d = 
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+function notify(t) {
+  t.$notify({
+    title: "การเลือกตั้งสำเร็จ!",
+    type: "success",
+    message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
+    duration: 2000
+  });
+  t.paramChanged = false;
+}
+
+function updateParams(t) {
+  t.paramChanged = true;
+  var toUpdate = {
+    name: t.partyName,
+    color: t.partyColor,
+    side: t.partySide,
+    nConstituentSeat: t.partyNConstituentSeat,
+    nTotalVote: t.partyNTotalVote
+  };
+
+  for (var n in _lodash.default.range(t.nParty)) {
+    var _arr = Object.entries(toUpdate);
+
+    for (var _i = 0; _i < _arr.length; _i++) {
+      var _arr$_i = _slicedToArray(_arr[_i], 2),
+          key = _arr$_i[0],
+          value = _arr$_i[1];
+
+      t.$set(t.$refs["party".concat(n)][0], key, value[n]);
+    }
+  }
+}
+
 var _default = {
   name: "UserDefinedParams",
   data: function data() {
     return {
+      nSimulationRun: 0,
+      template: "เริ่มต้น",
       nParty: 2,
       nConstituentSeat: 350,
       nVote: 35000000,
@@ -77556,14 +77591,15 @@ var _default = {
       partySide: ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"],
       partyNConstituentSeat: [175, 175],
       partyNTotalVote: [17500000, 17500000],
-      nSimulationRun: 0
+      paramChanged: false
     };
   },
   created: function created() {
     var _this = this;
 
     _eventBus.EventBus.$on("params-changed", function (data, key) {
-      // Update the parent data
+      _this.paramChanged = true; // Update the parent data
+
       var toUpdate = {
         partyName: "name",
         partyColor: "color",
@@ -77572,12 +77608,12 @@ var _default = {
         partyNTotalVote: "nTotalVote"
       };
 
-      var _arr = Object.entries(toUpdate);
+      var _arr2 = Object.entries(toUpdate);
 
-      for (var _i = 0; _i < _arr.length; _i++) {
-        var _arr$_i = _slicedToArray(_arr[_i], 2),
-            param = _arr$_i[0],
-            value = _arr$_i[1];
+      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
+        var _arr2$_i = _slicedToArray(_arr2[_i2], 2),
+            param = _arr2$_i[0],
+            value = _arr2$_i[1];
 
         _this[param][key] = data[value];
       } // adjust the nTotalVote of the parent data
@@ -77606,12 +77642,12 @@ var _default = {
         }
       });
 
-      var _arr2 = Object.entries(partyNConstituentSeatFiltered);
+      var _arr3 = Object.entries(partyNConstituentSeatFiltered);
 
-      for (var _i2 = 0; _i2 < _arr2.length; _i2++) {
-        var _arr2$_i = _slicedToArray(_arr2[_i2], 2),
-            _n2 = _arr2$_i[0],
-            value = _arr2$_i[1];
+      for (var _i3 = 0; _i3 < _arr3.length; _i3++) {
+        var _arr3$_i = _slicedToArray(_arr3[_i3], 2),
+            _n2 = _arr3$_i[0],
+            value = _arr3$_i[1];
 
         _this.partyNConstituentSeat.splice(_n2, 1, value);
 
@@ -77624,7 +77660,7 @@ var _default = {
       if (this.nParty > this.partyName.length) {
         // When nParty increases, add a new party before 'Other' party;
         this.partyName.splice(this.nParty - 2, 0, "\u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48 ".concat(this.nParty - 1));
-        this.partyColor.splice(this.nParty - 2, 0, "hsl(".concat(95 * (this.nParty - 2) % 360, ", 90%, 60%)"));
+        this.partyColor.splice(this.nParty - 2, 0, "hsl(".concat(95 * (this.nParty - 2) % 360, ", 90%, 50%)"));
         this.partySide.splice(this.nParty - 2, 0, "ฝ่ายค้าน");
         this.partyNConstituentSeat.push(Math.ceil(this.partyNConstituentSeat.pop() / 2));
         this.partyNConstituentSeat.push(this.nConstituentSeat - _lodash.default.sum(this.partyNConstituentSeat));
@@ -77639,12 +77675,12 @@ var _default = {
           nTotalVote: this.partyNTotalVote[this.nParty - 2]
         };
 
-        var _arr3 = Object.entries(toUpdate);
+        var _arr4 = Object.entries(toUpdate);
 
-        for (var _i3 = 0; _i3 < _arr3.length; _i3++) {
-          var _arr3$_i = _slicedToArray(_arr3[_i3], 2),
-              key = _arr3$_i[0],
-              value = _arr3$_i[1];
+        for (var _i4 = 0; _i4 < _arr4.length; _i4++) {
+          var _arr4$_i = _slicedToArray(_arr4[_i4], 2),
+              key = _arr4$_i[0],
+              value = _arr4$_i[1];
 
           this.$set(this.$refs["party".concat(this.nParty - 2)][0], key, value);
         }
@@ -77690,12 +77726,7 @@ var _default = {
         onlyAllocation: true,
         side: true
       }, parties);
-      this.$notify({
-        title: "การเลือกตั้งสำเร็จ!",
-        type: "success",
-        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
-        duration: 2000
-      });
+      notify(this);
     },
     runStarter: function runStarter() {
       var config = new app.ElectionConfig({
@@ -77705,17 +77736,11 @@ var _default = {
         pVoterTurnout: 0.7,
         nParty: 4
       });
-      var randomSeed = "starter";
       app.runApp(config, {
         randomSeed: this.nSimulationRun += 1,
         starter: true
       });
-      this.$notify({
-        title: "การเลือกตั้งสำเร็จ!",
-        type: "success",
-        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
-        duration: 2000
-      });
+      notify(this);
     },
     runFull: function runFull() {
       var config = new app.ElectionConfig({
@@ -77725,12 +77750,56 @@ var _default = {
         randomSeed: this.nSimulationRun += 1,
         side: true
       });
-      this.$notify({
-        title: "การเลือกตั้งสำเร็จ!",
-        type: "success",
-        message: "เลื่อนลงเพื่อดูผลการเลือกตั้ง",
-        duration: 2000
-      });
+      notify(this);
+    },
+    reset: function reset(template) {
+      switch (template) {
+        case "เริ่มต้น":
+          this.nParty = 2;
+          this.nConstituentSeat = 350;
+          this.nVote = 35000000;
+          this.partyName = ["พรรคที่ 1", "อื่นๆ"];
+          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(0, 0%, 60%)"];
+          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
+          this.partyNConstituentSeat = [175, 175];
+          this.partyNTotalVote = [17500000, 17500000];
+          break;
+
+        case "จำลอง พรรคใหญ่แยกพรรค":
+          this.nParty = 3;
+          this.nConstituentSeat = 350;
+          this.nVote = 35000000;
+          this.partyName = ["พรรคหลัก", "พรรครอง", "อื่นๆ"];
+          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(0, 100%, 80%)", "hsl(0, 0%, 60%)"];
+          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
+          this.partyNConstituentSeat = [150, 25, 175];
+          this.partyNTotalVote = [16500000, 2000000, 16500000];
+          break;
+
+        case "ผลการเลือกตั้งพ.ศ. 2554":
+          this.nParty = 17;
+          this.nConstituentSeat = 375;
+          this.nVote = 31760760;
+          this.partyName = ["เพื่อไทย", "ประชาธิปัตย์", "ภูมิใจไทย", "ชาติไทยพัฒนา", "ชาติพัฒนาเพื่อแผ่นดิน", "มาตุภูมิ", "พลังชล", "รักษ์สันติ", "กิจสังคม", "ความหวังใหม่", "ประชาธรรม", "เครือข่ายชาวนาแห่งประเทศไทย", "ประชาสันติ", "เพื่อฟ้าดิน", "เพื่อเกษตรกรไทย", "พลังคนกีฬา", "อื่นๆ"];
+          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(200, 90%, 50%)", "hsl(220, 90%, 50%)", "hsl(20, 90%, 50%)", "hsl(330, 90%, 50%)", "hsl(180, 90%, 50%)", "hsl(240, 90%, 50%)", "hsl(70, 90%, 50%)", "hsl(0, 100%, 80%)", "hsl(200, 100%, 80%)", "hsl(220, 100%, 80%)", "hsl(20, 100%, 80%)", "hsl(330, 100%, 80%)", "hsl(180, 100%, 80%)", "hsl(240, 100%, 80%)", "hsl(70, 100%, 80%)", "hsl(0, 0%, 60%)"];
+          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายค้าน", "ฝ่ายรัฐบาล", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายค้าน", "ฝ่ายค้าน"];
+          this.partyNConstituentSeat = [204, 115, 29, 15, 5, 1, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+          this.partyNTotalVote = [14272771, 10138045, 3523331, 1534027, 1258464, 369526, 246879, 138758, 114978, 31246, 26229, 20133, 20084, 13674, 13580, 13148, 25887];
+          break;
+
+        case "พรรคเด่น พ.ศ. 2562":
+          this.nParty = 12;
+          this.nConstituentSeat = 350;
+          this.nVote = 35000000;
+          this.partyName = ["เพื่อไทย", "อนาคตใหม่", "ประชาธิปัตย์", "พลังประชารัฐ", "ไทยรักษาชาติ", "เสรีรวมไทย", "ประชาชาติ", "ภูมิใจไทย", "รวมพลังประชาชาติไทย", "ชาติไทยพัฒนา", "ชาติพัฒนา", "อื่นๆ"];
+          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(30, 90%, 60%)", "hsl(200, 90%, 50%)", "hsl(240, 90%, 50%)", "hsl(340, 100%, 70%)", "hsl(55, 90%, 50%)", "hsl(70, 90%, 50%)", "hsl(260, 100%, 50%)", "hsl(220, 90%, 50%)", "hsl(320, 90%, 50%)", "hsl(25, 90%, 50%)", "hsl(0, 0%, 60%)"];
+          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
+          this.partyNConstituentSeat = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 20];
+          this.partyNTotalVote = [3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 2000000];
+          break;
+      }
+
+      updateParams(this);
     },
     numberWithCommas: function numberWithCommas(x) {
       return x ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : "";
@@ -77760,88 +77829,172 @@ exports.default = _default;
         [
           _c(
             "el-tab-pane",
-            { attrs: { label: "แบบจำลอง (ย่อ)" } },
+            { attrs: { label: "1 แบบจำลอง (ย่อ)" } },
             [
               _c(
                 "el-button",
                 { attrs: { type: "primary" }, on: { click: _vm.runStarter } },
                 [_vm._v("จำลองผลการเลือกตั้ง แบบย่อ")]
-              )
+              ),
+              _vm._v(" "),
+              _vm.nSimulationRun > 0
+                ? _c("p", [_c("small", [_vm._v("กดปุ่มซำ้ เพื่อสุ่มผลใหม่")])])
+                : _vm._e()
             ],
             1
           ),
           _vm._v(" "),
           _c(
             "el-tab-pane",
-            { attrs: { label: "แบบจำลอง (เต็ม)" } },
+            { attrs: { label: "2 แบบจำลอง (เต็ม)" } },
             [
               _c(
                 "el-button",
                 { attrs: { type: "primary" }, on: { click: _vm.runFull } },
                 [_vm._v("จำลองผลการเลือกตั้ง แบบเต็ม")]
-              )
+              ),
+              _vm._v(" "),
+              _vm.nSimulationRun > 0
+                ? _c("p", [_c("small", [_vm._v("กดปุ่มซำ้ เพื่อสุ่มผลใหม่")])])
+                : _vm._e()
             ],
             1
           ),
           _vm._v(" "),
-          _c("el-tab-pane", { attrs: { label: "กำหนดเอง" } }, [
-            _c(
-              "div",
-              [
-                _c(
-                  "div",
-                  [
-                    _c("p", [_vm._v("จำนวนพรรค")]),
-                    _vm._v(" "),
-                    _c("el-input-number", {
-                      attrs: { min: 2, max: 30 },
-                      on: { change: _vm.updateNParty },
+          _c(
+            "el-tab-pane",
+            { attrs: { label: "3 กำหนดเอง" } },
+            [
+              _c(
+                "div",
+                [
+                  _c("p", [_vm._v("ค่าเริ่มต้น")]),
+                  _vm._v(" "),
+                  _c(
+                    "el-radio-group",
+                    {
+                      on: {
+                        change: function($event) {
+                          _vm.reset(_vm.template)
+                        }
+                      },
                       model: {
-                        value: _vm.nParty,
+                        value: _vm.template,
                         callback: function($$v) {
-                          _vm.nParty = $$v
+                          _vm.template = $$v
                         },
-                        expression: "nParty"
+                        expression: "template"
+                      }
+                    },
+                    [
+                      _c("el-radio-button", { attrs: { label: "เริ่มต้น" } }),
+                      _vm._v(" "),
+                      _c("el-radio-button", {
+                        attrs: { label: "จำลอง พรรคใหญ่แยกพรรค" }
+                      }),
+                      _vm._v(" "),
+                      _c("el-radio-button", {
+                        attrs: { label: "ผลการเลือกตั้งพ.ศ. 2554" }
+                      }),
+                      _vm._v(" "),
+                      _c("el-radio-button", {
+                        attrs: { label: "พรรคเด่น พ.ศ. 2562" }
+                      })
+                    ],
+                    1
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("hr"),
+              _vm._v(" "),
+              _c(
+                "div",
+                [
+                  _c(
+                    "div",
+                    [
+                      _c("p", [_vm._v("จำนวนพรรค")]),
+                      _vm._v(" "),
+                      _c("el-input-number", {
+                        attrs: { min: 2, max: 30 },
+                        on: { change: _vm.updateNParty },
+                        model: {
+                          value: _vm.nParty,
+                          callback: function($$v) {
+                            _vm.nParty = $$v
+                          },
+                          expression: "nParty"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c("div", [
+                    _c("p", [_vm._v("จำนวนเสียงรวม")]),
+                    _vm._v(" "),
+                    _c("p", [_vm._v(_vm._s(_vm.numberWithCommas(_vm.nVote)))])
+                  ]),
+                  _vm._v(" "),
+                  _vm._l(_vm.nParty, function(n) {
+                    return _c("party-params", {
+                      key: n - 1,
+                      ref: "party" + (n - 1),
+                      refInFor: true,
+                      attrs: {
+                        "name-initial": _vm.partyName[n - 1],
+                        "color-initial": _vm.partyColor[n - 1],
+                        "side-initial": _vm.partySide[n - 1],
+                        "n-constituent-seat-initial":
+                          _vm.partyNConstituentSeat[n - 1],
+                        "n-total-vote-initial": _vm.partyNTotalVote[n - 1]
                       }
                     })
-                  ],
-                  1
-                ),
-                _vm._v(" "),
-                _c("div", [
-                  _c("p", [_vm._v("จำนวนเสียงรวม")]),
+                  }),
                   _vm._v(" "),
-                  _c("p", [_vm._v(_vm._s(_vm.numberWithCommas(_vm.nVote)))])
-                ]),
-                _vm._v(" "),
-                _vm._l(_vm.nParty, function(n) {
-                  return _c("party-params", {
-                    key: n - 1,
-                    ref: "party" + (n - 1),
-                    refInFor: true,
+                  _c(
+                    "el-button",
+                    {
+                      attrs: { type: "primary" },
+                      on: { click: _vm.runUserDefined }
+                    },
+                    [_vm._v("ส่งผลการนับคะแนน")]
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "el-button",
+                    {
+                      on: {
+                        click: function($event) {
+                          _vm.reset(_vm.template)
+                        }
+                      }
+                    },
+                    [_vm._v("เริ่มใหม่")]
+                  )
+                ],
+                2
+              ),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _vm.paramChanged
+                ? _c("el-alert", {
                     attrs: {
-                      "name-initial": _vm.partyName[n - 1],
-                      "color-initial": _vm.partyColor[n - 1],
-                      "side-initial": _vm.partySide[n - 1],
-                      "n-constituent-seat-initial":
-                        _vm.partyNConstituentSeat[n - 1],
-                      "n-total-vote-initial": _vm.partyNTotalVote[n - 1]
+                      title: "กรุณากดปุ่ม ส่งผลการนับคะแนน เพื่อดูผลใหม่",
+                      type: "warning",
+                      center: "",
+                      "show-icon": ""
                     }
                   })
-                }),
-                _vm._v(" "),
-                _c(
-                  "el-button",
-                  {
-                    attrs: { type: "primary" },
-                    on: { click: _vm.runUserDefined }
-                  },
-                  [_vm._v("ส่งผลการนับคะแนนใหม่")]
-                )
-              ],
-              2
-            )
-          ])
+                : _vm._e()
+            ],
+            1
+          )
         ],
         1
       )
@@ -129144,7 +129297,7 @@ var _default = {
       nTotalVote: this.nTotalVoteInitial || 0,
       side: this.sideInitial || "ฝ่ายรัฐบาล",
       color: this.colorInitial || "#777777",
-      predefinedColors: ["#ff4500", "#ff8c00", "#ffd700", "#90ee90", "#00ced1", "#1e90ff"]
+      predefinedColors: ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#b15928"]
     };
   },
   mounted: function mounted() {
@@ -129167,9 +129320,6 @@ var _default = {
       return function (party) {
         return party.value.indexOf(queryString) === 0;
       };
-    },
-    handleSelect: function handleSelect(item) {
-      console.log(item);
     },
     loadAll: function loadAll() {
       return [{
@@ -129413,7 +129563,12 @@ exports.default = _default;
         _c("el-autocomplete", {
           staticClass: "inline-input",
           attrs: { "fetch-suggestions": _vm.querySearch, placeholder: "ชื่อ" },
-          on: { select: _vm.handleSelect, change: _vm.changeParams },
+          on: { select: _vm.changeParams },
+          nativeOn: {
+            keyup: function($event) {
+              return _vm.changeParams($event)
+            }
+          },
           model: {
             value: _vm.name,
             callback: function($$v) {
@@ -129602,7 +129757,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62041" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60946" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
