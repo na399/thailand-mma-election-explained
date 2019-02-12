@@ -550,7 +550,8 @@ function drawResultConstituent(
   resultConstituent,
   selector,
   config,
-  scales
+  scales,
+  constituentNo
 ) {
   const { width, height, margin } = config;
   const { xScale, yScale } = scales;
@@ -640,6 +641,16 @@ function drawResultConstituent(
     .classed('x-axis', true)
     .attr('transform', `translate(0, ${yScale(0)})`)
     .call(xAxis);
+
+    svg
+    .append('g')
+    .datum(constituentNo)
+    .append('text')
+    .attr('y', d => 20)
+    .attr('x', d => 200)
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'grey')
+    .text(d => `เขตเลือกตั้งที่ ${d+1}`);
 }
 
 function drawResultConstituents(electionResult, electionConfig, selector) {
@@ -657,7 +668,8 @@ function drawResultConstituents(electionResult, electionConfig, selector) {
       electionResult.resultConstituents[i],
       `#constituent${i}`,
       config,
-      scales
+      scales,
+      i
     );
   }
 }
@@ -920,11 +932,11 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
     .attr('cy', d => yScale(d.name))
     .attr('cx', d => xScale(nVotePerSeat * (d.iOfParty + 0.5)))
     .attr('r', markSize / 2)
-    .attr('fill', d => (markSize >= 6 ? 'white' : d3.color(d.color).darker()))
+    .attr('fill', d => (markSize >= 8 ? 'white' : d3.color(d.color).darker()))
     .attr('stroke', d => d3.color(d.color).darker())
-    .attr('stroke-width', markSize >= 6 ? 2 : markSize / 3);
+    .attr('stroke-width', markSize >= 8 ? 2 : markSize / 3);
 
-  if (markSize > 6) {
+  if (markSize >= 8) {
     seats
       .enter()
       .append('text')
@@ -960,11 +972,11 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
         );
         return `rotate(45 ${cx} ${cy})`;
       })
-      .attr('fill', d => (markSize >= 6 ? 'white' : d3.color(d.color).darker()))
+      .attr('fill', d => (markSize >= 8 ? 'white' : d3.color(d.color).darker()))
       .attr('stroke', d => d3.color(d.color).darker())
-      .attr('stroke-width', markSize >= 6 ? 2 : markSize / 3);
+      .attr('stroke-width', markSize >= 8 ? 2 : markSize / 3);
 
-    if (markSize > 6) {
+    if (markSize >= 8) {
       seatsPL
         .enter()
         .append('text')

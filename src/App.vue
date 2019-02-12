@@ -268,7 +268,7 @@ export default {
     },
     runFull() {
       const config = new app.ElectionConfig({
-        nParty: 8
+        nParty: 6
       });
 
       app.runApp(config, {
