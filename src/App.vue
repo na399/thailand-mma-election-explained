@@ -102,7 +102,7 @@ export default {
       nConstituentSeat: 350,
       nVote: 35000000,
       partyName: ["พรรคที่ 1", "อื่นๆ"],
-      partyColor: ["hsl(0, 90%, 60%)", "hsl(0, 0%, 60%)"],
+      partyColor: ["hsl(30, 90%, 60%)", "hsl(0, 0%, 60%)"],
       partySide: ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"],
       partyNConstituentSeat: [175, 175],
       partyNTotalVote: [17500000, 17500000],
