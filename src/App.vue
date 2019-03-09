@@ -18,7 +18,6 @@
           <p>ค่าเริ่มต้น</p>
           <el-radio-group v-model="template" @change="reset(template)">
             <el-radio-button label="เริ่มต้น"></el-radio-button>
-            <el-radio-button label="จำลอง พรรคใหญ่แยกพรรค"></el-radio-button>
             <el-radio-button label="ผลการเลือกตั้งพ.ศ. 2554"></el-radio-button>
             <el-radio-button label="พรรคเด่น พ.ศ. 2562"></el-radio-button>
           </el-radio-group>
@@ -290,20 +289,6 @@ export default {
           this.partyNConstituentSeat = [175, 175];
           this.partyNTotalVote = [17500000, 17500000];
           break;
-        case "จำลอง พรรคใหญ่แยกพรรค":
-          this.nParty = 3;
-          this.nConstituentSeat = 350;
-          this.nVote = 35000000;
-          this.partyName = ["พรรคหลัก", "พรรครอง", "อื่นๆ"];
-          this.partyColor = [
-            "hsl(0, 90%, 50%)",
-            "hsl(0, 100%, 80%)",
-            "hsl(0, 0%, 60%)"
-          ];
-          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
-          this.partyNConstituentSeat = [150, 25, 175];
-          this.partyNTotalVote = [16500000, 2000000, 16500000];
-          break;
         case "ผลการเลือกตั้งพ.ศ. 2554":
           this.nParty = 17;
           this.nConstituentSeat = 375;
@@ -404,7 +389,7 @@ export default {
           ];
           break;
         case "พรรคเด่น พ.ศ. 2562":
-          this.nParty = 12;
+          this.nParty = 11;
           this.nConstituentSeat = 350;
           this.nVote = 35000000;
           this.partyName = [
@@ -412,7 +397,6 @@ export default {
             "อนาคตใหม่",
             "ประชาธิปัตย์",
             "พลังประชารัฐ",
-            "ไทยรักษาชาติ",
             "เสรีรวมไทย",
             "ประชาชาติ",
             "ภูมิใจไทย",
@@ -426,7 +410,6 @@ export default {
             "hsl(30, 90%, 60%)",
             "hsl(200, 90%, 50%)",
             "hsl(240, 90%, 50%)",
-            "hsl(340, 100%, 70%)",
             "hsl(55, 90%, 50%)",
             "hsl(70, 90%, 50%)",
             "hsl(260, 100%, 50%)",
@@ -436,7 +419,6 @@ export default {
             "hsl(0, 0%, 60%)"
           ];
           this.partySide = [
-            "ฝ่ายรัฐบาล",
             "ฝ่ายรัฐบาล",
             "ฝ่ายรัฐบาล",
             "ฝ่ายรัฐบาล",
@@ -460,8 +442,7 @@ export default {
             30,
             30,
             30,
-            30,
-            20
+            50
           ];
           this.partyNTotalVote = [
             3000000,
@@ -474,8 +455,7 @@ export default {
             3000000,
             3000000,
             3000000,
-            3000000,
-            2000000
+            5000000
           ];
           break;
       }
