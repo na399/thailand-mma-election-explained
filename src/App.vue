@@ -100,7 +100,7 @@ export default {
       nParty: 2,
       nConstituentSeat: 350,
       nVote: 35000000,
-      partyName: ["พรรคที่ 1", "อื่นๆ"],
+      partyName: ["ตัวอย่าง", "อื่นๆ"],
       partyColor: ["hsl(30, 90%, 60%)", "hsl(0, 0%, 60%)"],
       partySide: ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"],
       partyNConstituentSeat: [175, 175],
@@ -272,7 +272,7 @@ export default {
 
       app.runApp(config, {
         randomSeed: (this.nSimulationRun += 1),
-        side: true
+        side: false
       });
 
       notify(this);

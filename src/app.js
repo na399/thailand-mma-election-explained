@@ -1,6 +1,7 @@
 import * as main from './main';
 import { ElectionConfig, Party } from './main';
 import * as table from './table';
+import * as parliament from './parliament';
 import seedrandom from 'seedrandom';
 import * as d3 from 'd3';
 
@@ -76,12 +77,6 @@ function runApp(config, option, parties) {
         ฝ่ายรัฐบาลจึงต้องการส.ส.ถึง 376 ที่นั่ง แทนที่จะเป็น 251 ที่นั่ง
         เพื่อให้แน่ใจว่าจะได้เลือกนายกรัฐมนตรีที่ฝ่ายรัฐบาลเองต้องการ
         มาดำรงตำแหน่ง
-      </p>
-      <p>
-        หากคุณเปิดเว็บไซต์นี้บนคอมพิวเตอร์
-        คุณสามารถลองจัดฝ่ายรัฐบาลและฝ่ายค้านใหม่ได้ในตารางด้านล่าง
-        โดยการเลื่อนแต่ละพรรค ไปอยู่ในกลุ่มฝ่ายรัฐบาลหรือฝ่ายค้าน (ขออภัยครับ
-        กำลังพัฒนาส่วนนี้สำหรับมือถือและจอสัมผัส)
       </p>`);
     table.addTable(result, '#table-sides', 'sides');
   } else {
@@ -113,7 +108,9 @@ function runApp(config, option, parties) {
   main.drawInitialAllocation(result, config, '#initial-allocation');
   main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
   main.drawFinalAllocation(result, config, '#final-allocation');
-  main.drawWaffle(result, config, '#parliament-seats-all', 'all');
+  // main.drawWaffle(result, config, '#parliament-seats-all', 'all');
+
+  parliament.drawParliament(result, '#parliament-seats-all');
 }
 
 export { runApp, ElectionConfig, Party };

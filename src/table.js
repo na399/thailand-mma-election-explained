@@ -119,6 +119,7 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nConstituentSeat);
       table.addColumn(nPartyListSeat);
       table.addColumn(nTotalSeat);
+      table.addColumn(nTotalVote);
       table.setSort([
         { column: 'nConstituentSeat', dir: 'desc' },
         { column: 'nTotalSeat', dir: 'desc' }

@@ -183,7 +183,7 @@ function runVote(electionConfig) {
     '#ffff99'
   ];
 
-  const sides = ['ฝ่ายรัฐบาล', 'ฝ่ายค้าน'];
+  // const sides = ['ฝ่ายรัฐบาล', 'ฝ่ายค้าน'];
 
   // assign winning propabilities and party names, i.e., colours
   let parties = pParties.map((p, i) => {
@@ -191,8 +191,8 @@ function runVote(electionConfig) {
       name: partyNames[i],
       color: partyColors[i],
       pParty: p,
-      nExpectedConstituentSeat: _.round(p * electionConfig.nConstituentSeat),
-      side: sides[i % 2]
+      nExpectedConstituentSeat: _.round(p * electionConfig.nConstituentSeat)
+      // side: sides[i % 2]
     });
     return party;
   });
@@ -642,7 +642,7 @@ function drawResultConstituent(
     .attr('transform', `translate(0, ${yScale(0)})`)
     .call(xAxis);
 
-    svg
+  svg
     .append('g')
     .datum(constituentNo)
     .append('text')
@@ -650,7 +650,7 @@ function drawResultConstituent(
     .attr('x', d => 200)
     .attr('text-anchor', 'middle')
     .attr('fill', 'grey')
-    .text(d => `เขตเลือกตั้งที่ ${d+1}`);
+    .text(d => `เขตเลือกตั้งที่ ${d + 1}`);
 }
 
 function drawResultConstituents(electionResult, electionConfig, selector) {
