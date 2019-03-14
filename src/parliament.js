@@ -57,7 +57,12 @@ function drawParliament(electionResult, selector) {
 
   let nRows = 0;
   let maxSeatNumber = 0;
-  let b = 1;
+  let b = 0.4
+  
+  if (nSeats <= 5) {
+    b = 1;
+  } 
+
   (function() {
     let a = innerRadiusCoef / (1 - innerRadiusCoef);
     while (maxSeatNumber < nSeats) {
@@ -94,8 +99,8 @@ function drawParliament(electionResult, selector) {
           theta: -Math.PI + anglePerSeat * (j + 0.5)
         };
         s.cartesian = {
-          x: s.polar.r * Math.cos(s.polar.theta),
-          y: s.polar.r * Math.sin(s.polar.theta)
+          x: s.polar.r * Math.cos(s.polar.theta) + width / 2,
+          y: s.polar.r * Math.sin(s.polar.theta) + outerParliamentRadius
         };
         seats.push(s);
       }
@@ -179,10 +184,10 @@ function drawParliament(electionResult, selector) {
   //   container = svg.append('g');
   //   container.classed('parliament', true);
   // }
-  container.attr(
-    'transform',
-    'translate(' + width / 2 + ',' + outerParliamentRadius + ')'
-  );
+  // container.attr(
+  //   'transform',
+  //   'translate(' + width / 2 + ',' + outerParliamentRadius + ')'
+  // );
 
   /* constituent seats as circles */
   let circles = container.append('g').selectAll('.seat');

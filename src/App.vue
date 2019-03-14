@@ -162,7 +162,7 @@ export default {
     updateNParty() {
       if (this.nParty > this.partyName.length) {
         // When nParty increases, add a new party before 'Other' party;
-        this.partyName.splice(this.nParty - 2, 0, `พรรคที่ ${this.nParty - 1}`);
+        this.partyName.splice(this.nParty - 2, 0, this.nParty - 1);
 
         this.partyColor.splice(
           this.nParty - 2,
@@ -283,7 +283,7 @@ export default {
           this.nParty = 2;
           this.nConstituentSeat = 350;
           this.nVote = 35000000;
-          this.partyName = ["พรรคที่ 1", "อื่นๆ"];
+          this.partyName = ["ตัวอย่าง", "อื่นๆ"];
           this.partyColor = ["hsl(0, 90%, 50%)", "hsl(0, 0%, 60%)"];
           this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
           this.partyNConstituentSeat = [175, 175];
