@@ -284,7 +284,7 @@ export default {
           this.nConstituentSeat = 350;
           this.nVote = 35000000;
           this.partyName = ["ตัวอย่าง", "อื่นๆ"];
-          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(0, 0%, 60%)"];
+          this.partyColor = ["hsl(30, 90%, 60%)", "hsl(0, 0%, 60%)"];
           this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
           this.partyNConstituentSeat = [175, 175];
           this.partyNTotalVote = [17500000, 17500000];
