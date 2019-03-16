@@ -162,7 +162,7 @@ export default {
     updateNParty() {
       if (this.nParty > this.partyName.length) {
         // When nParty increases, add a new party before 'Other' party;
-        this.partyName.splice(this.nParty - 2, 0, this.nParty - 1);
+        this.partyName.splice(this.nParty - 2, 0, (this.nParty - 1).toString());
 
         this.partyColor.splice(
           this.nParty - 2,
