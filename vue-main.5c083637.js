@@ -55344,16 +55344,16 @@ function runVote(electionConfig) {
   });
   var partyNames = ['แดง', 'ฟ้า', 'เขียว', 'ส้ม', 'ชมพู', 'น้ำเงิน', 'เขียวอ่อน', 'ส้มอ่อน', 'ม่วง', 'น้ำตาล', 'ม่วงอ่อน', 'เหลือง']; // must be unique
 
-  var partyColors = ['#e31a1c', '#a6cee3', '#33a02c', '#ff7f00', '#fb9a99', '#1f78b4', '#b2df8a', '#fdbf6f', '#6a3d9a', '#b15928', '#cab2d6', '#ffff99'];
-  var sides = ['ฝ่ายรัฐบาล', 'ฝ่ายค้าน']; // assign winning propabilities and party names, i.e., colours
+  var partyColors = ['#e31a1c', '#a6cee3', '#33a02c', '#ff7f00', '#fb9a99', '#1f78b4', '#b2df8a', '#fdbf6f', '#6a3d9a', '#b15928', '#cab2d6', '#ffff99']; // const sides = ['ฝ่ายรัฐบาล', 'ฝ่ายค้าน'];
+  // assign winning propabilities and party names, i.e., colours
 
   var parties = pParties.map(function (p, i) {
     var party = new Party({
       name: partyNames[i],
       color: partyColors[i],
       pParty: p,
-      nExpectedConstituentSeat: _lodash.default.round(p * electionConfig.nConstituentSeat),
-      side: sides[i % 2]
+      nExpectedConstituentSeat: _lodash.default.round(p * electionConfig.nConstituentSeat) // side: sides[i % 2]
+
     });
     return party;
   }); // array of possible winners to be drawn from randomly
@@ -55735,7 +55735,7 @@ function getResultConstituentScales(electionResult, config) {
   };
 }
 
-function drawResultConstituent(electionResult, resultConstituent, selector, config, scales) {
+function drawResultConstituent(electionResult, resultConstituent, selector, config, scales, constituentNo) {
   var width = config.width,
       height = config.height,
       margin = config.margin;
@@ -55820,6 +55820,13 @@ function drawResultConstituent(electionResult, resultConstituent, selector, conf
   yAxisG.select('.domain').remove();
   var xAxis = d3.axisBottom().tickSizeOuter(0).scale(xScale);
   svg.append('g').classed('x-axis', true).attr('transform', "translate(0, ".concat(yScale(0), ")")).call(xAxis);
+  svg.append('g').datum(constituentNo).append('text').attr('y', function (d) {
+    return 20;
+  }).attr('x', function (d) {
+    return 200;
+  }).attr('text-anchor', 'middle').attr('fill', 'grey').text(function (d) {
+    return "\u0E40\u0E02\u0E15\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E15\u0E31\u0E49\u0E07\u0E17\u0E35\u0E48 ".concat(d + 1);
+  });
 }
 
 function drawResultConstituents(electionResult, electionConfig, selector) {
@@ -55831,7 +55838,7 @@ function drawResultConstituents(electionResult, electionConfig, selector) {
       d3.select(selector).append('svg').attr('id', "constituent".concat(i));
     }
 
-    drawResultConstituent(electionResult, electionResult.resultConstituents[i], "#constituent".concat(i), config, scales);
+    drawResultConstituent(electionResult, electionResult.resultConstituents[i], "#constituent".concat(i), config, scales, i);
   }
 }
 /*******************************
@@ -56021,12 +56028,12 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
   }).attr('cx', function (d) {
     return xScale(nVotePerSeat * (d.iOfParty + 0.5));
   }).attr('r', markSize / 2).attr('fill', function (d) {
-    return markSize >= 6 ? 'white' : d3.color(d.color).darker();
+    return markSize >= 8 ? 'white' : d3.color(d.color).darker();
   }).attr('stroke', function (d) {
     return d3.color(d.color).darker();
-  }).attr('stroke-width', markSize >= 6 ? 2 : markSize / 3);
+  }).attr('stroke-width', markSize >= 8 ? 2 : markSize / 3);
 
-  if (markSize > 6) {
+  if (markSize >= 8) {
     seats.enter().append('text').attr('y', function (d) {
       return yScale(d.name) + markSize * 0.25;
     }).attr('x', function (d) {
@@ -56049,12 +56056,12 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
       var cx = xScale(nVotePerSeat * (d.iOfParty + d.party.nConstituentSeat + 0.5));
       return "rotate(45 ".concat(cx, " ").concat(cy, ")");
     }).attr('fill', function (d) {
-      return markSize >= 6 ? 'white' : d3.color(d.color).darker();
+      return markSize >= 8 ? 'white' : d3.color(d.color).darker();
     }).attr('stroke', function (d) {
       return d3.color(d.color).darker();
-    }).attr('stroke-width', markSize >= 6 ? 2 : markSize / 3);
+    }).attr('stroke-width', markSize >= 8 ? 2 : markSize / 3);
 
-    if (markSize > 6) {
+    if (markSize >= 8) {
       seatsPL.enter().append('text').attr('y', function (d) {
         return yScale(d.name) + yScale.bandwidth() + markSize * 0.25;
       }).attr('x', function (d) {
@@ -76078,6 +76085,7 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nConstituentSeat);
       table.addColumn(nPartyListSeat);
       table.addColumn(nTotalSeat);
+      table.addColumn(nTotalVote);
       table.setSort([{
         column: 'nConstituentSeat',
         dir: 'desc'
@@ -76133,7 +76141,251 @@ function addTable(electionResult, selector, type) {
       break;
   }
 }
-},{"tabulator-tables":"node_modules/tabulator-tables/dist/js/tabulator.js","lodash":"node_modules/lodash/lodash.js"}],"node_modules/seedrandom/lib/alea.js":[function(require,module,exports) {
+},{"tabulator-tables":"node_modules/tabulator-tables/dist/js/tabulator.js","lodash":"node_modules/lodash/lodash.js"}],"src/parliament.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.drawParliament = drawParliament;
+
+var d3 = _interopRequireWildcard(require("d3"));
+
+var _lodash = _interopRequireDefault(require("lodash"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
+
+function series(s, n) {
+  var r = 0;
+
+  for (var i = 0; i <= n; i++) {
+    r += s(i);
+  }
+
+  return r;
+}
+
+function drawParliament(electionResult, selector) {
+  /* 
+  Modified from d3-parliament by Geoffrey Brossard (me@geoffreybrossard.fr)
+  under MIT License
+  */
+  var parliamentData = electionResult.parties; // keep only parties with seats
+
+  parliamentData = _lodash.default.filter(parliamentData, 'nTotalSeat'); // order by numbers of seat
+
+  parliamentData = _lodash.default.orderBy(parliamentData, 'nTotalSeat', 'desc'); // reverse the order of the opposition side and place on another end
+
+  parliamentData = _lodash.default.filter(parliamentData, ['side', 'ฝ่ายรัฐบาล']).concat(_lodash.default.filter(parliamentData, ['side', 'ฝ่ายค้าน']).reverse());
+  var width = 500;
+  var height = width / 2;
+  var innerRadiusCoef = 0.4;
+  var outerParliamentRadius = Math.min(width / 2, height);
+  var innerParliementRadius = outerParliamentRadius * innerRadiusCoef;
+  /* init the svg */
+
+  d3.select(selector).selectAll('*').remove();
+  var svg = d3.select(selector).append('svg').attr('width', width).attr('height', height).style('overflow', 'visible');
+  /***
+   * compute number of seats and rows of the parliament */
+
+  var nSeats = 0;
+  parliamentData.forEach(function (p) {
+    nSeats += p.nTotalSeat;
+  });
+  var nRows = 0;
+  var maxSeatNumber = 0;
+  var b = 0.4;
+
+  if (nSeats <= 5) {
+    b = 1;
+  }
+
+  (function () {
+    var a = innerRadiusCoef / (1 - innerRadiusCoef);
+
+    while (maxSeatNumber < nSeats) {
+      nRows++;
+      b += a;
+      /* NOTE: the number of seats available in each row depends on the total number
+      of rows and floor() is needed because a row can only contain entire seats. So,
+      it is not possible to increment the total number of seats adding a row. */
+
+      maxSeatNumber = series(function (i) {
+        return Math.floor(Math.PI * (b + i));
+      }, nRows - 1);
+    }
+  })();
+  /***
+   * create the seats list */
+
+  /* compute the cartesian and polar coordinates for each seat */
+
+
+  var rowWidth = (outerParliamentRadius - innerParliementRadius) / nRows;
+  var seats = [];
+
+  (function () {
+    var seatsToRemove = maxSeatNumber - nSeats;
+
+    for (var i = 0; i < nRows; i++) {
+      var rowRadius = innerParliementRadius + rowWidth * (i + 0.5);
+      var rowSeats = Math.floor(Math.PI * (b + i)) - Math.floor(seatsToRemove / nRows) - (seatsToRemove % nRows > i ? 1 : 0);
+      var anglePerSeat = Math.PI / rowSeats;
+
+      for (var j = 0; j < rowSeats; j++) {
+        var s = {};
+        s.polar = {
+          r: rowRadius,
+          theta: -Math.PI + anglePerSeat * (j + 0.5)
+        };
+        s.cartesian = {
+          x: s.polar.r * Math.cos(s.polar.theta) + width / 2,
+          y: s.polar.r * Math.sin(s.polar.theta) + outerParliamentRadius
+        };
+        seats.push(s);
+      }
+    }
+  })();
+  /* sort the seats by angle */
+
+
+  seats.sort(function (a, b) {
+    return a.polar.theta - b.polar.theta || b.polar.r - a.polar.r;
+  });
+  /* fill the seat objects with data of its party and of itself if existing */
+
+  (function () {
+    var partyIndex = 0;
+    var seatIndex = 0;
+    seats.forEach(function (s) {
+      /* get current party and go to the next one if it has all its seats filled */
+      var party = parliamentData[partyIndex];
+      var nSeatsInParty = party.nTotalSeat;
+
+      if (seatIndex >= nSeatsInParty) {
+        partyIndex++;
+        seatIndex = 0;
+        party = parliamentData[partyIndex];
+      }
+      /* set party data */
+
+
+      s.data = party;
+      s.seatIndex = seatIndex;
+      /* set seat type */
+
+      if (seatIndex < party.nConstituentSeat) {
+        s.seatType = 'constituent';
+      } else {
+        s.seatType = 'partyList';
+      }
+
+      seatIndex++;
+    });
+  })();
+  /***
+   * helpers to get value from seat data */
+
+
+  var seatClasses = function seatClasses(d) {
+    var c = 'seat ';
+    c += d.data.name.replace(/ /g, '') || '';
+    return c;
+  };
+
+  var seatX = function seatX(d) {
+    return d.cartesian.x;
+  };
+
+  var seatY = function seatY(d) {
+    return d.cartesian.y;
+  };
+
+  var seatColor = function seatColor(d) {
+    return d.data.color;
+  };
+
+  var seatRadius = function seatRadius(d) {
+    var r = 0.4 * rowWidth; // limit radius to 40
+
+    r = r > 40 ? 40 : r;
+
+    if (d.data && typeof d.data.size === 'number') {
+      r *= d.data.size;
+    }
+
+    return r;
+  };
+
+  var seatWidth = function seatWidth(d) {
+    return 2 * seatRadius(d);
+  };
+
+  var seatTransform = function seatTransform(d) {
+    return "translate(".concat(seatX(d) - seatRadius(d), ", ").concat(seatY(d) - seatRadius(d) / 2, ")\n    rotate(45 ").concat(seatRadius(d), " ").concat(seatRadius(d), ")\n    scale(0.7)");
+  };
+  /***
+   * fill svg with seats as circles */
+
+  /* container of the parliament */
+
+
+  var container = svg; // if (container.empty()) {
+  //   container = svg.append('g');
+  //   container.classed('parliament', true);
+  // }
+  // container.attr(
+  //   'transform',
+  //   'translate(' + width / 2 + ',' + outerParliamentRadius + ')'
+  // );
+
+  /* constituent seats as circles */
+
+  var circles = container.append('g').selectAll('.seat');
+  var circlesEnter = circles.data(seats.filter(function (d) {
+    return d.seatType === 'constituent';
+  })).enter().append('circle');
+  circlesEnter.attr('class', seatClasses);
+  circlesEnter.attr('cx', seatX);
+  circlesEnter.attr('cy', seatY);
+  circlesEnter.attr('r', seatRadius);
+  circlesEnter.attr('fill', seatColor);
+  /* party list seats as diamonds */
+
+  var diamonds = container.append('g').selectAll('.seat');
+  var diamondsEnter = diamonds.data(seats.filter(function (d) {
+    return d.seatType === 'partyList';
+  })).enter().append('rect');
+  diamondsEnter.attr('class', seatClasses);
+  diamondsEnter.attr('width', seatWidth);
+  diamondsEnter.attr('height', seatWidth);
+  diamondsEnter.attr('fill', seatColor);
+  diamondsEnter.attr('transform', seatTransform);
+  var svgLegend = d3.select(selector).append('svg').attr('width', 200).attr('height', height).style('overflow', 'visible');
+  svgLegend.append('g').selectAll('text').data(parliamentData).enter().append('text').attr('font-size', 16).attr('y', function (_d, i) {
+    return (i + 1) * 20;
+  }).attr('x', 90).text(function (d) {
+    return "\u0E1E\u0E23\u0E23\u0E04".concat(d.name);
+  });
+  svgLegend.append('g').selectAll('text').data(parliamentData).enter().append('text').attr('font-size', 16).attr('y', function (_d, i) {
+    return (i + 1) * 20;
+  }).attr('x', 40).attr('fill', function (d) {
+    return d.color;
+  }).attr('text-anchor', 'end').text(function (d) {
+    return "".concat(d.nConstituentSeat, " \u25CF");
+  });
+  svgLegend.append('g').selectAll('text').data(parliamentData).enter().append('text').attr('font-size', 16).attr('y', function (_d, i) {
+    return (i + 1) * 20;
+  }).attr('x', 80).attr('fill', function (d) {
+    return d.color;
+  }).attr('text-anchor', 'end').text(function (d) {
+    return "".concat(d.nPartyListSeat, " \u25C6");
+  });
+}
+},{"d3":"node_modules/d3/index.js","lodash":"node_modules/lodash/lodash.js"}],"node_modules/seedrandom/lib/alea.js":[function(require,module,exports) {
 var define;
 // A port of an algorithm by Johannes Baagøe <baagoe@baagoe.com>, 2010
 // http://baagoe.com/en/RandomMusings/javascript/
@@ -77120,6 +77372,8 @@ var main = _interopRequireWildcard(require("./main"));
 
 var table = _interopRequireWildcard(require("./table"));
 
+var parliament = _interopRequireWildcard(require("./parliament"));
+
 var _seedrandom = _interopRequireDefault(require("seedrandom"));
 
 var d3 = _interopRequireWildcard(require("d3"));
@@ -77176,7 +77430,7 @@ function runApp(config, option, parties) {
   table.addTable(result, '#table-conclusion', 'conclusion');
 
   if (option.side) {
-    d3.select('#text-sides').html("\n      <h3>\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19</h3>\n      <p>\n        \u0E1E\u0E23\u0E23\u0E04\u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E32\u0E23\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E02\u0E2D\u0E07\u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48\u0E21\u0E35\u0E08\u0E33\u0E19\u0E27\u0E19\u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E2A.\u0E2A.\u0E43\u0E19\u0E2A\u0E20\u0E32\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E44\u0E14\u0E49\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E48\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07\n        \u0E2B\u0E23\u0E37\u0E2D 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B \u0E21\u0E35\u0E42\u0E2D\u0E01\u0E32\u0E2A\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E40\u0E1B\u0E47\u0E19\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\n      </p>\n      <p>\n        \u0E41\u0E15\u0E48\u0E01\u0E32\u0E23\u0E44\u0E14\u0E49\u0E21\u0E32\u0E0B\u0E36\u0E48\u0E07\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E19\u0E31\u0E49\u0E19\u0E21\u0E32\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E25\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E2D\u0E07\u0E17\u0E31\u0E49\u0E07\u0E2A\u0E20\u0E32\u0E1C\u0E39\u0E49\u0E41\u0E17\u0E19\u0E23\u0E32\u0E29\u0E0E\u0E23\n        (\u0E2A.\u0E2A.) \u0E08\u0E33\u0E19\u0E27\u0E19 500 \u0E40\u0E2A\u0E35\u0E22\u0E07 \u0E41\u0E25\u0E30\u0E27\u0E38\u0E12\u0E34\u0E2A\u0E20\u0E32 (\u0E2A.\u0E27.) \u0E2D\u0E35\u0E01\u0E08\u0E33\u0E19\u0E27\u0E19 250 \u0E40\u0E2A\u0E35\u0E22\u0E07\n        \u0E14\u0E31\u0E49\u0E07\u0E19\u0E31\u0E49\u0E19\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E43\u0E0A\u0E49\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E48\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07 \u0E2B\u0E23\u0E37\u0E2D 376 \u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B\n      </p>\n      <p>\n        \u0E14\u0E49\u0E27\u0E22\u0E40\u0E2B\u0E15\u0E38\u0E19\u0E35\u0E49 \u0E2B\u0E32\u0E01\u0E40\u0E01\u0E23\u0E07\u0E27\u0E48\u0E32\n        \u0E2A.\u0E27.\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14\u0E08\u0E30\u0E2D\u0E2D\u0E01\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E44\u0E21\u0E48\u0E15\u0E23\u0E07\u0E01\u0E31\u0E1A\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E43\u0E19\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\n        \u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2A.\u0E2A.\u0E16\u0E36\u0E07 376 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \u0E41\u0E17\u0E19\u0E17\u0E35\u0E48\u0E08\u0E30\u0E40\u0E1B\u0E47\u0E19 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\n        \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E43\u0E2B\u0E49\u0E41\u0E19\u0E48\u0E43\u0E08\u0E27\u0E48\u0E32\u0E08\u0E30\u0E44\u0E14\u0E49\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E17\u0E35\u0E48\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E40\u0E2D\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\n        \u0E21\u0E32\u0E14\u0E33\u0E23\u0E07\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\n      </p>\n      <p>\n        \u0E2B\u0E32\u0E01\u0E04\u0E38\u0E13\u0E40\u0E1B\u0E34\u0E14\u0E40\u0E27\u0E47\u0E1A\u0E44\u0E0B\u0E15\u0E4C\u0E19\u0E35\u0E49\u0E1A\u0E19\u0E04\u0E2D\u0E21\u0E1E\u0E34\u0E27\u0E40\u0E15\u0E2D\u0E23\u0E4C\n        \u0E04\u0E38\u0E13\u0E2A\u0E32\u0E21\u0E32\u0E23\u0E16\u0E25\u0E2D\u0E07\u0E08\u0E31\u0E14\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19\u0E43\u0E2B\u0E21\u0E48\u0E44\u0E14\u0E49\u0E43\u0E19\u0E15\u0E32\u0E23\u0E32\u0E07\u0E14\u0E49\u0E32\u0E19\u0E25\u0E48\u0E32\u0E07\n        \u0E42\u0E14\u0E22\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E48\u0E2D\u0E19\u0E41\u0E15\u0E48\u0E25\u0E30\u0E1E\u0E23\u0E23\u0E04 \u0E44\u0E1B\u0E2D\u0E22\u0E39\u0E48\u0E43\u0E19\u0E01\u0E25\u0E38\u0E48\u0E21\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E2B\u0E23\u0E37\u0E2D\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19 (\u0E02\u0E2D\u0E2D\u0E20\u0E31\u0E22\u0E04\u0E23\u0E31\u0E1A\n        \u0E01\u0E33\u0E25\u0E31\u0E07\u0E1E\u0E31\u0E12\u0E19\u0E32\u0E2A\u0E48\u0E27\u0E19\u0E19\u0E35\u0E49\u0E2A\u0E33\u0E2B\u0E23\u0E31\u0E1A\u0E21\u0E37\u0E2D\u0E16\u0E37\u0E2D\u0E41\u0E25\u0E30\u0E08\u0E2D\u0E2A\u0E31\u0E21\u0E1C\u0E31\u0E2A)\n      </p>");
+    d3.select('#text-sides').html("\n      <h3>\u0E01\u0E32\u0E23\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E41\u0E25\u0E30\u0E1D\u0E48\u0E32\u0E22\u0E04\u0E49\u0E32\u0E19</h3>\n      <p>\n        \u0E1E\u0E23\u0E23\u0E04\u0E2B\u0E23\u0E37\u0E2D\u0E01\u0E32\u0E23\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E02\u0E2D\u0E07\u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48\u0E21\u0E35\u0E08\u0E33\u0E19\u0E27\u0E19\u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E2A.\u0E2A.\u0E43\u0E19\u0E2A\u0E20\u0E32\u0E23\u0E27\u0E21\u0E01\u0E31\u0E19\u0E44\u0E14\u0E49\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E48\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07\n        \u0E2B\u0E23\u0E37\u0E2D 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B \u0E21\u0E35\u0E42\u0E2D\u0E01\u0E32\u0E2A\u0E08\u0E31\u0E14\u0E15\u0E31\u0E49\u0E07\u0E40\u0E1B\u0E47\u0E19\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\n      </p>\n      <p>\n        \u0E41\u0E15\u0E48\u0E01\u0E32\u0E23\u0E44\u0E14\u0E49\u0E21\u0E32\u0E0B\u0E36\u0E48\u0E07\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E19\u0E31\u0E49\u0E19\u0E21\u0E32\u0E08\u0E32\u0E01\u0E01\u0E32\u0E23\u0E25\u0E07\u0E04\u0E30\u0E41\u0E19\u0E19\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E2D\u0E07\u0E17\u0E31\u0E49\u0E07\u0E2A\u0E20\u0E32\u0E1C\u0E39\u0E49\u0E41\u0E17\u0E19\u0E23\u0E32\u0E29\u0E0E\u0E23\n        (\u0E2A.\u0E2A.) \u0E08\u0E33\u0E19\u0E27\u0E19 500 \u0E40\u0E2A\u0E35\u0E22\u0E07 \u0E41\u0E25\u0E30\u0E27\u0E38\u0E12\u0E34\u0E2A\u0E20\u0E32 (\u0E2A.\u0E27.) \u0E2D\u0E35\u0E01\u0E08\u0E33\u0E19\u0E27\u0E19 250 \u0E40\u0E2A\u0E35\u0E22\u0E07\n        \u0E14\u0E31\u0E49\u0E07\u0E19\u0E31\u0E49\u0E19\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E43\u0E0A\u0E49\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E40\u0E01\u0E34\u0E19\u0E01\u0E36\u0E48\u0E07\u0E2B\u0E19\u0E36\u0E48\u0E07 \u0E2B\u0E23\u0E37\u0E2D 376 \u0E40\u0E2A\u0E35\u0E22\u0E07\u0E02\u0E36\u0E49\u0E19\u0E44\u0E1B\n      </p>\n      <p>\n        \u0E14\u0E49\u0E27\u0E22\u0E40\u0E2B\u0E15\u0E38\u0E19\u0E35\u0E49 \u0E2B\u0E32\u0E01\u0E40\u0E01\u0E23\u0E07\u0E27\u0E48\u0E32\n        \u0E2A.\u0E27.\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14\u0E08\u0E30\u0E2D\u0E2D\u0E01\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E44\u0E21\u0E48\u0E15\u0E23\u0E07\u0E01\u0E31\u0E1A\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E43\u0E19\u0E01\u0E32\u0E23\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\n        \u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E08\u0E36\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2A.\u0E2A.\u0E16\u0E36\u0E07 376 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07 \u0E41\u0E17\u0E19\u0E17\u0E35\u0E48\u0E08\u0E30\u0E40\u0E1B\u0E47\u0E19 251 \u0E17\u0E35\u0E48\u0E19\u0E31\u0E48\u0E07\n        \u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E43\u0E2B\u0E49\u0E41\u0E19\u0E48\u0E43\u0E08\u0E27\u0E48\u0E32\u0E08\u0E30\u0E44\u0E14\u0E49\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E19\u0E32\u0E22\u0E01\u0E23\u0E31\u0E10\u0E21\u0E19\u0E15\u0E23\u0E35\u0E17\u0E35\u0E48\u0E1D\u0E48\u0E32\u0E22\u0E23\u0E31\u0E10\u0E1A\u0E32\u0E25\u0E40\u0E2D\u0E07\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\n        \u0E21\u0E32\u0E14\u0E33\u0E23\u0E07\u0E15\u0E33\u0E41\u0E2B\u0E19\u0E48\u0E07\n      </p>");
     table.addTable(result, '#table-sides', 'sides');
   } else {
     d3.select('#text-sides').html('');
@@ -77203,10 +77457,11 @@ function runApp(config, option, parties) {
   main.drawWaffle(result, config, '#parliament-seats-constituent', 'constituent');
   main.drawInitialAllocation(result, config, '#initial-allocation');
   main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
-  main.drawFinalAllocation(result, config, '#final-allocation');
-  main.drawWaffle(result, config, '#parliament-seats-all', 'all');
+  main.drawFinalAllocation(result, config, '#final-allocation'); // main.drawWaffle(result, config, '#parliament-seats-all', 'all');
+
+  parliament.drawParliament(result, '#parliament-seats-all');
 }
-},{"./main":"src/main.js","./table":"src/table.js","seedrandom":"node_modules/seedrandom/index.js","d3":"node_modules/d3/index.js"}],"node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
+},{"./main":"src/main.js","./table":"src/table.js","./parliament":"src/parliament.js","seedrandom":"node_modules/seedrandom/index.js","d3":"node_modules/d3/index.js"}],"node_modules/parcel-bundler/src/builtins/bundle-url.js":[function(require,module,exports) {
 var bundleURL = null;
 
 function getBundleURLCached() {
@@ -77586,8 +77841,8 @@ var _default = {
       nParty: 2,
       nConstituentSeat: 350,
       nVote: 35000000,
-      partyName: ["พรรคที่ 1", "อื่นๆ"],
-      partyColor: ["hsl(0, 90%, 60%)", "hsl(0, 0%, 60%)"],
+      partyName: ["ตัวอย่าง", "อื่นๆ"],
+      partyColor: ["hsl(30, 90%, 60%)", "hsl(0, 0%, 60%)"],
       partySide: ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"],
       partyNConstituentSeat: [175, 175],
       partyNTotalVote: [17500000, 17500000],
@@ -77659,7 +77914,7 @@ var _default = {
     updateNParty: function updateNParty() {
       if (this.nParty > this.partyName.length) {
         // When nParty increases, add a new party before 'Other' party;
-        this.partyName.splice(this.nParty - 2, 0, "\u0E1E\u0E23\u0E23\u0E04\u0E17\u0E35\u0E48 ".concat(this.nParty - 1));
+        this.partyName.splice(this.nParty - 2, 0, (this.nParty - 1).toString());
         this.partyColor.splice(this.nParty - 2, 0, "hsl(".concat(95 * (this.nParty - 2) % 360, ", 90%, 50%)"));
         this.partySide.splice(this.nParty - 2, 0, "ฝ่ายค้าน");
         this.partyNConstituentSeat.push(Math.ceil(this.partyNConstituentSeat.pop() / 2));
@@ -77744,11 +77999,11 @@ var _default = {
     },
     runFull: function runFull() {
       var config = new app.ElectionConfig({
-        nParty: 8
+        nParty: 6
       });
       app.runApp(config, {
         randomSeed: this.nSimulationRun += 1,
-        side: true
+        side: false
       });
       notify(this);
     },
@@ -77758,22 +78013,11 @@ var _default = {
           this.nParty = 2;
           this.nConstituentSeat = 350;
           this.nVote = 35000000;
-          this.partyName = ["พรรคที่ 1", "อื่นๆ"];
-          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(0, 0%, 60%)"];
+          this.partyName = ["ตัวอย่าง", "อื่นๆ"];
+          this.partyColor = ["hsl(30, 90%, 60%)", "hsl(0, 0%, 60%)"];
           this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
           this.partyNConstituentSeat = [175, 175];
           this.partyNTotalVote = [17500000, 17500000];
-          break;
-
-        case "จำลอง พรรคใหญ่แยกพรรค":
-          this.nParty = 3;
-          this.nConstituentSeat = 350;
-          this.nVote = 35000000;
-          this.partyName = ["พรรคหลัก", "พรรครอง", "อื่นๆ"];
-          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(0, 100%, 80%)", "hsl(0, 0%, 60%)"];
-          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
-          this.partyNConstituentSeat = [150, 25, 175];
-          this.partyNTotalVote = [16500000, 2000000, 16500000];
           break;
 
         case "ผลการเลือกตั้งพ.ศ. 2554":
@@ -77788,14 +78032,14 @@ var _default = {
           break;
 
         case "พรรคเด่น พ.ศ. 2562":
-          this.nParty = 12;
+          this.nParty = 11;
           this.nConstituentSeat = 350;
           this.nVote = 35000000;
-          this.partyName = ["เพื่อไทย", "อนาคตใหม่", "ประชาธิปัตย์", "พลังประชารัฐ", "ไทยรักษาชาติ", "เสรีรวมไทย", "ประชาชาติ", "ภูมิใจไทย", "รวมพลังประชาชาติไทย", "ชาติไทยพัฒนา", "ชาติพัฒนา", "อื่นๆ"];
-          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(30, 90%, 60%)", "hsl(200, 90%, 50%)", "hsl(240, 90%, 50%)", "hsl(340, 100%, 70%)", "hsl(55, 90%, 50%)", "hsl(70, 90%, 50%)", "hsl(260, 100%, 50%)", "hsl(220, 90%, 50%)", "hsl(320, 90%, 50%)", "hsl(25, 90%, 50%)", "hsl(0, 0%, 60%)"];
-          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
-          this.partyNConstituentSeat = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 20];
-          this.partyNTotalVote = [3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 2000000];
+          this.partyName = ["เพื่อไทย", "อนาคตใหม่", "ประชาธิปัตย์", "พลังประชารัฐ", "เสรีรวมไทย", "ประชาชาติ", "ภูมิใจไทย", "รวมพลังประชาชาติไทย", "ชาติไทยพัฒนา", "ชาติพัฒนา", "อื่นๆ"];
+          this.partyColor = ["hsl(0, 90%, 50%)", "hsl(30, 90%, 60%)", "hsl(200, 90%, 50%)", "hsl(240, 90%, 50%)", "hsl(55, 90%, 50%)", "hsl(70, 90%, 50%)", "hsl(260, 100%, 50%)", "hsl(220, 90%, 50%)", "hsl(320, 90%, 50%)", "hsl(25, 90%, 50%)", "hsl(0, 0%, 60%)"];
+          this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
+          this.partyNConstituentSeat = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 50];
+          this.partyNTotalVote = [3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 3000000, 5000000];
           break;
       }
 
@@ -77888,10 +78132,6 @@ exports.default = _default;
                     },
                     [
                       _c("el-radio-button", { attrs: { label: "เริ่มต้น" } }),
-                      _vm._v(" "),
-                      _c("el-radio-button", {
-                        attrs: { label: "จำลอง พรรคใหญ่แยกพรรค" }
-                      }),
                       _vm._v(" "),
                       _c("el-radio-button", {
                         attrs: { label: "ผลการเลือกตั้งพ.ศ. 2554" }
@@ -129757,7 +129997,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60946" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55889" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
