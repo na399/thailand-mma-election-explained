@@ -277,7 +277,7 @@ function runAllocation(electionConfig, voteResult) {
   }, 0);
 
   // calculate allocated seats
-  let nVotePerSeat = Math.floor(nTotalVote / electionConfig.nTotalSeat);
+  let nVotePerSeat = Math.ceil(nTotalVote / electionConfig.nTotalSeat);
 
   parties.forEach(party => {
     party.nInitialAllocatedSeat = Math.floor(party.nTotalVote / nVotePerSeat);
@@ -333,7 +333,7 @@ function runAllocation(electionConfig, voteResult) {
       return nTotalRemainingVote;
     }, 0);
 
-    var nVotePerRemainingSeat = Math.floor(
+    var nVotePerRemainingSeat = Math.ceil(
       nTotalRemainingVote / nRemainingSeat
     );
   } else {
