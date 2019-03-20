@@ -1104,7 +1104,6 @@ function addInitialAllocatedText(electionResult, electionConfig, selector) {
 
 function addFinalAllocationText(electionResult, electionConfig, selector) {
   let text = ``;
-  console.log('electionResult :', electionResult);
   if (electionResult.nPartyWithoutPartyListNeeded > 0) {
     text = `
     <p>เนื่องจากมี ${electionResult.nPartyWithoutPartyListNeeded} 
