@@ -284,9 +284,13 @@ function runAllocation(electionConfig, voteResult) {
   });
 
   parties.forEach(party => {
-    party.nInitialRemainderVote =
-      party.nTotalVote % (party.nInitialAllocatedSeat * nVotePerSeat) ||
-      party.nTotalVote; // in case of party.nInitialAllocatedSeat == 0
+    if (party.nInitialAllocatedSeat === 0) {
+      // in case of party.nInitialAllocatedSeat == 0
+      party.nInitialRemainderVote = party.nTotalVote;
+    } else {
+      party.nInitialRemainderVote =
+        party.nTotalVote % (party.nInitialAllocatedSeat * nVotePerSeat);
+    }
   });
 
   parties = _.orderBy(parties, 'nInitialRemainderVote', 'desc');
@@ -333,9 +337,7 @@ function runAllocation(electionConfig, voteResult) {
       return nTotalRemainingVote;
     }, 0);
 
-    var nVotePerRemainingSeat = Math.ceil(
-      nTotalRemainingVote / nRemainingSeat
-    );
+    var nVotePerRemainingSeat = Math.ceil(nTotalRemainingVote / nRemainingSeat);
   } else {
     var nVotePerRemainingSeat = nVotePerSeat;
   }
@@ -345,9 +347,13 @@ function runAllocation(electionConfig, voteResult) {
       party.nAllocatedSeat = Math.floor(
         party.nTotalVote / nVotePerRemainingSeat
       );
-      party.nRemainderVote =
-        party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat) ||
-        party.nTotalVote; // in case of party.nAllocatedSeat == 0
+      if (party.nAllocatedSeat === 0) {
+        // in case of party.nAllocatedSeat == 0
+        party.nRemainderVote = party.nTotalVote;
+      } else {
+        party.nRemainderVote =
+          party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat);
+      }
     } else {
       party.nAllocatedSeat = party.nConstituentSeat;
     }

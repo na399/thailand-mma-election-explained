@@ -1,6 +1,6 @@
 {
   "name": "thailand-mma-election-explained",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Visual explanation of the Mixed Members Apportionment (MMA) election system in Thailand",
   "main": "index.html",
   "author": "Natthawut Adulyanukosol <na399@cantab.net>",
