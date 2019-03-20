@@ -27,9 +27,11 @@ class ElectionResult {
     resultConstituents,
     constituentSeatsNames,
     nTotalVote,
+    nTotalRemainingVote,
     nVotePerSeat,
     nPartyWithoutPartyListNeeded,
     nVotePerRemainingSeat,
+    nRemainingSeat,
     nUnallocatedSeat,
     nTotalInitialAllocatedSeat,
     nTotalAllocatedSeat,
@@ -41,9 +43,11 @@ class ElectionResult {
     this.resultConstituents = resultConstituents;
     this.constituentSeatsNames = constituentSeatsNames;
     this.nTotalVote = nTotalVote;
+    this.nTotalRemainingVote = nTotalRemainingVote;
     this.nVotePerSeat = nVotePerSeat;
     this.nPartyWithoutPartyListNeeded = nPartyWithoutPartyListNeeded;
     this.nVotePerRemainingSeat = nVotePerRemainingSeat;
+    this.nRemainingSeat = nRemainingSeat;
     this.nUnallocatedSeat = nUnallocatedSeat;
     this.nTotalInitialAllocatedSeat = nTotalInitialAllocatedSeat;
     this.nTotalAllocatedSeat = nTotalAllocatedSeat;
@@ -321,16 +325,16 @@ function runAllocation(electionConfig, voteResult) {
     false
   ]).length;
 
+  let nTotalRemainingVote = 0;
+  let nRemainingSeat = 0;
+
   if (_.filter(parties, ['bPartyListNeeded', false]).length > 0) {
-    const nRemainingSeat = _.filter(parties, [
-      'bPartyListNeeded',
-      false
-    ]).reduce(
+    nRemainingSeat = _.filter(parties, ['bPartyListNeeded', false]).reduce(
       (nRemainingSeat, party) => nRemainingSeat - party.nConstituentSeat,
       electionConfig.nTotalSeat
     );
 
-    let nTotalRemainingVote = parties.reduce((nTotalRemainingVote, party) => {
+    nTotalRemainingVote = parties.reduce((nTotalRemainingVote, party) => {
       if (party.bPartyListNeeded) {
         nTotalRemainingVote += party.nTotalVote;
       }
@@ -482,9 +486,11 @@ function runAllocation(electionConfig, voteResult) {
     resultConstituents,
     constituentSeatsNames,
     nTotalVote,
+    nTotalRemainingVote,
     nVotePerSeat,
     nPartyWithoutPartyListNeeded,
     nVotePerRemainingSeat,
+    nRemainingSeat,
     nUnallocatedSeat,
     nTotalInitialAllocatedSeat,
     nTotalAllocatedSeat,
@@ -1069,8 +1075,10 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
   <p>จำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี ■ ได้นั้น มาจากจำนวนเสียงทั้งหมด 
   ${numberWithCommas(nTotalVote)} เสียง 
   หารด้วยจำนวนส.ส.ทั้งหมด ${electionConfig.nTotalSeat} ที่นั่ง 
-  ได้ผลลัพธ์ว่าต้องใช้ ${numberWithCommas(electionResult.nVotePerSeat)} เสียง 
-  ต่อ 1 ที่นั่งในสภา</p>
+  ได้ผลลัพธ์ว่า <b>ต้องใช้ ${numberWithCommas(
+    electionResult.nVotePerSeat
+  )} เสียง 
+  ต่อ 1 ที่นั่งในสภา</b></p>
   <p>จำนวนดังกล่าวแทนด้วยแต่ละบล็อกสี่เหลี่ยม ■ ในกราฟแท่งด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี
   ตามจำนวนเสียงที่ได้เต็มบล็อก ■ จนครบกว่าจะครบทั้ง ${electionConfig.nTotalSeat}
   ที่นั่งในสภา เมื่อรวมกันทุกพรรคแล้ว</p>
@@ -1096,6 +1104,7 @@ function addInitialAllocatedText(electionResult, electionConfig, selector) {
 
 function addFinalAllocationText(electionResult, electionConfig, selector) {
   let text = ``;
+  console.log('electionResult :', electionResult);
   if (electionResult.nPartyWithoutPartyListNeeded > 0) {
     text = `
     <p>เนื่องจากมี ${electionResult.nPartyWithoutPartyListNeeded} 
@@ -1104,9 +1113,14 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
     พรรคนี้ได้รับส.ส.ตามที่ได้มาจากแบบแบ่งเขตเลือกตั้ง ● แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อ ◆ ได้อีก</p>
     <p>ดังนั้นการจัดสรรส.ส.พึงมีและส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
       electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น
-      โดยใช้เสียง ${numberWithCommas(
+      <b>โดยใช้เสียง ${numberWithCommas(
         electionResult.nVotePerRemainingSeat
-      )} ต่อ 1 ที่นั่ง</p>`;
+      )} ต่อ 1 ที่นั่ง</b> ซึ่งคำนวนมาจาก จำนวนเสียงที่เหลือจากเฉพาะพรรคที่ยังได้ส.ส.แบ่งเขตไม่ครบจำนวนส.ส.พึงมี 
+      ${numberWithCommas(
+        electionResult.nTotalRemainingVote
+      )} เสียง หารด้วย จำนวนที่นั่งที่เหลือ ${numberWithCommas(
+      electionResult.nRemainingSeat
+    )} ที่นั่ง</p>`;
   } else {
     text = `<p>เนื่องจากไม่มีพรรคใด ได้รับจำนวนส.ส.แบบเบ่งเขต ● ไปครบจำนวนส.ส.พึงมี ■</p>
     <p>ดังนั้นทุกพรรคจะได้รับจำนวนส.ส.แบบบัญชีรายชื่อ ◆ รวมกับส.ส.แบบเบ่งเขต ● จนครบจำนวนส.ส.พึงมี ■</p>`;
