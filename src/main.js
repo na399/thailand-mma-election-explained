@@ -281,7 +281,7 @@ function runAllocation(electionConfig, voteResult) {
   }, 0);
 
   // calculate allocated seats
-  let nVotePerSeat = Math.ceil(nTotalVote / electionConfig.nTotalSeat);
+  let nVotePerSeat = +(nTotalVote / electionConfig.nTotalSeat).toFixed(4);
 
   parties.forEach(party => {
     party.nInitialAllocatedSeat = Math.floor(party.nTotalVote / nVotePerSeat);
@@ -341,7 +341,9 @@ function runAllocation(electionConfig, voteResult) {
       return nTotalRemainingVote;
     }, 0);
 
-    var nVotePerRemainingSeat = Math.ceil(nTotalRemainingVote / nRemainingSeat);
+    var nVotePerRemainingSeat = +(nTotalRemainingVote / nRemainingSeat).toFixed(
+      4
+    );
   } else {
     var nVotePerRemainingSeat = nVotePerSeat;
   }
@@ -376,7 +378,9 @@ function runAllocation(electionConfig, voteResult) {
 
   parties.forEach(party => {
     if (party.bPartyListNeeded && party.nAllocatedSeat > 0) {
-      party.nVotePerAllocatedSeat = party.nTotalVote / party.nAllocatedSeat;
+      party.nVotePerAllocatedSeat = +(
+        party.nTotalVote / party.nAllocatedSeat
+      ).toFixed(4);
     }
   });
 
@@ -399,6 +403,9 @@ function runAllocation(electionConfig, voteResult) {
     parties[i % nPartiesGettingPartyList].nAllocatedSeat += 1;
     parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
   }
+
+  // TODO
+  // 128(7) in case nPartyList exceeds 150, recalculate the proportion
 
   // calculate final total seat numbers
   parties.forEach(party => {
@@ -1075,9 +1082,7 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
   <p>จำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี ■ ได้นั้น มาจากจำนวนเสียงทั้งหมด 
   ${numberWithCommas(nTotalVote)} เสียง 
   หารด้วยจำนวนส.ส.ทั้งหมด ${electionConfig.nTotalSeat} ที่นั่ง 
-  ได้ผลลัพธ์ว่า <b>ต้องใช้ ${numberWithCommas(
-    electionResult.nVotePerSeat
-  )} เสียง 
+  ได้ผลลัพธ์ว่า <b>ต้องใช้ ${electionResult.nVotePerSeat} เสียง 
   ต่อ 1 ที่นั่งในสภา</b></p>
   <p>จำนวนดังกล่าวแทนด้วยแต่ละบล็อกสี่เหลี่ยม ■ ในกราฟแท่งด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี
   ตามจำนวนเสียงที่ได้เต็มบล็อก ■ จนครบกว่าจะครบทั้ง ${electionConfig.nTotalSeat}
@@ -1112,9 +1117,9 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
     พรรคนี้ได้รับส.ส.ตามที่ได้มาจากแบบแบ่งเขตเลือกตั้ง ● แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อ ◆ ได้อีก</p>
     <p>ดังนั้นการจัดสรรส.ส.พึงมีและส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
       electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น
-      <b>โดยใช้เสียง ${numberWithCommas(
+      <b>โดยใช้เสียง ${
         electionResult.nVotePerRemainingSeat
-      )} ต่อ 1 ที่นั่ง</b> ซึ่งคำนวนมาจาก จำนวนเสียงที่เหลือจากเฉพาะพรรคที่ยังได้ส.ส.แบ่งเขตไม่ครบจำนวนส.ส.พึงมี 
+      } ต่อ 1 ที่นั่ง</b> ซึ่งคำนวนมาจาก จำนวนเสียงที่เหลือจากเฉพาะพรรคที่ยังได้ส.ส.แบ่งเขตไม่ครบจำนวนส.ส.พึงมี 
       ${numberWithCommas(
         electionResult.nTotalRemainingVote
       )} เสียง หารด้วย จำนวนที่นั่งที่เหลือ ${numberWithCommas(
