@@ -55432,10 +55432,11 @@ function runAllocation(electionConfig, voteResult) {
     party.nInitialAllocatedSeat = Math.floor(party.nTotalVote / nVotePerSeat);
   });
   parties.forEach(function (party) {
-    party.nInitialRemainderVote = party.nTotalVote % (party.nInitialAllocatedSeat * nVotePerSeat); // in case of party.nInitialAllocatedSeat == 0
-
     if (party.nInitialAllocatedSeat === 0) {
+      // in case of party.nInitialAllocatedSeat == 0
       party.nInitialRemainderVote = party.nTotalVote;
+    } else {
+      party.nInitialRemainderVote = party.nTotalVote % (party.nInitialAllocatedSeat * nVotePerSeat);
     }
   });
   parties = _lodash.default.orderBy(parties, 'nInitialRemainderVote', 'desc');
@@ -55500,7 +55501,13 @@ function runAllocation(electionConfig, voteResult) {
   parties.forEach(function (party) {
     if (party.bPartyListNeeded) {
       party.nAllocatedSeat = Math.floor(party.nTotalVote / nVotePerRemainingSeat);
-      party.nRemainderVote = party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat) || party.nTotalVote; // in case of party.nAllocatedSeat == 0
+
+      if (party.nAllocatedSeat === 0) {
+        // in case of party.nAllocatedSeat == 0
+        party.nRemainderVote = party.nTotalVote;
+      } else {
+        party.nRemainderVote = party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat);
+      }
     } else {
       party.nAllocatedSeat = party.nConstituentSeat;
     }
@@ -130001,7 +130008,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53768" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58267" + '/');
 
   ws.onmessage = function (event) {
     var data = JSON.parse(event.data);
