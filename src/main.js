@@ -1093,6 +1093,9 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
   <p>แต่ถ้าหากมีพรรคใดได้รับส.ส.แบบแบ่งเขตเลือกตั้ง ● เป็นจำนวนเท่ากับหรือมากกว่าส.ส.พึงมี ■ 
   ให้นำพรรคนั้นออกจากการคำนวณ และได้ส.ส.แบบแบ่งเขตเลือกตั้ง ● ตามที่ได้มา แต่ไม่ได้รับส.ส.แบบบัญชีรายชื่อ ◆ เพิ่มเติม
   ส่วนพรรคที่เหลือนำไปคำนวณส.ส.พึงมี ■ ใหม่อีกครั้งตามจำนวนที่นั่งที่เหลืออยู่</p>
+  <p><i>หากเปิดบนจอมือถือ กรุณาเลื่อนไปทางซ้ายเพื่อดูกราฟคะแนนเสียงทั้งหมด</i><p>
+  <p><u><a href="https://github.com/na399/thailand-mma-election-explained/raw/master/src/assets/explainer.jpg" target="_blank">
+  วิธีการอ่านกราฟการจัดสรรส.ส.</a></u><p></p>
   `;
 
   d3.select(selector).html(allocationText);

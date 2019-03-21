@@ -32,7 +32,9 @@ function runApp(config, option, parties) {
     if (!option.onlyAllocation) {
       main.addIntroText(config, '#text-intro', '');
     } else {
-      d3.select('#text-intro').html('');
+      d3.select('#text-intro').html(
+        '<br /><p><u><small><a href="#text-conclusion">ข้ามไปที่สรุปจำนวนส.ส.ทั้งหมด<a><small></u></p>'
+      );
     }
   }
 

@@ -27,7 +27,7 @@
       <span>จำนวนเสียงที่ได้รับทั้งประเทศ</span>
       <el-slider
         v-model="nTotalVote"
-        :max="35000000"
+        :max="40000000"
         show-input
         :format-tooltip="numberWithCommas"
         @change="changeParams"

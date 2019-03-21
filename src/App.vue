@@ -1,25 +1,13 @@
 <template>
   <div id="app">
     <el-tabs type="border-card">
-      <el-tab-pane label="1 แบบจำลอง (ย่อ)">
-        <el-button type="primary" @click="runStarter">จำลองผลการเลือกตั้ง แบบย่อ</el-button>
-        <p v-if="nSimulationRun > 0">
-          <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
-        </p>
-      </el-tab-pane>
-      <el-tab-pane label="2 แบบจำลอง (เต็ม)">
-        <el-button type="primary" @click="runFull">จำลองผลการเลือกตั้ง แบบเต็ม</el-button>
-        <p v-if="nSimulationRun > 0">
-          <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
-        </p>
-      </el-tab-pane>
-      <el-tab-pane label="3 กำหนดเอง">
+      <el-tab-pane label="กำหนดเอง">
         <div>
           <p>ค่าเริ่มต้น</p>
           <el-radio-group v-model="template" @change="reset(template)">
-            <el-radio-button label="เริ่มต้น"></el-radio-button>
-            <el-radio-button label="ผลการเลือกตั้งพ.ศ. 2554"></el-radio-button>
             <el-radio-button label="พรรคเด่น พ.ศ. 2562"></el-radio-button>
+            <el-radio-button label="ผลการเลือกตั้งพ.ศ. 2554"></el-radio-button>
+            <el-radio-button label="เริ่มต้น"></el-radio-button>
           </el-radio-group>
         </div>
         <br>
@@ -55,6 +43,18 @@
           center
           show-icon
         ></el-alert>
+      </el-tab-pane>
+      <el-tab-pane label="แบบจำลอง (ย่อ)">
+        <el-button type="primary" @click="runStarter">จำลองผลการเลือกตั้ง แบบย่อ</el-button>
+        <p v-if="nSimulationRun > 0">
+          <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
+        </p>
+      </el-tab-pane>
+      <el-tab-pane label="แบบจำลอง (เต็ม)">
+        <el-button type="primary" @click="runFull">จำลองผลการเลือกตั้ง แบบเต็ม</el-button>
+        <p v-if="nSimulationRun > 0">
+          <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
+        </p>
       </el-tab-pane>
     </el-tabs>
   </div>
@@ -96,19 +96,91 @@ export default {
   data() {
     return {
       nSimulationRun: 0,
-      template: "เริ่มต้น",
-      nParty: 2,
+      template: "พรรคเด่น พ.ศ. 2562",
+      nParty: 13,
       nConstituentSeat: 350,
-      nVote: 35000000,
-      partyName: ["ตัวอย่าง", "อื่นๆ"],
-      partyColor: ["hsl(30, 90%, 60%)", "hsl(0, 0%, 60%)"],
-      partySide: ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"],
-      partyNConstituentSeat: [175, 175],
-      partyNTotalVote: [17500000, 17500000],
+      nVote: 40000000,
+      partyName: [
+        "เพื่อไทย",
+        "อนาคตใหม่",
+        "ประชาธิปัตย์",
+        "พลังประชารัฐ",
+        "เสรีรวมไทย",
+        "เศรษฐกิจใหม่",
+        "ชาติพัฒนา",
+        "เพื่อชาติ",
+        "ภูมิใจไทย",
+        "รวมพลังประชาชาติไทย",
+        "ประชาชาติ",
+        "ชาติไทยพัฒนา",
+        "อื่นๆ"
+      ],
+      partyColor: [
+        "hsl(0, 90%, 50%)",
+        "hsl(30, 90%, 60%)",
+        "hsl(200, 90%, 50%)",
+        "hsl(240, 90%, 50%)",
+        "hsl(55, 90%, 50%)",
+        "hsl(230, 100%, 70%)",
+        "hsl(25, 90%, 50%)",
+        "hsl(340, 100%, 70%)",
+        "hsl(260, 100%, 50%)",
+        "hsl(220, 90%, 50%)",
+        "hsl(70, 90%, 50%)",
+        "hsl(320, 90%, 50%)",
+        "hsl(0, 0%, 60%)"
+      ],
+      partySide: [
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายรัฐบาล",
+        "ฝ่ายค้าน"
+      ],
+      partyNConstituentSeat: [
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        25,
+        50
+      ],
+      partyNTotalVote: [
+        3000000,
+        3000000,
+        3000000,
+        3000000,
+        3000000,
+        3000000,
+        2999999,
+        2999999,
+        2999999,
+        2999999,
+        2999999,
+        2999999,
+        4000006
+      ],
       paramChanged: false
     };
   },
   created() {
+    this.runUserDefined();
+
     EventBus.$on("params-changed", (data, key) => {
       this.paramChanged = true;
       // Update the parent data
@@ -282,12 +354,12 @@ export default {
         case "เริ่มต้น":
           this.nParty = 2;
           this.nConstituentSeat = 350;
-          this.nVote = 35000000;
+          this.nVote = 40000000;
           this.partyName = ["ตัวอย่าง", "อื่นๆ"];
           this.partyColor = ["hsl(30, 90%, 60%)", "hsl(0, 0%, 60%)"];
           this.partySide = ["ฝ่ายรัฐบาล", "ฝ่ายค้าน"];
           this.partyNConstituentSeat = [175, 175];
-          this.partyNTotalVote = [17500000, 17500000];
+          this.partyNTotalVote = [20000000, 20000000];
           break;
         case "ผลการเลือกตั้งพ.ศ. 2554":
           this.nParty = 17;
@@ -389,20 +461,22 @@ export default {
           ];
           break;
         case "พรรคเด่น พ.ศ. 2562":
-          this.nParty = 11;
+          this.nParty = 13;
           this.nConstituentSeat = 350;
-          this.nVote = 35000000;
+          this.nVote = 40000000;
           this.partyName = [
             "เพื่อไทย",
             "อนาคตใหม่",
             "ประชาธิปัตย์",
             "พลังประชารัฐ",
             "เสรีรวมไทย",
-            "ประชาชาติ",
+            "เศรษฐกิจใหม่",
+            "ชาติพัฒนา",
+            "เพื่อชาติ",
             "ภูมิใจไทย",
             "รวมพลังประชาชาติไทย",
+            "ประชาชาติ",
             "ชาติไทยพัฒนา",
-            "ชาติพัฒนา",
             "อื่นๆ"
           ];
           this.partyColor = [
@@ -411,11 +485,13 @@ export default {
             "hsl(200, 90%, 50%)",
             "hsl(240, 90%, 50%)",
             "hsl(55, 90%, 50%)",
-            "hsl(70, 90%, 50%)",
+            "hsl(230, 100%, 70%)",
+            "hsl(25, 90%, 50%)",
+            "hsl(340, 100%, 70%)",
             "hsl(260, 100%, 50%)",
             "hsl(220, 90%, 50%)",
+            "hsl(70, 90%, 50%)",
             "hsl(320, 90%, 50%)",
-            "hsl(25, 90%, 50%)",
             "hsl(0, 0%, 60%)"
           ];
           this.partySide = [
@@ -429,19 +505,23 @@ export default {
             "ฝ่ายรัฐบาล",
             "ฝ่ายรัฐบาล",
             "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
+            "ฝ่ายรัฐบาล",
             "ฝ่ายค้าน"
           ];
           this.partyNConstituentSeat = [
-            30,
-            30,
-            30,
-            30,
-            30,
-            30,
-            30,
-            30,
-            30,
-            30,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
+            25,
             50
           ];
           this.partyNTotalVote = [
@@ -451,11 +531,13 @@ export default {
             3000000,
             3000000,
             3000000,
-            3000000,
-            3000000,
-            3000000,
-            3000000,
-            5000000
+            2999999,
+            2999999,
+            2999999,
+            2999999,
+            2999999,
+            2999999,
+            4000006
           ];
           break;
       }
