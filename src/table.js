@@ -81,6 +81,18 @@ function addTable(electionResult, selector, type) {
     bottomCalc: 'sum'
   };
 
+  const nInitialRemainderVote = {
+    title: 'เสียงที่เป็นเศษจากการคำนวณที่นั่งส.ส.พึงมีครั้งแรก',
+    field: 'nInitialRemainderVote',
+    align: 'center',
+  }
+
+  const nRemainderVote = {
+    title: 'เสียงที่เป็นเศษจากการคำนวณที่นั่งส.ส.พึงมีครั้งที่ 2',
+    field: 'nRemainderVote',
+    align: 'center',
+  }
+
   switch (type) {
     case 'constituent':
       table.addColumn(nConstituentSeat);
@@ -95,6 +107,7 @@ function addTable(electionResult, selector, type) {
       table.addColumn(bAllocationFilled);
       table.addColumn(nConstituentSeat);
       table.addColumn(nTotalVote);
+      table.addColumn(nInitialRemainderVote);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       break;
     case 'final-allocation':
@@ -102,6 +115,7 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nConstituentSeat);
       table.addColumn(nPartyListSeat);
       table.addColumn(nTotalVote);
+      table.addColumn(nRemainderVote);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       table.setGroupBy(data => data.bAllocationFilled);
       table.setGroupHeader(value => {

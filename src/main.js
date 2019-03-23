@@ -72,6 +72,7 @@ class Party {
     bPartyListNeeded = true,
     bAllocationFilled = false,
     nVotePerAllocatedSeat = 0,
+    nInitialRemainderVote = 0,
     nRemainderVote = 0,
     side = 'ฝ่ายรัฐบาล'
   } = {}) {
@@ -87,6 +88,7 @@ class Party {
     this.bPartyListNeeded = bPartyListNeeded;
     this.bAllocationFilled = bAllocationFilled;
     this.nVotePerAllocatedSeat = nVotePerAllocatedSeat;
+    this.nInitialRemainderVote = nInitialRemainderVote;
     this.nRemainderVote = nRemainderVote;
     this.nExpectedConstituentSeat = nExpectedConstituentSeat;
     this.side = side;
@@ -292,8 +294,10 @@ function runAllocation(electionConfig, voteResult) {
       // in case of party.nInitialAllocatedSeat == 0
       party.nInitialRemainderVote = party.nTotalVote;
     } else {
-      party.nInitialRemainderVote =
-        party.nTotalVote % (party.nInitialAllocatedSeat * nVotePerSeat);
+      party.nInitialRemainderVote = +(
+        party.nTotalVote %
+        (party.nInitialAllocatedSeat * nVotePerSeat)
+      ).toFixed(4);
     }
   });
 
@@ -357,8 +361,10 @@ function runAllocation(electionConfig, voteResult) {
         // in case of party.nAllocatedSeat == 0
         party.nRemainderVote = party.nTotalVote;
       } else {
-        party.nRemainderVote =
-          party.nTotalVote % (party.nAllocatedSeat * nVotePerRemainingSeat);
+        party.nRemainderVote = +(
+          party.nTotalVote %
+          (party.nAllocatedSeat * nVotePerRemainingSeat)
+        ).toFixed(4);
       }
     } else {
       party.nAllocatedSeat = party.nConstituentSeat;
@@ -917,7 +923,7 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
       .attr('x2', xScale(nVotePerSeat * i))
       .attr('y1', margin.top)
       .attr('y2', height - margin.bottom)
-      .attr('stroke', 'white')
+      .attr('stroke', 'hsla(0,0%,100%,0.7)')
       .attr('stroke-width', markSize >= 6 ? 3 : markSize / 3);
 
     if (markSize > 6) {
@@ -1039,7 +1045,8 @@ function addIntroText(
     <p>กราฟแท่งด้านล่างแสดงคะแนนของผู้สมัครแต่ละเขตเลือกตั้ง
     ทั้ง ${electionConfig.nConstituentSeat} เขต 
     โดยผู้สมัครที่ได้คะแนนสูงสุดเป็นผู้ได้รับเลือกตั้งในเขตนั้นไป 
-    ซึ่งแทนด้วยสัญลักษณ์วงกลม ●</p>`;
+    ซึ่งแทนด้วยสัญลักษณ์วงกลม ●</p>
+    <p><i>หากเปิดบนจอมือถือ กรุณาเลื่อนไปทางซ้ายเพื่อดูกราฟคะแนนเสียงทั้งหมด</i><p>`;
 
   const introText = `
     <p>${additionalText}</p>
