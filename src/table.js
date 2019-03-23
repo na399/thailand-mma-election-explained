@@ -8,7 +8,7 @@ function addTable(electionResult, selector, type) {
     virtualDom: false,
     movableRows: true,
     movableColumns: true,
-    data: tableData, 
+    data: tableData,
     layout: 'fitDataFill',
     columns: [
       { title: 'พรรค', field: 'name' },
@@ -85,17 +85,16 @@ function addTable(electionResult, selector, type) {
     case 'constituent':
       table.addColumn(nConstituentSeat);
       table.addColumn(nTotalVote);
-      table.hideColumn('nTotalVote');
       table.setSort([
         { column: 'nTotalVote', dir: 'desc' },
         { column: 'nConstituentSeat', dir: 'desc' }
       ]);
       break;
     case 'initial-allocation':
-      table.addColumn(nConstituentSeat);
-      table.addColumn(nTotalVote);
       table.addColumn(nInitialAllocatedSeat);
       table.addColumn(bAllocationFilled);
+      table.addColumn(nConstituentSeat);
+      table.addColumn(nTotalVote);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       break;
     case 'final-allocation':
@@ -103,7 +102,6 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nConstituentSeat);
       table.addColumn(nPartyListSeat);
       table.addColumn(nTotalVote);
-      table.hideColumn('nTotalVote');
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       table.setGroupBy(data => data.bAllocationFilled);
       table.setGroupHeader(value => {
@@ -116,9 +114,9 @@ function addTable(electionResult, selector, type) {
       // table.setFilter('bPartyListNeeded', '=', true);
       break;
     case 'conclusion':
+      table.addColumn(nTotalSeat);
       table.addColumn(nConstituentSeat);
       table.addColumn(nPartyListSeat);
-      table.addColumn(nTotalSeat);
       table.addColumn(nTotalVote);
       table.setSort([
         { column: 'nConstituentSeat', dir: 'desc' },
@@ -126,9 +124,9 @@ function addTable(electionResult, selector, type) {
       ]);
       break;
     case 'sides':
+      table.addColumn(nTotalSeat);
       table.addColumn(nConstituentSeat);
       table.addColumn(nPartyListSeat);
-      table.addColumn(nTotalSeat);
       table.addColumn(nTotalVote);
       table.setSort([
         { column: 'nConstituentSeat', dir: 'desc' },
@@ -145,12 +143,12 @@ function addTable(electionResult, selector, type) {
       });
       break;
     case 'all':
+      table.addColumn(nTotalSeat);
       table.addColumn(nConstituentSeat);
       table.addColumn(nInitialAllocatedSeat);
       table.addColumn(bAllocationFilled);
       table.addColumn(nAllocatedSeat);
       table.addColumn(nPartyListSeat);
-      table.addColumn(nTotalSeat);
       table.addColumn(nTotalVote);
       table.setGroupBy(data => data.side);
       table.setSort([
