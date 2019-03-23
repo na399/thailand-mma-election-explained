@@ -5,9 +5,9 @@
         <div>
           <p>ค่าเริ่มต้น</p>
           <el-radio-group v-model="template" @change="reset(template)">
+            <el-radio-button label="เริ่มต้น"></el-radio-button>
             <el-radio-button label="พรรคเด่น พ.ศ. 2562"></el-radio-button>
             <el-radio-button label="ผลการเลือกตั้งพ.ศ. 2554"></el-radio-button>
-            <el-radio-button label="เริ่มต้น"></el-radio-button>
           </el-radio-group>
         </div>
         <br>
