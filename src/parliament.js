@@ -227,8 +227,8 @@ function drawParliament(electionResult, selector) {
     .enter()
     .append('text')
     .attr('font-size', 16)
-    .attr('y', (_d, i) => (i + 1) * 20)
-    .attr('x', 100)
+    .attr('y', (_d, i) => ((i % 13) + 1) * 20)
+    .attr('x', (_d, i) => i < 13 ? 100 : 400)
     .text(d => `พรรค${d.name}`);
 
   svgLegend
@@ -238,8 +238,8 @@ function drawParliament(electionResult, selector) {
     .enter()
     .append('text')
     .attr('font-size', 16)
-    .attr('y', (_d, i) => (i + 1) * 20)
-    .attr('x', 40)
+    .attr('y', (_d, i) => ((i % 13) + 1) * 20)
+    .attr('x', (_d, i) => i < 13 ? 40 : 340)
     .attr('fill', d => d.color)
     .attr('text-anchor', 'end')
     .text(d => `${d.nConstituentSeat} ●`);
@@ -251,8 +251,8 @@ function drawParliament(electionResult, selector) {
     .enter()
     .append('text')
     .attr('font-size', 16)
-    .attr('y', (_d, i) => (i + 1) * 20)
-    .attr('x', 90)
+    .attr('y', (_d, i) => ((i % 13) + 1) * 20)
+    .attr('x', (_d, i) => i < 13 ? 90 : 390)
     .attr('fill', d => d.color)
     .attr('text-anchor', 'end')
     .text(d => `${d.nPartyListSeat} ◆`);

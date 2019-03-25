@@ -1,5 +1,9 @@
 import Tabulator from 'tabulator-tables';
 import _ from 'lodash';
+import * as d3 from 'd3';
+
+const formatterInt = d3.format(',');
+const formatterFloat = d3.format(',.4f');
 
 function addTable(electionResult, selector, type) {
   const tableData = electionResult.parties;
@@ -19,16 +23,11 @@ function addTable(electionResult, selector, type) {
   const nTotalVote = {
     title: 'จำนวนเสียงรวม',
     field: 'nTotalVote',
-    align: 'center',
-    formatter: cell => {
-      return cell
-        .getValue()
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    },
+    align: 'right',
+    formatter: cell => formatterInt(cell.getValue()),
     bottomCalc: values => {
       const sum = _.sum(values);
-      return sum.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return formatterInt(sum);
     }
   };
 
@@ -84,14 +83,16 @@ function addTable(electionResult, selector, type) {
   const nInitialRemainderVote = {
     title: 'เสียงที่เป็นเศษจากการคำนวณที่นั่งส.ส.พึงมีครั้งแรก',
     field: 'nInitialRemainderVote',
-    align: 'center',
-  }
+    align: 'right',
+    formatter: cell => formatterFloat(cell.getValue())
+  };
 
   const nRemainderVote = {
     title: 'เสียงที่เป็นเศษจากการคำนวณที่นั่งส.ส.พึงมีครั้งที่ 2',
     field: 'nRemainderVote',
-    align: 'center',
-  }
+    align: 'right',
+    formatter: cell => formatterFloat(cell.getValue())
+  };
 
   switch (type) {
     case 'constituent':
@@ -101,6 +102,7 @@ function addTable(electionResult, selector, type) {
         { column: 'nTotalVote', dir: 'desc' },
         { column: 'nConstituentSeat', dir: 'desc' }
       ]);
+      table.setFilter("nConstituentSeat", ">", 0)
       break;
     case 'initial-allocation':
       table.addColumn(nInitialAllocatedSeat);
@@ -125,7 +127,7 @@ function addTable(electionResult, selector, type) {
           return 'ส.ส.พึงมียังไม่ครบ';
         }
       });
-      // table.setFilter('bPartyListNeeded', '=', true);
+      table.setFilter('bPartyListNeeded', '=', true);
       break;
     case 'conclusion':
       table.addColumn(nTotalSeat);
@@ -136,6 +138,7 @@ function addTable(electionResult, selector, type) {
         { column: 'nConstituentSeat', dir: 'desc' },
         { column: 'nTotalSeat', dir: 'desc' }
       ]);
+      // table.setFilter("nTotalSeat", ">", 0)
       break;
     case 'sides':
       table.addColumn(nTotalSeat);
@@ -155,6 +158,7 @@ function addTable(electionResult, selector, type) {
         width: 30,
         minWidth: 30
       });
+      table.setFilter("nTotalSeat", ">", 0)
       break;
     case 'all':
       table.addColumn(nTotalSeat);
@@ -169,6 +173,7 @@ function addTable(electionResult, selector, type) {
         { column: 'nConstituentSeat', dir: 'desc' },
         { column: 'nTotalSeat', dir: 'desc' }
       ]);
+      table.setFilter("nTotalSeat", ">", 0)
       break;
   }
 }

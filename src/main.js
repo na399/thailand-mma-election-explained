@@ -95,6 +95,8 @@ class Party {
   }
 }
 
+const formatterFloat = d3.format(',.4f');
+
 /**
  * Shuffles array in place. ES6 version
  * @param {Array} a items An array containing the items.
@@ -779,9 +781,9 @@ function getAllocationConfig(electionResult, electionConfig, stage) {
   const width = 1200;
   const height =
     stage == 'initial'
-      ? electionConfig.nParty * 80
+      ? electionResult.parties.length * 60
       : (electionConfig.nParty - electionResult.nPartyWithoutPartyListNeeded) *
-        100;
+        60;
 
   const maxNameLength = _.max(
     electionResult.parties.map(party => party.name.length)
@@ -835,7 +837,7 @@ function getAllocationScales(electionResult, config, stage) {
     .scaleBand()
     .domain(partyNames)
     .range([height - margin.bottom, margin.top])
-    .padding(0.5)
+    .padding(0.4)
     .round(true);
 
   return { xScale, yScale, xMax };
@@ -926,7 +928,7 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
       .attr('stroke', 'hsla(0,0%,100%,0.7)')
       .attr('stroke-width', markSize >= 6 ? 3 : markSize / 3);
 
-    if (markSize > 6) {
+    if (markSize > 8) {
       svg
         .append('text')
         .attr('y', margin.top)
@@ -1017,6 +1019,13 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
 }
 
 function drawInitialAllocation(electionResult, electionConfig, selector) {
+  electionResult.parties = electionResult.parties
+    .map(p => {
+      if (p.nInitialAllocatedSeat > 0) {
+        return p;
+      }
+    })
+    .filter(p => p);
   const config = getAllocationConfig(electionResult, electionConfig, 'initial');
   const scales = getAllocationScales(electionResult, config, 'initial');
   drawAllocationChart(electionResult, selector, config, scales, 'initial');
@@ -1089,7 +1098,7 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
   <p>จำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี ■ ได้นั้น มาจากจำนวนเสียงทั้งหมด 
   ${numberWithCommas(nTotalVote)} เสียง 
   หารด้วยจำนวนส.ส.ทั้งหมด ${electionConfig.nTotalSeat} ที่นั่ง 
-  ได้ผลลัพธ์ว่า <b>ต้องใช้ ${electionResult.nVotePerSeat} เสียง 
+  ได้ผลลัพธ์ว่า <b>ต้องใช้ ${formatterFloat(electionResult.nVotePerSeat)} เสียง 
   ต่อ 1 ที่นั่งในสภา</b></p>
   <p>จำนวนดังกล่าวแทนด้วยแต่ละบล็อกสี่เหลี่ยม ■ ในกราฟแท่งด้านล่าง แต่ละพรรคจะได้รับจำนวนส.ส.พึงมี
   ตามจำนวนเสียงที่ได้เต็มบล็อก ■ จนครบกว่าจะครบทั้ง ${electionConfig.nTotalSeat}
@@ -1128,7 +1137,7 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
     <p>ดังนั้นการจัดสรรส.ส.พึงมีและส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
       electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น
       <b>โดยใช้เสียง ${
-        electionResult.nVotePerRemainingSeat
+        formatterFloat(electionResult.nVotePerRemainingSeat)
       } ต่อ 1 ที่นั่ง</b> ซึ่งคำนวนมาจาก จำนวนเสียงที่เหลือจากเฉพาะพรรคที่ยังได้ส.ส.แบ่งเขตไม่ครบจำนวนส.ส.พึงมี 
       ${numberWithCommas(
         electionResult.nTotalRemainingVote
