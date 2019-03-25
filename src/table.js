@@ -81,14 +81,14 @@ function addTable(electionResult, selector, type) {
   };
 
   const nInitialRemainderVote = {
-    title: 'เสียงที่เป็นเศษจากการคำนวณที่นั่งส.ส.พึงมีครั้งแรก',
+    title: 'เศษจากการคำนวณที่นั่งส.ส.พึงมี',
     field: 'nInitialRemainderVote',
     align: 'right',
     formatter: cell => formatterFloat(cell.getValue())
   };
 
   const nRemainderVote = {
-    title: 'เสียงที่เป็นเศษจากการคำนวณที่นั่งส.ส.พึงมีครั้งที่ 2',
+    title: 'เศษจากการคำนวณที่นั่งส.ส.พึงมี',
     field: 'nRemainderVote',
     align: 'right',
     formatter: cell => formatterFloat(cell.getValue())

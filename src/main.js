@@ -288,19 +288,9 @@ function runAllocation(electionConfig, voteResult) {
   let nVotePerSeat = +(nTotalVote / electionConfig.nTotalSeat).toFixed(4);
 
   parties.forEach(party => {
-    party.nInitialAllocatedSeat = Math.floor(party.nTotalVote / nVotePerSeat);
-  });
-
-  parties.forEach(party => {
-    if (party.nInitialAllocatedSeat === 0) {
-      // in case of party.nInitialAllocatedSeat == 0
-      party.nInitialRemainderVote = party.nTotalVote;
-    } else {
-      party.nInitialRemainderVote = +(
-        party.nTotalVote %
-        (party.nInitialAllocatedSeat * nVotePerSeat)
-      ).toFixed(4);
-    }
+    party.nInitialAllocatedSeat = +(party.nTotalVote / nVotePerSeat).toFixed(4);
+    party.nInitialRemainderVote = +(party.nInitialAllocatedSeat % 1).toFixed(4);
+    party.nInitialAllocatedSeat = Math.floor(party.nInitialAllocatedSeat);
   });
 
   parties = _.orderBy(parties, 'nInitialRemainderVote', 'desc');
@@ -334,6 +324,8 @@ function runAllocation(electionConfig, voteResult) {
   let nTotalRemainingVote = 0;
   let nRemainingSeat = 0;
 
+  /*
+  // Old rule no longer applied
   if (_.filter(parties, ['bPartyListNeeded', false]).length > 0) {
     nRemainingSeat = _.filter(parties, ['bPartyListNeeded', false]).reduce(
       (nRemainingSeat, party) => nRemainingSeat - party.nConstituentSeat,
@@ -353,67 +345,83 @@ function runAllocation(electionConfig, voteResult) {
   } else {
     var nVotePerRemainingSeat = nVotePerSeat;
   }
+  */
 
-  parties.forEach(party => {
-    if (party.bPartyListNeeded) {
-      party.nAllocatedSeat = Math.floor(
-        party.nTotalVote / nVotePerRemainingSeat
-      );
-      if (party.nAllocatedSeat === 0) {
-        // in case of party.nAllocatedSeat == 0
-        party.nRemainderVote = party.nTotalVote;
+  let nVotePerRemainingSeat = nVotePerSeat;
+
+  function allocateSeats(parties, adjustmentRatio) {
+    parties.forEach(party => {
+      if (party.bPartyListNeeded) {
+        party.nAllocatedSeat = +(
+          (party.nTotalVote / nVotePerRemainingSeat) *
+          adjustmentRatio
+        ).toFixed(4);
+        party.nRemainderVote = +(party.nAllocatedSeat % 1).toFixed(4);
+        party.nAllocatedSeat = Math.floor(party.nAllocatedSeat);
       } else {
-        party.nRemainderVote = +(
-          party.nTotalVote %
-          (party.nAllocatedSeat * nVotePerRemainingSeat)
+        party.nAllocatedSeat = party.nConstituentSeat;
+      }
+    });
+
+    // allocate party list seats
+    parties.forEach(party => {
+      if (party.nAllocatedSeat < party.nConstituentSeat) {
+        party.nPartyListSeat = 0;
+        party.nAllocatedSeat = party.nConstituentSeat;
+        party.nRemainderVote = 0;
+      } else {
+        party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
+      }
+    });
+
+    parties.forEach(party => {
+      if (party.bPartyListNeeded && party.nAllocatedSeat > 0) {
+        party.nVotePerAllocatedSeat = +(
+          party.nTotalVote / party.nAllocatedSeat
         ).toFixed(4);
       }
-    } else {
-      party.nAllocatedSeat = party.nConstituentSeat;
+    });
+
+    // assigning unallocated seats
+    const nUnallocatedSeat = parties.reduce(
+      (nUnallocatedSeat, party) =>
+        nUnallocatedSeat - (party.nConstituentSeat + party.nPartyListSeat),
+      electionConfig.nTotalSeat
+    );
+
+    parties = _.orderBy(
+      parties,
+      ['nRemainderVote', 'nVotePerAllocatedSeat'],
+      ['desc', 'desc']
+    );
+
+    let nPartiesGettingPartyList = _.filter(parties, 'bPartyListNeeded').length;
+
+    for (let i = 0; i < nUnallocatedSeat; i++) {
+      parties[i % nPartiesGettingPartyList].nAllocatedSeat += 1;
+      parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
     }
-  });
-
-  // allocate party list seats
-  parties.forEach(party => {
-    if (party.nAllocatedSeat < party.nConstituentSeat) {
-      party.nPartyListSeat = 0;
-      party.nAllocatedSeat = party.nConstituentSeat;
-      party.nRemainderVote = 0;
-    } else {
-      party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
-    }
-  });
-
-  parties.forEach(party => {
-    if (party.bPartyListNeeded && party.nAllocatedSeat > 0) {
-      party.nVotePerAllocatedSeat = +(
-        party.nTotalVote / party.nAllocatedSeat
-      ).toFixed(4);
-    }
-  });
-
-  // assigning unallocated seats
-  const nUnallocatedSeat = parties.reduce(
-    (nUnallocatedSeat, party) =>
-      nUnallocatedSeat - (party.nConstituentSeat + party.nPartyListSeat),
-    electionConfig.nTotalSeat
-  );
-
-  parties = _.orderBy(
-    parties,
-    ['nRemainderVote', 'nVotePerAllocatedSeat'],
-    ['desc', 'desc']
-  );
-
-  let nPartiesGettingPartyList = _.filter(parties, 'bPartyListNeeded').length;
-
-  for (let i = 0; i < nUnallocatedSeat; i++) {
-    parties[i % nPartiesGettingPartyList].nAllocatedSeat += 1;
-    parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
+    return [parties, nUnallocatedSeat];
   }
 
-  // TODO
+  let nUnallocatedSeat = 0;
+
+  [parties, nUnallocatedSeat] = allocateSeats(parties, 1);
+
   // 128(7) in case nPartyList exceeds 150, recalculate the proportion
+  let nTotalPartyListSeat = parties.reduce(
+    (n, party) => n + party.nPartyListSeat,
+    0
+  );
+
+  console.log('nTotalPartyListSeat :', nTotalPartyListSeat);
+
+  if (nTotalPartyListSeat > 150) {
+    const adjustmentRatio = 150 / nTotalPartyListSeat;
+    console.log('adjustmentRatio :', adjustmentRatio);
+    [parties, nUnallocatedSeat] = allocateSeats(parties, adjustmentRatio);
+    nVotePerRemainingSeat = nVotePerSeat / adjustmentRatio;
+  }
 
   // calculate final total seat numbers
   parties.forEach(party => {
@@ -435,7 +443,7 @@ function runAllocation(electionConfig, voteResult) {
     0
   );
 
-  const nTotalPartyListSeat = parties.reduce(
+  nTotalPartyListSeat = parties.reduce(
     (n, party) => n + party.nPartyListSeat,
     0
   );
@@ -1135,15 +1143,7 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
     ${electionResult.nPartyWithoutPartyListNeeded} 
     พรรคนี้ได้รับส.ส.ตามที่ได้มาจากแบบแบ่งเขตเลือกตั้ง ● แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อ ◆ ได้อีก</p>
     <p>ดังนั้นการจัดสรรส.ส.พึงมีและส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
-      electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น
-      <b>โดยใช้เสียง ${
-        formatterFloat(electionResult.nVotePerRemainingSeat)
-      } ต่อ 1 ที่นั่ง</b> ซึ่งคำนวนมาจาก จำนวนเสียงที่เหลือจากเฉพาะพรรคที่ยังได้ส.ส.แบ่งเขตไม่ครบจำนวนส.ส.พึงมี 
-      ${numberWithCommas(
-        electionResult.nTotalRemainingVote
-      )} เสียง หารด้วย จำนวนที่นั่งที่เหลือ ${numberWithCommas(
-      electionResult.nRemainingSeat
-    )} ที่นั่ง</p>`;
+      electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น</p>`;
   } else {
     text = `<p>เนื่องจากไม่มีพรรคใด ได้รับจำนวนส.ส.แบบเบ่งเขต ● ไปครบจำนวนส.ส.พึงมี ■</p>
     <p>ดังนั้นทุกพรรคจะได้รับจำนวนส.ส.แบบบัญชีรายชื่อ ◆ รวมกับส.ส.แบบเบ่งเขต ● จนครบจำนวนส.ส.พึงมี ■</p>`;
