@@ -32,7 +32,6 @@ class ElectionResult {
     nPartyWithoutPartyListNeeded,
     nVotePerRemainingSeat,
     nRemainingSeat,
-    nUnallocatedSeat,
     nTotalInitialAllocatedSeat,
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
@@ -48,7 +47,6 @@ class ElectionResult {
     this.nPartyWithoutPartyListNeeded = nPartyWithoutPartyListNeeded;
     this.nVotePerRemainingSeat = nVotePerRemainingSeat;
     this.nRemainingSeat = nRemainingSeat;
-    this.nUnallocatedSeat = nUnallocatedSeat;
     this.nTotalInitialAllocatedSeat = nTotalInitialAllocatedSeat;
     this.nTotalAllocatedSeat = nTotalAllocatedSeat;
     this.nTotalConstituentSeat = nTotalConstituentSeat;
@@ -288,9 +286,13 @@ function runAllocation(electionConfig, voteResult) {
   let nVotePerSeat = +(nTotalVote / electionConfig.nTotalSeat).toFixed(4);
 
   parties.forEach(party => {
-    party.nInitialAllocatedSeat = +(party.nTotalVote / nVotePerSeat).toFixed(4);
-    party.nInitialRemainderVote = +(party.nInitialAllocatedSeat % 1).toFixed(4);
-    party.nInitialAllocatedSeat = Math.floor(party.nInitialAllocatedSeat);
+    party.nInitialAllocatedSeatRaw = +(party.nTotalVote / nVotePerSeat).toFixed(
+      4
+    );
+    party.nInitialRemainderVote = +(party.nInitialAllocatedSeatRaw % 1).toFixed(
+      4
+    );
+    party.nInitialAllocatedSeat = Math.floor(party.nInitialAllocatedSeatRaw);
   });
 
   parties = _.orderBy(parties, 'nInitialRemainderVote', 'desc');
@@ -324,61 +326,27 @@ function runAllocation(electionConfig, voteResult) {
   let nTotalRemainingVote = 0;
   let nRemainingSeat = 0;
 
-  /*
-  // Old rule no longer applied
-  if (_.filter(parties, ['bPartyListNeeded', false]).length > 0) {
-    nRemainingSeat = _.filter(parties, ['bPartyListNeeded', false]).reduce(
-      (nRemainingSeat, party) => nRemainingSeat - party.nConstituentSeat,
-      electionConfig.nTotalSeat
-    );
-
-    nTotalRemainingVote = parties.reduce((nTotalRemainingVote, party) => {
-      if (party.bPartyListNeeded) {
-        nTotalRemainingVote += party.nTotalVote;
-      }
-      return nTotalRemainingVote;
-    }, 0);
-
-    var nVotePerRemainingSeat = +(nTotalRemainingVote / nRemainingSeat).toFixed(
-      4
-    );
-  } else {
-    var nVotePerRemainingSeat = nVotePerSeat;
-  }
-  */
-
-  let nVotePerRemainingSeat = nVotePerSeat;
 
   function allocateSeats(parties, adjustmentRatio) {
     parties.forEach(party => {
       if (party.bPartyListNeeded) {
-        party.nAllocatedSeat = +(
-          (party.nTotalVote / nVotePerRemainingSeat) *
-          adjustmentRatio
-        ).toFixed(4);
-        party.nRemainderVote = +(party.nAllocatedSeat % 1).toFixed(4);
-        party.nAllocatedSeat = Math.floor(party.nAllocatedSeat);
-      } else {
-        party.nAllocatedSeat = party.nConstituentSeat;
-      }
-    });
+        party.nAllocatedSeatRaw = +(party.nTotalVote / nVotePerSeat).toFixed(4);
+        party.nRemainderVote = +(party.nAllocatedSeatRaw % 1).toFixed(4);
 
-    // allocate party list seats
-    parties.forEach(party => {
-      if (party.nAllocatedSeat < party.nConstituentSeat) {
-        party.nPartyListSeat = 0;
-        party.nAllocatedSeat = party.nConstituentSeat;
-        party.nRemainderVote = 0;
-      } else {
-        party.nPartyListSeat = party.nAllocatedSeat - party.nConstituentSeat;
-      }
-    });
+        party.nPropablePartyListSeat =
+          party.nAllocatedSeatRaw - party.nConstituentSeat;
+        party.nPartyListSeatRaw = party.nPropablePartyListSeat * adjustmentRatio;
 
-    parties.forEach(party => {
-      if (party.bPartyListNeeded && party.nAllocatedSeat > 0) {
+        party.nPartyListSeat = Math.floor(party.nPartyListSeatRaw);
+        party.nAllocatedSeat = party.nConstituentSeat + party.nPartyListSeat;
+
         party.nVotePerAllocatedSeat = +(
           party.nTotalVote / party.nAllocatedSeat
         ).toFixed(4);
+      } else {
+        party.nAllocatedSeat = party.nConstituentSeat;
+        party.nPartyListSeat = 0;
+        party.nRemainderVote = 0;
       }
     });
 
@@ -401,12 +369,10 @@ function runAllocation(electionConfig, voteResult) {
       parties[i % nPartiesGettingPartyList].nAllocatedSeat += 1;
       parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
     }
-    return [parties, nUnallocatedSeat];
+    return parties;
   }
 
-  let nUnallocatedSeat = 0;
-
-  [parties, nUnallocatedSeat] = allocateSeats(parties, 1);
+  parties = allocateSeats(parties, 1);
 
   // 128(7) in case nPartyList exceeds 150, recalculate the proportion
   let nTotalPartyListSeat = parties.reduce(
@@ -414,13 +380,16 @@ function runAllocation(electionConfig, voteResult) {
     0
   );
 
-  console.log('nTotalPartyListSeat :', nTotalPartyListSeat);
+  let nVotePerRemainingSeat = nVotePerSeat;
 
-  if (nTotalPartyListSeat > 150) {
-    const adjustmentRatio = 150 / nTotalPartyListSeat;
-    console.log('adjustmentRatio :', adjustmentRatio);
-    [parties, nUnallocatedSeat] = allocateSeats(parties, adjustmentRatio);
-    nVotePerRemainingSeat = nVotePerSeat / adjustmentRatio;
+  if (nTotalPartyListSeat > electionConfig.nPartyListSeat) {
+    const adjustmentRatio = electionConfig.nPartyListSeat / nTotalPartyListSeat;
+    parties = allocateSeats(parties, adjustmentRatio);
+    
+    // TODO: fix
+    nVotePerRemainingSeat = _.mean(_.compact(parties.map(party => party.nTotalVote / (party.nPartyListSeatRaw + party.nConstituentSeat))))
+    // console.log(parties.map(party => party.nTotalVote / (party.nPartyListSeatRaw + party.nConstituentSeat)));
+    // nVotePerRemainingSeat = _.mean(_.compact(parties.map(party => party.nVotePerAllocatedSeat)))
   }
 
   // calculate final total seat numbers
@@ -514,7 +483,6 @@ function runAllocation(electionConfig, voteResult) {
     nPartyWithoutPartyListNeeded,
     nVotePerRemainingSeat,
     nRemainingSeat,
-    nUnallocatedSeat,
     nTotalInitialAllocatedSeat,
     nTotalAllocatedSeat,
     nTotalConstituentSeat,

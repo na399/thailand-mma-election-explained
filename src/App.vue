@@ -48,7 +48,7 @@
           show-icon
         ></el-alert>
       </el-tab-pane>
-      <el-tab-pane label="แบบจำลอง (ย่อ)">
+      <!-- <el-tab-pane label="แบบจำลอง (ย่อ)">
         <el-button type="primary" @click="runStarter">จำลองผลการเลือกตั้ง แบบย่อ</el-button>
         <p v-if="nSimulationRun > 0">
           <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
@@ -59,7 +59,7 @@
         <p v-if="nSimulationRun > 0">
           <small>กดปุ่มซำ้ เพื่อสุ่มผลใหม่</small>
         </p>
-      </el-tab-pane>
+      </el-tab-pane> -->
     </el-tabs>
   </div>
 </template>
