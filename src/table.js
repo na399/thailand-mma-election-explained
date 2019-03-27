@@ -9,7 +9,8 @@ function addTable(electionResult, selector, type) {
   const tableData = electionResult.parties;
 
   const table = new Tabulator(selector, {
-    virtualDom: false,
+    virtualDom: true,
+    height: 600,
     movableRows: true,
     movableColumns: true,
     data: tableData,

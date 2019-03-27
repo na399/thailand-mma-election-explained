@@ -33,6 +33,7 @@ class ElectionResult {
     nVotePerRemainingSeat,
     nRemainingSeat,
     nTotalInitialAllocatedSeat,
+    nTotalInitialPartyListSeat,
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
     nTotalPartyListSeat,
@@ -48,6 +49,7 @@ class ElectionResult {
     this.nVotePerRemainingSeat = nVotePerRemainingSeat;
     this.nRemainingSeat = nRemainingSeat;
     this.nTotalInitialAllocatedSeat = nTotalInitialAllocatedSeat;
+    this.nTotalInitialPartyListSeat = nTotalInitialPartyListSeat;
     this.nTotalAllocatedSeat = nTotalAllocatedSeat;
     this.nTotalConstituentSeat = nTotalConstituentSeat;
     this.nTotalPartyListSeat = nTotalPartyListSeat;
@@ -326,16 +328,19 @@ function runAllocation(electionConfig, voteResult) {
   let nTotalRemainingVote = 0;
   let nRemainingSeat = 0;
 
-
   function allocateSeats(parties, adjustmentRatio) {
+
     parties.forEach(party => {
       if (party.bPartyListNeeded) {
         party.nAllocatedSeatRaw = +(party.nTotalVote / nVotePerSeat).toFixed(4);
         party.nRemainderVote = +(party.nAllocatedSeatRaw % 1).toFixed(4);
 
-        party.nPropablePartyListSeat =
-          party.nAllocatedSeatRaw - party.nConstituentSeat;
-        party.nPartyListSeatRaw = party.nPropablePartyListSeat * adjustmentRatio;
+        party.nPropablePartyListSeat = +(
+          party.nAllocatedSeatRaw - party.nConstituentSeat
+        ).toFixed(4);
+        party.nPartyListSeatRaw = +(
+          party.nPropablePartyListSeat * adjustmentRatio
+        ).toFixed(4);
 
         party.nPartyListSeat = Math.floor(party.nPartyListSeatRaw);
         party.nAllocatedSeat = party.nConstituentSeat + party.nPartyListSeat;
@@ -375,21 +380,21 @@ function runAllocation(electionConfig, voteResult) {
   parties = allocateSeats(parties, 1);
 
   // 128(7) in case nPartyList exceeds 150, recalculate the proportion
-  let nTotalPartyListSeat = parties.reduce(
+  const nTotalInitialPartyListSeat = parties.reduce(
     (n, party) => n + party.nPartyListSeat,
     0
   );
 
   let nVotePerRemainingSeat = nVotePerSeat;
 
-  if (nTotalPartyListSeat > electionConfig.nPartyListSeat) {
-    const adjustmentRatio = electionConfig.nPartyListSeat / nTotalPartyListSeat;
+  if (nTotalInitialPartyListSeat > electionConfig.nPartyListSeat) {
+    const adjustmentRatio =
+      electionConfig.nPartyListSeat / nTotalInitialPartyListSeat;
     parties = allocateSeats(parties, adjustmentRatio);
-    
-    // TODO: fix
-    nVotePerRemainingSeat = _.mean(_.compact(parties.map(party => party.nTotalVote / (party.nPartyListSeatRaw + party.nConstituentSeat))))
-    // console.log(parties.map(party => party.nTotalVote / (party.nPartyListSeatRaw + party.nConstituentSeat)));
-    // nVotePerRemainingSeat = _.mean(_.compact(parties.map(party => party.nVotePerAllocatedSeat)))
+
+    nVotePerRemainingSeat = _.mean(
+      _.compact(parties.map(party => party.nVotePerAllocatedSeat))
+    );
   }
 
   // calculate final total seat numbers
@@ -412,7 +417,7 @@ function runAllocation(electionConfig, voteResult) {
     0
   );
 
-  nTotalPartyListSeat = parties.reduce(
+  const nTotalPartyListSeat = parties.reduce(
     (n, party) => n + party.nPartyListSeat,
     0
   );
@@ -484,6 +489,7 @@ function runAllocation(electionConfig, voteResult) {
     nVotePerRemainingSeat,
     nRemainingSeat,
     nTotalInitialAllocatedSeat,
+    nTotalInitialPartyListSeat,
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
     nTotalPartyListSeat,
@@ -876,10 +882,7 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
     .call(yAxis);
 
   // seat allocation
-  const nVotePerSeat =
-    stage == 'initial'
-      ? electionResult.nVotePerSeat
-      : electionResult.nVotePerRemainingSeat;
+  const nVotePerSeat = electionResult.nVotePerSeat
 
   const blockWidth = xScale(nVotePerSeat) - xScale(0);
   const markSize = blockWidth < 20 ? Math.floor(blockWidth) : 20;
@@ -1103,9 +1106,9 @@ function addInitialAllocatedText(electionResult, electionConfig, selector) {
 }
 
 function addFinalAllocationText(electionResult, electionConfig, selector) {
-  let text = ``;
+  let finalAllocationText = ``;
   if (electionResult.nPartyWithoutPartyListNeeded > 0) {
-    text = `
+    finalAllocationText = `
     <p>เนื่องจากมี ${electionResult.nPartyWithoutPartyListNeeded} 
     พรรค ได้รับจำนวนส.ส.แบบเบ่งเขต ไปครบจำนวนส.ส.พึงมีแล้ว (✓) จึงกำหนดให้ 
     ${electionResult.nPartyWithoutPartyListNeeded} 
@@ -1113,18 +1116,29 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
     <p>ดังนั้นการจัดสรรส.ส.พึงมีและส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
       electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น</p>`;
   } else {
-    text = `<p>เนื่องจากไม่มีพรรคใด ได้รับจำนวนส.ส.แบบเบ่งเขต ● ไปครบจำนวนส.ส.พึงมี ■</p>
+    finalAllocationText = `<p>เนื่องจากไม่มีพรรคใด ได้รับจำนวนส.ส.แบบเบ่งเขต ● ไปครบจำนวนส.ส.พึงมี ■</p>
     <p>ดังนั้นทุกพรรคจะได้รับจำนวนส.ส.แบบบัญชีรายชื่อ ◆ รวมกับส.ส.แบบเบ่งเขต ● จนครบจำนวนส.ส.พึงมี ■</p>`;
   }
 
-  const FinalAllocationText =
-    text +
-    `
+  if (
+    electionResult.nTotalInitialPartyListSeat > electionConfig.nPartyListSeat
+  ) {
+    finalAllocationText += `<p>แต่เนื่องจาก เมื่อใช้วิธีการหารจำนวนเสียงต่อ 1 ที่นั่งก่อนหน้านี้ ได้ส.ส.บัญชีรายชื่อเป็นจำนวน ${
+      electionResult.nTotalInitialPartyListSeat
+    } คน ซึ่งเกิน ${electionConfig.nPartyListSeat} ที่นั่ง ที่กำหนดไว้ 
+    ดังนั้นจึงต้องปรับจำนวนส.ส.บัญชีรายชื่อที่แต่ละพรรคได้รับลง เป็นอัตราส่วน ${
+      electionConfig.nPartyListSeat
+    } : ${electionResult.nTotalInitialPartyListSeat} หรือ ${formatterFloat(
+      electionConfig.nPartyListSeat / electionResult.nTotalInitialPartyListSeat
+    )} ที่นั่งที่ได้รับจริง : 1 ที่นั่งที่คำนวณได้จากขั้นก่อนหน้านี้</p>`;
+  }
+
+  finalAllocationText += `
   <br />
   <h3>ผลการแบ่งส.ส.บัญชีรายชื่อ</h3>
   `;
 
-  d3.select(selector).html(FinalAllocationText);
+  d3.select(selector).html(finalAllocationText);
 }
 
 export {
