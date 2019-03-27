@@ -55,11 +55,6 @@ a:hover,a:active {
   margin: 20px 0px;
 }
 
-@media only screen and (min-width: 768px) {
-  .table {
-    max-width: 90%;
-  }
-}
 
 .plot {
   overflow-x: scroll;

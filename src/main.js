@@ -312,12 +312,12 @@ function runAllocation(electionConfig, voteResult) {
   }
 
   // check whether nConstituentSeat exceeds nInitialAllocatedSeats
-  for (let party of parties) {
+  parties.forEach(party => {
     if (party.nConstituentSeat >= party.nInitialAllocatedSeat) {
       party.bPartyListNeeded = false;
       party.bAllocationFilled = true;
     }
-  }
+  });
 
   // recalculate votes per remaining seat if there is at least one party with nConstituentSeat exceeds nInitialAllocatedSeats
   const nPartyWithoutPartyListNeeded = _.filter(parties, [
@@ -329,7 +329,6 @@ function runAllocation(electionConfig, voteResult) {
   let nRemainingSeat = 0;
 
   function allocateSeats(parties, adjustmentRatio) {
-
     parties.forEach(party => {
       if (party.bPartyListNeeded) {
         party.nAllocatedSeatRaw = +(party.nTotalVote / nVotePerSeat).toFixed(4);
@@ -342,10 +341,10 @@ function runAllocation(electionConfig, voteResult) {
           party.nPropablePartyListSeat * adjustmentRatio
         ).toFixed(4);
 
-        if (adjustmentRatio != 1){
+        if (adjustmentRatio != 1) {
           party.nRemainderVote = +(party.nPartyListSeatRaw % 1).toFixed(4);
         }
-        
+
         party.nPartyListSeat = Math.floor(party.nPartyListSeatRaw);
         party.nAllocatedSeat = party.nConstituentSeat + party.nPartyListSeat;
 
@@ -886,7 +885,7 @@ function drawAllocationChart(electionResult, selector, config, scales, stage) {
     .call(yAxis);
 
   // seat allocation
-  const nVotePerSeat = electionResult.nVotePerSeat
+  const nVotePerSeat = electionResult.nVotePerSeat;
 
   const blockWidth = xScale(nVotePerSeat) - xScale(0);
   const markSize = blockWidth < 20 ? Math.floor(blockWidth) : 20;
