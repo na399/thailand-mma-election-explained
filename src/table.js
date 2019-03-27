@@ -8,9 +8,15 @@ const formatterFloat = d3.format(',.4f');
 function addTable(electionResult, selector, type) {
   const tableData = electionResult.parties;
 
+  let tableHeight = 600;
+
+  if (tableData.length < 11) {
+    tableHeight = 50 * tableData.length + 100;
+  }
+
   const table = new Tabulator(selector, {
     virtualDom: true,
-    height: 600,
+    height: tableHeight,
     movableRows: true,
     movableColumns: true,
     data: tableData,
@@ -33,7 +39,7 @@ function addTable(electionResult, selector, type) {
   };
 
   const nConstituentSeat = {
-    title: 'ส.ส.แบ่งเขต ●',
+    title: 'ส.ส.เขต ●',
     field: 'nConstituentSeat',
     align: 'center',
     bottomCalc: 'sum'
@@ -81,6 +87,13 @@ function addTable(electionResult, selector, type) {
     bottomCalc: 'sum'
   };
 
+  const nInitialAllocatedSeatRaw = {
+    title: 'ส.ส.พึงมีที่คำนวณได้',
+    field: 'nInitialAllocatedSeatRaw',
+    align: 'right',
+    formatter: cell => formatterFloat(cell.getValue())
+  }
+
   const nInitialRemainderVote = {
     title: 'เศษจากการคำนวณที่นั่งส.ส.พึงมี',
     field: 'nInitialRemainderVote',
@@ -88,8 +101,15 @@ function addTable(electionResult, selector, type) {
     formatter: cell => formatterFloat(cell.getValue())
   };
 
+  const nPartyListSeatRaw = {
+    title: 'ส.ส.บัญชีรายชื่อที่คำนวณได้',
+    field: 'nPartyListSeatRaw',
+    align: 'right',
+    formatter: cell => formatterFloat(cell.getValue())
+  }
+
   const nRemainderVote = {
-    title: 'เศษจากการคำนวณที่นั่งส.ส.พึงมี',
+    title: 'เศษจากการคำนวณที่นั่งส.ส.บัญชีรายชื่อ',
     field: 'nRemainderVote',
     align: 'right',
     formatter: cell => formatterFloat(cell.getValue())
@@ -103,13 +123,14 @@ function addTable(electionResult, selector, type) {
         { column: 'nTotalVote', dir: 'desc' },
         { column: 'nConstituentSeat', dir: 'desc' }
       ]);
-      table.setFilter("nConstituentSeat", ">", 0)
+      // table.setFilter("nConstituentSeat", ">", 0)
       break;
     case 'initial-allocation':
       table.addColumn(nInitialAllocatedSeat);
       table.addColumn(bAllocationFilled);
       table.addColumn(nConstituentSeat);
       table.addColumn(nTotalVote);
+      table.addColumn(nInitialAllocatedSeatRaw);
       table.addColumn(nInitialRemainderVote);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       break;
@@ -118,6 +139,7 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nConstituentSeat);
       table.addColumn(nPartyListSeat);
       table.addColumn(nTotalVote);
+      table.addColumn(nPartyListSeatRaw);
       table.addColumn(nRemainderVote);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       table.setGroupBy(data => data.bAllocationFilled);
@@ -128,7 +150,7 @@ function addTable(electionResult, selector, type) {
           return 'ส.ส.พึงมียังไม่ครบ';
         }
       });
-      table.setFilter('bPartyListNeeded', '=', true);
+      // table.setFilter('bPartyListNeeded', '=', true);
       break;
     case 'conclusion':
       table.addColumn(nTotalSeat);
@@ -159,7 +181,7 @@ function addTable(electionResult, selector, type) {
         width: 30,
         minWidth: 30
       });
-      table.setFilter("nTotalSeat", ">", 0)
+      table.setFilter('nTotalSeat', '>', 0);
       break;
     case 'all':
       table.addColumn(nTotalSeat);
@@ -174,7 +196,7 @@ function addTable(electionResult, selector, type) {
         { column: 'nConstituentSeat', dir: 'desc' },
         { column: 'nTotalSeat', dir: 'desc' }
       ]);
-      table.setFilter("nTotalSeat", ">", 0)
+      table.setFilter('nTotalSeat', '>', 0);
       break;
   }
 }
