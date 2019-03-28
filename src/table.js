@@ -204,7 +204,7 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nPartyListSeatRaw);
       table.addColumn(nRemainderVote);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
-      table.setGroupBy(data => data.bAllocationFilled);
+      // table.setGroupBy(data => data.bAllocationFilled);
       table.setGroupHeader(value => {
         if (value) {
           return 'ส.ส.พึงมีครบแล้ว (ไม่ได้รับส.ส.บัญชีรายชื่อเพิ่ม)';
@@ -212,7 +212,7 @@ function addTable(electionResult, selector, type) {
           return 'ส.ส.พึงมียังไม่ครบ';
         }
       });
-      // table.setFilter('bPartyListNeeded', '=', true);
+      table.setFilter('bPartyListNeeded', '=', true);
       break;
     case 'conclusion':
       table.addColumn(nTotalSeat);

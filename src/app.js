@@ -44,13 +44,13 @@ function runApp(config, option, parties) {
   main.addIntermediateAllocationText(result, config, '#text-intermediate-allocation');
   main.addFinalAllocationText(result, config, '#text-final-allocation');
 
-  d3.select('#text-party-list').html(`
-    <h4>จำนวนส.ส.บัญชีรายชื่อ</h4>
-    <p>
-      จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมี ■ และ ส.ส.บัญชีรายชื่อ ◆
-      (ส่วนต่างระหว่างจำนวนส.ส.พึงมี ■ - จำนวนส.ส.แบ่งเขต ●)
-      ให้แต่ละพรรคได้ดังต่อไปนี้
-    </p>`);
+  // d3.select('#text-party-list').html(`
+  //   <h4>จำนวนส.ส.บัญชีรายชื่อ</h4>
+  //   <p>
+  //     จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมี ■ และ ส.ส.บัญชีรายชื่อ ◆
+  //     (ส่วนต่างระหว่างจำนวนส.ส.พึงมี ■ - จำนวนส.ส.แบ่งเขต ●)
+  //     ให้แต่ละพรรคได้ดังต่อไปนี้
+  //   </p>`);
 
   d3.select('#text-conclusion').html(`
     <h3>สรุปจำนวนส.ส.ทั้งหมด</h3>`);
@@ -107,14 +107,14 @@ function runApp(config, option, parties) {
   } else {
     d3.select('#result-constituents').html('');
   }
-  main.drawWaffle(
-    result,
-    config,
-    '#parliament-seats-constituent',
-    'constituent'
-  );
-  main.drawInitialAllocation(result, config, '#initial-allocation');
-  main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
+  // main.drawWaffle(
+  //   result,
+  //   config,
+  //   '#parliament-seats-constituent',
+  //   'constituent'
+  // );
+  // main.drawInitialAllocation(result, config, '#initial-allocation');
+  // main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
   // main.drawFinalAllocation(result, config, '#final-allocation');
   // main.drawWaffle(result, config, '#parliament-seats-all', 'all');
 
