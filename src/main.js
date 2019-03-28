@@ -297,9 +297,16 @@ function runAllocation(electionConfig, voteResult) {
       4
     );
     party.nInitialAllocatedSeat = Math.floor(party.nInitialAllocatedSeatRaw);
+    party.nVotePerInitialAllocatedSeat = +(
+      party.nTotalVote / party.nInitialAllocatedSeat || 0
+    ).toFixed(4);
   });
 
-  parties = _.orderBy(parties, 'nInitialRemainderVote', 'desc');
+  parties = _.orderBy(
+    parties,
+    ['nInitialRemainderVote', 'nVotePerInitialAllocatedSeat'],
+    ['desc', 'desc']
+  );
 
   const nInitialUnallocatedSeat = parties.reduce(
     (nInitialUnallocatedSeat, party) =>
@@ -311,6 +318,7 @@ function runAllocation(electionConfig, voteResult) {
 
   for (let i = 0; i < nInitialUnallocatedSeat; i++) {
     parties[i % nParty].nInitialAllocatedSeat += 1;
+    parties[i % nParty].bInitialAllocatedSeatFromUnallocated = true;
   }
 
   // check whether nConstituentSeat exceeds nInitialAllocatedSeats
@@ -342,6 +350,10 @@ function runAllocation(electionConfig, voteResult) {
           party.intermediate.nPartyListSeatRaw = party.nPartyListSeatRaw;
           party.intermediate.nPartyListSeat = party.nPartyListSeat;
           party.intermediate.nAllocatedSeat = party.nAllocatedSeat;
+          party.intermediate.nVotePerAllocatedSeat =
+            party.nVotePerAllocatedSeat;
+          party.intermediate.bAllocatedSeatFromUnallocated =
+            party.bAllocatedSeatFromUnallocated;
         }
 
         party.nAllocatedSeatRaw = +(party.nTotalVote / nVotePerSeat).toFixed(4);
@@ -391,6 +403,9 @@ function runAllocation(electionConfig, voteResult) {
     for (let i = 0; i < nUnallocatedSeat; i++) {
       parties[i % nPartiesGettingPartyList].nAllocatedSeat += 1;
       parties[i % nPartiesGettingPartyList].nPartyListSeat += 1;
+      parties[
+        i % nPartiesGettingPartyList
+      ].bAllocatedSeatFromUnallocated = true;
     }
     return parties;
   }
@@ -1140,7 +1155,7 @@ function addIntermediateAllocationText(
   let intermediateAllocationText = ``;
   if (electionResult.bIntermediateAllocation) {
     intermediateAllocationText += `
-    <p>แต่เนื่องจาก เมื่อใช้วิธีการหารจำนวนเสียงต่อ 1 ที่นั่ง จะได้ส.ส.บัญชีรายชื่อเป็นจำนวน ${
+    <p>แต่เนื่องจากเมื่อใช้วิธีการข้างต้น จะได้ส.ส.บัญชีรายชื่อเป็นจำนวน ${
       electionResult.nTotalInitialPartyListSeat
     } คน ซึ่งเกิน ${electionConfig.nPartyListSeat} ที่นั่ง ที่กำหนดไว้ 
     ดังนั้นจึงต้องปรับจำนวนส.ส.บัญชีรายชื่อที่แต่ละพรรคได้รับลง เป็นอัตราส่วน ${
@@ -1166,8 +1181,10 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
     พรรค ได้รับจำนวนส.ส.แบบเบ่งเขต ไปครบจำนวนส.ส.พึงมีแล้ว (✓) จึงกำหนดให้ 
     ${electionResult.nPartyWithoutPartyListNeeded} 
     พรรคนี้ได้รับส.ส.ตามที่ได้มาจากแบบแบ่งเขตเลือกตั้ง ● แต่ไม่สามารถมีส.ส.แบบบัญชีรายชื่อ ◆ ได้อีก</p>
-    <p>ดังนั้นการจัดสรรส.ส.พึงมีและส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
-      electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น</p>`;
+    <p>ดังนั้นการจัดสรรส.ส.บัญชีรายชื่อจึงพิจารณาจาก ${electionConfig.nParty -
+      electionResult.nPartyWithoutPartyListNeeded} พรรคที่เหลือเพียงเท่านั้น โดยจัดสรรส.ส.บัญชีรายชื่อจนกว่าจะครบ ${
+      electionConfig.nPartyListSeat
+    } ที่นั่ง ด้วยวิธีการเดียวกับการจัดสรรส.ส.พึงมี คือ เริ่มจากจำนวนเต็มก่อน เรียงจำนวนเศษ และเรียงจำนวนเสียงต่อที่นั่ง</p>`;
   } else {
     finalAllocationText = `<p>เนื่องจากไม่มีพรรคใด ได้รับจำนวนส.ส.แบบเบ่งเขต ● ไปครบจำนวนส.ส.พึงมี ■</p>
     <p>ดังนั้นทุกพรรคจะได้รับจำนวนส.ส.แบบบัญชีรายชื่อ ◆ รวมกับส.ส.แบบเบ่งเขต ● จนครบจำนวนส.ส.พึงมี ■</p>`;

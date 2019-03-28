@@ -157,6 +157,50 @@ function addTable(electionResult, selector, type) {
     bottomCalc: 'sum'
   };
 
+  
+  const nVotePerInitialAllocatedSeat = {
+    title: 'จำนวนเสียงต่อที่นั่งเต็ม 1 ที่นั่ง',
+    field: 'nVotePerInitialAllocatedSeat',
+    align: 'right',
+    formatter: cell => formatterFloat(cell.getValue())
+  }
+
+  const nVotePerAllocatedSeatI = {
+    title: 'จำนวนเสียงต่อที่นั่งเต็ม 1 ที่นั่ง',
+    field: 'intermediate.nVotePerAllocatedSeat',
+    align: 'right',
+    formatter: cell => formatterFloat(cell.getValue())
+  }
+
+  const nVotePerAllocatedSeat = {
+    title: 'จำนวนเสียงต่อที่นั่งเต็ม 1 ที่นั่ง',
+    field: 'nVotePerAllocatedSeat',
+    align: 'right',
+    formatter: cell => formatterFloat(cell.getValue())
+  }
+
+  const bInitialAllocatedSeatFromUnallocated = {
+    title: 'ส.ส.พึงมีจากเศษส่วนสูงสุด',
+    field: 'bInitialAllocatedSeatFromUnallocated',
+    formatter: 'tickCross',
+    align: 'center'
+  };
+
+  const bAllocatedSeatFromUnallocatedI = {
+    title: 'ส.ส.บัญชีรายชื่อจากเศษส่วนสูงสุด',
+    field: 'bAllocatedSeatFromUnallocatedI',
+    formatter: 'tickCross',
+    align: 'center'
+  };
+
+  const bAllocatedSeatFromUnallocated = {
+    title: 'ส.ส.บัญชีรายชื่อจากเศษส่วนสูงสุด',
+    field: 'bAllocatedSeatFromUnallocated',
+    formatter: 'tickCross',
+    align: 'center'
+  };
+
+
   switch (type) {
     case 'constituent':
       table.addColumn(nConstituentSeat);
@@ -175,6 +219,8 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nTotalVote);
       table.addColumn(nInitialAllocatedSeatRaw);
       table.addColumn(nInitialRemainderVote);
+      table.addColumn(nVotePerInitialAllocatedSeat);
+      table.addColumn(bInitialAllocatedSeatFromUnallocated);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       break;
     case 'intermediate-allocation':
@@ -183,8 +229,9 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nPartyListSeatI);
       table.addColumn(nTotalVote);
       table.addColumn(nPartyListSeatRawI);
-      table.addColumn(nAllocatedSeatRawI);
       table.addColumn(nRemainderVoteI);
+      table.addColumn(nVotePerAllocatedSeatI);
+      table.addColumn(bAllocatedSeatFromUnallocatedI);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       // table.setGroupBy(data => data.bAllocationFilled);
       table.setGroupHeader(value => {
@@ -203,6 +250,8 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nTotalVote);
       table.addColumn(nPartyListSeatRaw);
       table.addColumn(nRemainderVote);
+      table.addColumn(nVotePerAllocatedSeat);
+      table.addColumn(bAllocatedSeatFromUnallocated);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       // table.setGroupBy(data => data.bAllocationFilled);
       table.setGroupHeader(value => {
