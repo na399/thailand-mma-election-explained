@@ -159,21 +159,21 @@ function addTable(electionResult, selector, type) {
 
   
   const nVotePerInitialAllocatedSeat = {
-    title: 'จำนวนเสียงต่อที่นั่งเต็ม 1 ที่นั่ง',
+    title: 'จำนวนเสียงต่อที่นั่งพึงมีเต็ม 1 ที่นั่ง',
     field: 'nVotePerInitialAllocatedSeat',
     align: 'right',
     formatter: cell => formatterFloat(cell.getValue())
   }
 
   const nVotePerAllocatedSeatI = {
-    title: 'จำนวนเสียงต่อที่นั่งเต็ม 1 ที่นั่ง',
+    title: 'จำนวนเสียงต่อที่นั่งพึงมีเต็ม 1 ที่นั่ง',
     field: 'intermediate.nVotePerAllocatedSeat',
     align: 'right',
     formatter: cell => formatterFloat(cell.getValue())
   }
 
   const nVotePerAllocatedSeat = {
-    title: 'จำนวนเสียงต่อที่นั่งเต็ม 1 ที่นั่ง',
+    title: 'จำนวนเสียงต่อที่นั่งพึงมีเต็ม 1 ที่นั่ง',
     field: 'nVotePerAllocatedSeat',
     align: 'right',
     formatter: cell => formatterFloat(cell.getValue())
