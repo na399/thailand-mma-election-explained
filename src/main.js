@@ -37,7 +37,8 @@ class ElectionResult {
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
     nTotalPartyListSeat,
-    parliamentSeat
+    parliamentSeat,
+    bIntermediateAllocation = false
   ) {
     this.parties = parties;
     this.resultConstituents = resultConstituents;
@@ -54,6 +55,7 @@ class ElectionResult {
     this.nTotalConstituentSeat = nTotalConstituentSeat;
     this.nTotalPartyListSeat = nTotalPartyListSeat;
     this.parliamentSeat = parliamentSeat;
+    this.bIntermediateAllocation = bIntermediateAllocation;
   }
 }
 
@@ -316,10 +318,12 @@ function runAllocation(electionConfig, voteResult) {
     if (party.nConstituentSeat >= party.nInitialAllocatedSeat) {
       party.bPartyListNeeded = false;
       party.bAllocationFilled = true;
+    } else {
+      party.nInitialPartyListSeat =
+        party.nInitialAllocatedSeat - party.nConstituentSeat;
     }
   });
 
-  // recalculate votes per remaining seat if there is at least one party with nConstituentSeat exceeds nInitialAllocatedSeats
   const nPartyWithoutPartyListNeeded = _.filter(parties, [
     'bPartyListNeeded',
     false
@@ -331,6 +335,15 @@ function runAllocation(electionConfig, voteResult) {
   function allocateSeats(parties, adjustmentRatio) {
     parties.forEach(party => {
       if (party.bPartyListNeeded) {
+        if (adjustmentRatio != 1) {
+          party.intermediate = {};
+          party.intermediate.nAllocatedSeatRaw = party.nAllocatedSeatRaw;
+          party.intermediate.nRemainderVote = party.nRemainderVote;
+          party.intermediate.nPartyListSeatRaw = party.nPartyListSeatRaw;
+          party.intermediate.nPartyListSeat = party.nPartyListSeat;
+          party.intermediate.nAllocatedSeat = party.nAllocatedSeat;
+        }
+
         party.nAllocatedSeatRaw = +(party.nTotalVote / nVotePerSeat).toFixed(4);
         party.nRemainderVote = +(party.nAllocatedSeatRaw % 1).toFixed(4);
 
@@ -389,15 +402,13 @@ function runAllocation(electionConfig, voteResult) {
   );
 
   let nVotePerRemainingSeat = nVotePerSeat;
+  let bIntermediateAllocation = false;
 
   if (nTotalInitialPartyListSeat > electionConfig.nPartyListSeat) {
+    bIntermediateAllocation = true;
     const adjustmentRatio =
       electionConfig.nPartyListSeat / nTotalInitialPartyListSeat;
     parties = allocateSeats(parties, adjustmentRatio);
-
-    nVotePerRemainingSeat = _.mean(
-      _.compact(parties.map(party => party.nVotePerAllocatedSeat))
-    );
   }
 
   // calculate final total seat numbers
@@ -496,7 +507,8 @@ function runAllocation(electionConfig, voteResult) {
     nTotalAllocatedSeat,
     nTotalConstituentSeat,
     nTotalPartyListSeat,
-    parliamentSeat
+    parliamentSeat,
+    bIntermediateAllocation
   );
 
   return electionResult;
@@ -1108,6 +1120,32 @@ function addInitialAllocatedText(electionResult, electionConfig, selector) {
   d3.select(selector).html(initialAllocatedText);
 }
 
+function addIntermediateAllocationText(
+  electionResult,
+  electionConfig,
+  selector
+) {
+  let intermediateAllocationText = ``;
+  if (electionResult.bIntermediateAllocation) {
+    intermediateAllocationText += `
+    <p>แต่เนื่องจาก เมื่อใช้วิธีการหารจำนวนเสียงต่อ 1 ที่นั่งก่อนหน้านี้ ได้ส.ส.บัญชีรายชื่อเป็นจำนวน ${
+      electionResult.nTotalInitialPartyListSeat
+    } คน ซึ่งเกิน ${electionConfig.nPartyListSeat} ที่นั่ง ที่กำหนดไว้ 
+    ดังนั้นจึงต้องปรับจำนวนส.ส.บัญชีรายชื่อที่แต่ละพรรคได้รับลง เป็นอัตราส่วน ${
+      electionConfig.nPartyListSeat
+    } : ${electionResult.nTotalInitialPartyListSeat} หรือ ${formatterFloat(
+      electionConfig.nPartyListSeat / electionResult.nTotalInitialPartyListSeat
+    )} ที่นั่งที่ได้รับจริง : 1 ที่นั่งที่คำนวณได้จากขั้นก่อนหน้านี้</p>`;
+  }
+
+  intermediateAllocationText += `
+  <br />
+  <h3>ผลการแบ่งส.ส.บัญชีรายชื่อ</h3>
+  `;
+
+  d3.select(selector).html(intermediateAllocationText);
+}
+
 function addFinalAllocationText(electionResult, electionConfig, selector) {
   let finalAllocationText = ``;
   if (electionResult.nPartyWithoutPartyListNeeded > 0) {
@@ -1122,24 +1160,6 @@ function addFinalAllocationText(electionResult, electionConfig, selector) {
     finalAllocationText = `<p>เนื่องจากไม่มีพรรคใด ได้รับจำนวนส.ส.แบบเบ่งเขต ● ไปครบจำนวนส.ส.พึงมี ■</p>
     <p>ดังนั้นทุกพรรคจะได้รับจำนวนส.ส.แบบบัญชีรายชื่อ ◆ รวมกับส.ส.แบบเบ่งเขต ● จนครบจำนวนส.ส.พึงมี ■</p>`;
   }
-
-  if (
-    electionResult.nTotalInitialPartyListSeat > electionConfig.nPartyListSeat
-  ) {
-    finalAllocationText += `<p>แต่เนื่องจาก เมื่อใช้วิธีการหารจำนวนเสียงต่อ 1 ที่นั่งก่อนหน้านี้ ได้ส.ส.บัญชีรายชื่อเป็นจำนวน ${
-      electionResult.nTotalInitialPartyListSeat
-    } คน ซึ่งเกิน ${electionConfig.nPartyListSeat} ที่นั่ง ที่กำหนดไว้ 
-    ดังนั้นจึงต้องปรับจำนวนส.ส.บัญชีรายชื่อที่แต่ละพรรคได้รับลง เป็นอัตราส่วน ${
-      electionConfig.nPartyListSeat
-    } : ${electionResult.nTotalInitialPartyListSeat} หรือ ${formatterFloat(
-      electionConfig.nPartyListSeat / electionResult.nTotalInitialPartyListSeat
-    )} ที่นั่งที่ได้รับจริง : 1 ที่นั่งที่คำนวณได้จากขั้นก่อนหน้านี้</p>`;
-  }
-
-  finalAllocationText += `
-  <br />
-  <h3>ผลการแบ่งส.ส.บัญชีรายชื่อ</h3>
-  `;
 
   d3.select(selector).html(finalAllocationText);
 }
@@ -1158,5 +1178,6 @@ export {
   addConstituentText,
   addInitialAllocationText,
   addInitialAllocatedText,
+  addIntermediateAllocationText,
   addFinalAllocationText
 };

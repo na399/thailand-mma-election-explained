@@ -41,6 +41,7 @@ function runApp(config, option, parties) {
   main.addConstituentText(result, config, '#text-constituent-seats');
   main.addInitialAllocationText(result, config, '#text-initial-allocation');
   main.addInitialAllocatedText(result, config, '#text-initial-allocated-seats');
+  main.addIntermediateAllocationText(result, config, '#text-intermediate-allocation');
   main.addFinalAllocationText(result, config, '#text-final-allocation');
 
   d3.select('#text-party-list').html(`
@@ -58,6 +59,11 @@ function runApp(config, option, parties) {
   ********************************/
   table.addTable(result, '#table-constituent', 'constituent');
   table.addTable(result, '#table-initial-allocation', 'initial-allocation');
+  if (result.bIntermediateAllocation) {
+    table.addTable(result, '#table-intermediate-allocation', 'intermediate-allocation')
+  } else {
+    d3.select('#table-initial-allocation').html('');
+  }
   table.addTable(result, '#table-final-allocation', 'final-allocation');
   table.addTable(result, '#table-conclusion', 'conclusion');
 
@@ -109,7 +115,7 @@ function runApp(config, option, parties) {
   );
   main.drawInitialAllocation(result, config, '#initial-allocation');
   main.drawWaffle(result, config, '#parliament-seats-party-list', 'partyList');
-  main.drawFinalAllocation(result, config, '#final-allocation');
+  // main.drawFinalAllocation(result, config, '#final-allocation');
   // main.drawWaffle(result, config, '#parliament-seats-all', 'all');
 
   parliament.drawParliament(result, '#parliament-seats-all');
