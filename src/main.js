@@ -1070,7 +1070,7 @@ function addIntroText(
 
 function addConstituentText(electionResult, electionConfig, selector) {
   const constituentText = `
-  <h3>ผลผู้ได้รับเลือกเป็นส.ส.แบบแบ่งเขตเลือกตั้ง</h3>
+  <h3>ผลการเลือกตั้งส.ส.แบบแบ่งเขตเลือกตั้ง ●</h3>
   <br />
   `;
 
@@ -1088,7 +1088,7 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
 
   const allocationText = `
   <h3>ผลคะแนนรวมทั่วประเทศ</h3>
-  <p>ขั้นตอนต่อไปคือการจัดสรรจำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี (แทนด้วยสัญลักษณ์ ■)
+  <p>ขั้นตอนต่อไปคือการจัดสรรจำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี ■
   โดยคิดคำนวณจากสัดส่วนคะแนนรวมทั้งประเทศของแต่ละพรรค จากการเลือกตั้งแบบแบ่งเขตในขั้นตอนแรก</p>
   <p>จำนวนส.ส.ทั้งหมดที่แต่ละพรรคพึงมี ■ ได้นั้น มาจากจำนวนเสียงทั้งหมด 
   ${numberWithCommas(nTotalVote)} เสียง 
@@ -1122,11 +1122,11 @@ function addInitialAllocationText(electionResult, electionConfig, selector) {
 
 function addInitialAllocatedText(electionResult, electionConfig, selector) {
   const initialAllocatedText = `
-  <h4>จำนวนส.ส.พึงมี</h4>
+  <h4>จำนวนส.ส.พึงมี ■</h4>
   `;
 
   // <p>จากกราฟข้างบน แบ่งจำนวนส.ส.พึงมี ■ ให้แต่ละพรรคดังต่อไปนี้</p>
-  
+
   d3.select(selector).html(initialAllocatedText);
 }
 
@@ -1150,7 +1150,7 @@ function addIntermediateAllocationText(
 
   intermediateAllocationText += `
   <br />
-  <h3>ผลการแบ่งส.ส.บัญชีรายชื่อ</h3>
+  <h3>ผลการแบ่งส.ส.บัญชีรายชื่อ ◆</h3>
   `;
 
   d3.select(selector).html(intermediateAllocationText);
