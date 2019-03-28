@@ -184,7 +184,6 @@ function addTable(electionResult, selector, type) {
       table.addColumn(nTotalVote);
       table.addColumn(nPartyListSeatRawI);
       table.addColumn(nAllocatedSeatRawI);
-      table.addColumn(nAllocatedSeatRawI);
       table.addColumn(nRemainderVoteI);
       table.setSort([{ column: 'nTotalVote', dir: 'desc' }]);
       // table.setGroupBy(data => data.bAllocationFilled);

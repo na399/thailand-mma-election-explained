@@ -1128,7 +1128,7 @@ function addIntermediateAllocationText(
   let intermediateAllocationText = ``;
   if (electionResult.bIntermediateAllocation) {
     intermediateAllocationText += `
-    <p>แต่เนื่องจาก เมื่อใช้วิธีการหารจำนวนเสียงต่อ 1 ที่นั่งก่อนหน้านี้ ได้ส.ส.บัญชีรายชื่อเป็นจำนวน ${
+    <p>แต่เนื่องจาก เมื่อใช้วิธีการหารจำนวนเสียงต่อ 1 ที่นั่ง จะได้ส.ส.บัญชีรายชื่อเป็นจำนวน ${
       electionResult.nTotalInitialPartyListSeat
     } คน ซึ่งเกิน ${electionConfig.nPartyListSeat} ที่นั่ง ที่กำหนดไว้ 
     ดังนั้นจึงต้องปรับจำนวนส.ส.บัญชีรายชื่อที่แต่ละพรรคได้รับลง เป็นอัตราส่วน ${
