@@ -350,11 +350,13 @@ function runAllocation(electionConfig, voteResult) {
         party.nPropablePartyListSeat = +(
           party.nAllocatedSeatRaw - party.nConstituentSeat
         ).toFixed(4);
-        party.nPartyListSeatRaw = +(
-          party.nPropablePartyListSeat * adjustmentRatio
-        ).toFixed(4);
+
+        party.nPartyListSeatRaw = +party.nPropablePartyListSeat.toFixed(4);
 
         if (adjustmentRatio != 1) {
+          party.nPartyListSeatRaw = +(
+            party.intermediate.nPartyListSeat * adjustmentRatio
+          ).toFixed(4);
           party.nRemainderVote = +(party.nPartyListSeatRaw % 1).toFixed(4);
         }
 
