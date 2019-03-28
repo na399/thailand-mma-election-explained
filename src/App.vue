@@ -439,7 +439,7 @@ export default {
     };
   },
   created() {
-    // this.runUserDefined();
+    this.runUserDefined();
 
     EventBus.$on("params-changed", (data, key) => {
       this.paramChanged = true;
